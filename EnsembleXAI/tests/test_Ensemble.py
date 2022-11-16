@@ -58,3 +58,29 @@ class TestAggregate(TestCase):
     def test_illegal_args(self):
         with self.assertRaises(AssertionError):
             Ensemble.aggregate(self.obs1_tensor, 'asdf')
+            Ensemble.aggregate(self.obs1_tensor, 2)
+
+    def test_custom_func(self):
+        def custom_avg(x):
+            return sum(x) / len(x)
+
+        ensembled = Ensemble.aggregate(self.obs1_tensor, custom_avg)
+
+        self.assertIsInstance(ensembled, t.Tensor)
+
+        expected = 2 * t.ones([1, 2, 2])
+        self.assertTrue(t.equal(ensembled, expected))
+
+        # 2 observations
+        ensembled = Ensemble.aggregate((self.obs1_tensor, self.obs2_tensor), custom_avg)
+        self.assertIsInstance(ensembled, t.Tensor)
+
+        expected = t.stack([2 * t.ones([2, 2]), 1.5 * t.ones([2, 2])])
+        self.assertTrue(t.equal(ensembled, expected))
+
+        def custom_func(x):
+            return (3 * x[0] + x[1]) / 6
+
+        ensembled = Ensemble.aggregate(self.obs1_tensor, custom_func)
+        expected = t.ones([1, 2, 2])
+        self.assertTrue(t.equal(ensembled, expected))
