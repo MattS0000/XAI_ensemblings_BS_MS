@@ -1,6 +1,6 @@
 from captum.attr import Attribution
 from torch.utils.data import Dataset
-from typing import Callable, Union
+from typing import Callable, Union, List
 import itertools
 import torch
 
@@ -32,7 +32,7 @@ def _union(
     )
 
 
-def consistency(explanations: list[torch.Tensor]) -> torch.Tensor:
+def consistency(explanations: List[torch.Tensor]) -> torch.Tensor:
     """
     Opis: Mierzy jak bardzo wyjaśnienia różnych modeli uczenia maszynowego są do siebie podobne.
     Argumenty wejściowe: Lista<torch.Tensor> (lista wyjaśnień które chcemy ze sobą porównać)
@@ -157,7 +157,7 @@ def set_accordance_precision(masks, explanations, threshold=0.5):
 
 
 def F1_score(
-    masks: list[torch.Tensor], explanations: list[torch.Tensor], threshold: float = 0.5
+    masks: List[torch.Tensor], explanations: List[torch.Tensor], threshold: float = 0.5
 ) -> torch.Tensor:
     """
         Opis: Średnia harmoniczna Accordance recall i Accordance precision.
@@ -181,7 +181,7 @@ def F1_score(
 
 
 def intersection_over_union(
-    masks: list[torch.Tensor], explanations: list[torch.Tensor], threshold: float = 0.5
+    masks: List[torch.Tensor], explanations: List[torch.Tensor], threshold: float = 0.5
 ) -> torch.Tensor:
     """
         Opis: Pole iloczynu maski i wyjaśnienia podzielone przez pole sumy maski i wyjaśnienia.
@@ -205,7 +205,7 @@ def intersection_over_union(
 
 def ensemble_score(
     weights: Union[list, torch.Tensor],
-    metrics_scores: Union[list[torch.Tensor], torch.Tensor],
+    metrics_scores: Union[List[torch.Tensor], torch.Tensor],
 ) -> torch.Tensor:
     """
     Opis: średnia ważona innych metryk. Ensemble_score(wagi, metryki) -> torch.tensor
