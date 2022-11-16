@@ -5,12 +5,19 @@ import itertools
 import torch
 
 
+def replace_mask(image: torch.Tensor, mask: torch.Tensor, value: Union[int, float]) -> torch.Tensor:
+    temp_image = torch.clone(image)
+    reshaped_mask = mask.repeat(3, 1, 1)
+    temp_image[reshaped_mask] = value
+    return temp_image
+
+
 def _matrix_norm_2(exp1: torch.Tensor, exp2: torch.Tensor) -> torch.Tensor:
-    diff = (exp1 - exp2).float()
-    return torch.linalg.matrix_norm(diff, ord=2)
+    difference = (exp1 - exp2).float()
+    return torch.linalg.matrix_norm(difference, ord=2)
 
 
-def _overlap(
+def _intersection(
     tensor1: torch.Tensor,
     tensor2: torch.Tensor,
     threshold1: float = 0.0,
@@ -113,7 +120,7 @@ def accordance_recall(
         recall = sum_i(recall_i)/N
     """
     # maska logiczna, jest czy nie jest w masce
-    overlaping_area = _overlap(explanation, mask, threshold1=threshold)
+    overlaping_area = _intersection(explanation, mask, threshold1=threshold)
     return torch.sum(overlaping_area) / torch.sum(torch.abs(mask) != 0)
 
 
@@ -134,7 +141,7 @@ def accordance_precision(
         precision = sum_i (precision_i)/N
     """
     # maska logiczna, jest czy nie jest w masce
-    overlaping_area = _overlap(explanation, mask, threshold1=threshold)
+    overlaping_area = _intersection(explanation, mask, threshold1=threshold)
     return torch.sum(overlaping_area) / torch.sum(torch.abs(explanation) > threshold)
 
 
@@ -196,7 +203,7 @@ def intersection_over_union(
         IOU=1/N * sum_i(S(x_i) cz. wspolna F(x_i)/S(x_i) suma F(x_i))
     """
     values = [
-        torch.sum(_overlap(expl, mask, threshold1=threshold))
+        torch.sum(_intersection(expl, mask, threshold1=threshold))
         / torch.sum(_union(expl, mask, threshold1=threshold))
         for (expl, mask) in zip(explanations, masks)
     ]
@@ -204,8 +211,8 @@ def intersection_over_union(
 
 
 def ensemble_score(
-    weights: Union[list, torch.Tensor],
-    metrics_scores: Union[List[torch.Tensor], torch.Tensor],
+    weights: Union[List, torch.Tensor],
+    metrics_scores: Union[List[torch.Tensor], torch.Tensor, List[float]],
 ) -> torch.Tensor:
     """
     Opis: średnia ważona innych metryk. Ensemble_score(wagi, metryki) -> torch.tensor
