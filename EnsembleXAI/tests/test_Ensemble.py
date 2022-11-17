@@ -1,7 +1,71 @@
+import torch
 import torch as t
 
 from EnsembleXAI import Ensemble
 from unittest import TestCase
+
+from EnsembleXAI.Ensemble import _normalize_across_dataset
+
+
+def _dummy_metric(x: t.Tensor) -> t.Tensor:
+    return t.ones([x.size(dim=0)])
+
+
+def _dummy_metric2(x: t.Tensor) -> t.Tensor:
+    return 2 * _dummy_metric(x)
+
+
+class TestNormalize(TestCase):
+    def test_normalization(self):
+        x = torch.tensor([[[[1, 2], [2, 1]], [[3, 4], [3, 4]]],
+                          [[[3, 5], [5, 3]], [[0, 1], [1, 0]]]], dtype=t.float64)
+        normalized = _normalize_across_dataset(x)
+        expected = torch.tensor([[[[-1.1068, 0.0000],
+                                   [-0.4743, -0.5916]],
+
+                                  [[0.1581, 1.1832],
+                                   [0.1581, 1.1832]]],
+
+                                 [[[0.1581, 1.7748],
+                                   [1.4230, 0.5916]],
+
+                                  [[-1.7393, -0.5916],
+                                   [-1.1068, -1.1832]]]], dtype=t.float64)
+        self.assertTrue(t.allclose(normalized, expected, atol=0.001))
+
+
+class TestEnsemble(TestCase):
+    x = torch.tensor([[[[0, 1], [1, 0]], [[0, 1], [1, 0]]],
+                      [[[0, 1], [1, 0]], [[0, 1], [1, 0]]]], dtype=t.float)
+
+    def test_ensemble_multiple_obs_single_metric(self):
+        ensemble = Ensemble.ensemble(self.x, [_dummy_metric], [1])
+        self.assertIsInstance(ensemble, t.Tensor)
+
+        expected = t.tensor([[[-0.9354, 0.9354],
+                              [0.9354, -0.9354]],
+                             [[-0.9354, 0.9354],
+                              [0.9354, -0.9354]]])
+
+        self.assertTrue(t.allclose(ensemble, expected, atol=.01))
+
+    def test_ensemble_multiple_obs_mult_metric(self):
+        ensemble = Ensemble.ensemble(self.x, [_dummy_metric, _dummy_metric], [0.5, 0.5])
+        self.assertIsInstance(ensemble, t.Tensor)
+
+        expected = t.tensor([[[-0.9354, 0.9354],
+                              [0.9354, -0.9354]],
+                             [[-0.9354, 0.9354],
+                              [0.9354, -0.9354]]])
+
+        self.assertTrue(t.allclose(ensemble, expected, atol=.01))
+
+    def test_ensemble_one_obs(self):
+        exp1 = t.tensor([[[0, 1], [1, 0]], [[0, 1], [1, 0]]], dtype=t.float)
+        ensemble = Ensemble.ensemble(tuple(exp1), [_dummy_metric], [1])
+        expected = t.tensor([[[[-0.8660, 0.8660],
+                               [0.8660, -0.8660]]]])
+        self.assertTrue(t.allclose(ensemble, expected, atol=.01))
 
 
 class TestAggregate(TestCase):

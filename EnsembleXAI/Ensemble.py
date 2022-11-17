@@ -1,6 +1,7 @@
 import torch
 
 from copy import deepcopy
+from EnsembleXAI.Metrics import ensemble_score
 from torch import Tensor, stack
 from typing import TypeVar, Tuple, List, Callable, Union
 
@@ -16,10 +17,12 @@ def _apply_over_axis(x: torch.Tensor, function: Callable, axis: int) -> torch.Te
 def _reformat_input_tensors(inputs: TensorOrTupleOfTensorsGeneric) -> Tensor:
     # change tuple of tensors into one standard 4d tensor
     parsed_inputs = deepcopy(inputs)
-    if isinstance(inputs, tuple):
+    if isinstance(inputs, tuple) or isinstance(inputs, list):
         if inputs[0].dim() <= 3:
             # multiple observations with explanations as tensor
             parsed_inputs = stack(inputs)
+    if parsed_inputs.dim() == 2:
+        parsed_inputs = parsed_inputs[None, :]
     if parsed_inputs.dim() == 3:
         # single observation with multiple explanations
         parsed_inputs = parsed_inputs[None, :]
@@ -56,10 +59,38 @@ def aggregate(inputs: TensorOrTupleOfTensorsGeneric,
     return output
 
 
+def _normalize_across_dataset(parsed_inputs, delta=0.00001):
+    # mean, std normalization
+    var, mean = torch.var_mean(parsed_inputs, dim=[0, 2, 3], unbiased=True)
+    if torch.min(var.abs()) < delta:
+        raise ZeroDivisionError("Variance close to 0. Can't normalize")
+    return (parsed_inputs - mean) / torch.sqrt(var)
+
+
 def ensemble(inputs: TensorOrTupleOfTensorsGeneric, metrics: List[Callable], weights: List[float]) -> Tensor:
     parsed_inputs = _reformat_input_tensors(inputs)
 
+    # calculate metrics and ensemble scores
+    metric_vals = [[metric(explanation) for metric in metrics] for explanation in torch.unbind(parsed_inputs, dim=1)]
+    ensemble_scores = torch.stack([ensemble_score(weights, metric_val) for metric_val in metric_vals])
+    ensemble_scores.transpose_(0, 1)
 
+    normalized_exp = _normalize_across_dataset(parsed_inputs)
+
+    # allocate array for ensemble explanations
+    n = parsed_inputs.size()[0]
+    results = [0] * n
+
+    for observation, scores, i in zip(torch.unbind(normalized_exp), torch.unbind(ensemble_scores), range(n)):
+        # multiply single explanation by its ensemble score
+        weighted_exp = torch.stack([
+            exp * score for exp, score in zip(torch.unbind(observation), torch.unbind(scores))
+        ])
+        # sum weighted explanations and normalize by sum of scores
+        ensemble_exp = torch.sum(weighted_exp, dim=0) / scores.sum()
+        results[i] = ensemble_exp
+
+    return torch.stack(results)
 
 def ensembleXAI(inputs: Tensor, masks: Tensor) -> Tensor:
     pass
