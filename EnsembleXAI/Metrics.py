@@ -93,7 +93,7 @@ def _impact_ratio_helper(
     predictor: Callable[..., torch.Tensor],
     explanations: torch.Tensor,
     baseline: int,
-) -> tuple[Tensor, Tensor]:
+) -> Tuple[Tensor, Tensor]:
     """"""
     probabilities_original = predictor(images_tensor)
     modified_images = replace_mask(images_tensor, explanations, baseline)
@@ -116,7 +116,7 @@ def decision_impact_ratio(
     DIR = Suma po i (1 jeżeli D(x_i)=/=D(x_i-c_i) else 0)/N, D to klasyfikacja, c_i obszar krytyczny
     """
     n = image_tensors.shape[0]
-    #predictor returns probabilities in a tensor format
+    # predictor returns probabilities in a tensor format
     probs_original, probs_modified = _impact_ratio_helper(image_tensors, predictor, explanations, baseline)
     preds_original = torch.max(probs_original)
     preds_modified = torch.max(probs_modified)
