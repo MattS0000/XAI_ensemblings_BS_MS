@@ -1,6 +1,4 @@
-from captum.attr import Attribution
 from torch import Tensor
-from torch.utils.data import Dataset
 from typing import Callable, Union, List, Tuple
 import itertools
 import torch
@@ -13,16 +11,21 @@ def replace_mask(image: torch.Tensor, mask: torch.Tensor, value: Union[int, floa
     return temp_image
 
 
-def explanations_to_list(explanations: torch.Tensor, depth: int) -> List[torch.Tensor]:
+def tensor_to_list_tensors(explanations: torch.Tensor, depth: int) -> List[torch.Tensor]:
     tensor_list = [x.squeeze() for x in torch.tensor_split(explanations, explanations.shape[0], dim=0)]
     for i in range(depth-1):
         tensor_list = [y.squeeze() for x in tensor_list for y in torch.tensor_split(x, x.shape[0], dim=0)]
     return tensor_list
 
 
-def _matrix_norm_2(exp1: torch.Tensor, exp2: torch.Tensor) -> torch.Tensor:
-    difference = (exp1 - exp2).float()
-    return torch.linalg.matrix_norm(difference, ord=2)
+def _matrix_norm_2(matrix1: torch.Tensor, matrix2: torch.Tensor, sum_dim: int = None) -> torch.Tensor:
+    difference = (matrix1 - matrix2).float()
+    norm = torch.linalg.matrix_norm(difference, ord=2)
+    if sum_dim:
+        norm = torch.pow(norm, 2)
+        norm = torch.sum(norm, dim=sum_dim)
+        norm = torch.sqrt(norm)
+    return norm
 
 
 def _intersection(
@@ -56,7 +59,7 @@ def consistency(explanations: torch.Tensor) -> torch.Tensor:
     C(phi,...) = [max_{a,b}(||phi_{j}^{e->m_a} - phi_{j}^{e->m_b}||_2) + 1]^{-1}, phi_j-wyjasnienie j tego zdjęcia lub
     [max_{a,b}(||phi_{j}^{e_a->m} - phi_{j}^{e_b->m}||_2) + 1]^{-1}
     """
-    explanations_list = explanations_to_list(explanations, depth=2)
+    explanations_list = tensor_to_list_tensors(explanations, depth=2)
     diffs = [
         _matrix_norm_2(exp1, exp2)
         for exp1, exp2 in itertools.combinations(explanations_list, 2)
@@ -65,7 +68,7 @@ def consistency(explanations: torch.Tensor) -> torch.Tensor:
 
 
 def stability(
-    explanator: Attribution, model, image: torch.Tensor, epsilon: float = 0.1
+    explanator: Callable, image: torch.Tensor, images_to_compare: torch.Tensor, epsilon: float = 0.1
 ) -> torch.Tensor:
     """
     Opis: Mierzy jak podobne wyjaśnienia otrzymamy dla podobnych danych wejściowych.
@@ -75,7 +78,14 @@ def stability(
     L(phi, X) = max_{x_j} (||x_i-x_j||_{2}/(||phi_i^{e->m} - phi_j^{e->m}||_{2}+1))
     https://github.com/sbobek/inxai/blob/main/inxai/global_metrics.py
     """
-    pass
+    images_list = tensor_to_list_tensors(images_to_compare, depth=1)
+    close_images = [other_image for other_image in images_list if _matrix_norm_2(image, other_image, sum_dim=-1).item() < epsilon]
+    close_images_tensor = torch.Tensor(close_images)
+    close_images_explanations = explanator(close_images_tensor)
+    image_explanation = explanator(image.unsqueeze(dim=0)).squeeze()
+    image_dists = _matrix_norm_2(close_images_tensor, image, sum_dim=-1)
+    expl_dists = _matrix_norm_2(close_images_explanations, image_explanation)
+    return torch.max(image_dists/(expl_dists + 1))
 
 
 def _impact_ratio_helper(
@@ -84,6 +94,7 @@ def _impact_ratio_helper(
     explanations: torch.Tensor,
     baseline: int,
 ) -> tuple[Tensor, Tensor]:
+    """"""
     probabilities_original = predictor(images_tensor)
     modified_images = replace_mask(images_tensor, explanations, baseline)
     probabilities_modified = predictor(modified_images)
@@ -91,13 +102,12 @@ def _impact_ratio_helper(
 
 
 def decision_impact_ratio(
-    images_tensor: torch.Tensor,
+    image_tensors: torch.Tensor,
     predictor: Callable[..., torch.Tensor],
     explanations: torch.Tensor,
     baseline: int,
 ) -> torch.Tensor:
     """
-    Czy chcemy tylko na tescie to robic?
     Opis: Jest to odsetek obserwacji, dla których po usunięciu obszaru wrażliwości (wskazanego przez wyjaśnienie)
     klasyfikacja modelu zmieniła się.
     Argumenty wejściowe: dataset, forward z modelu, funkcja wyjasnienia, baseline do podmiany pixeli
@@ -105,9 +115,9 @@ def decision_impact_ratio(
     :return:
     DIR = Suma po i (1 jeżeli D(x_i)=/=D(x_i-c_i) else 0)/N, D to klasyfikacja, c_i obszar krytyczny
     """
-    n = images_tensor.shape[0]
+    n = image_tensors.shape[0]
     #predictor returns probabilities in a tensor format
-    probs_original, probs_modified = _impact_ratio_helper(images_tensor, predictor, explanations, baseline)
+    probs_original, probs_modified = _impact_ratio_helper(image_tensors, predictor, explanations, baseline)
     preds_original = torch.max(probs_original)
     preds_modified = torch.max(probs_modified)
     value = torch.sum(preds_original != preds_modified)/n
