@@ -94,6 +94,108 @@ class TestHelperFuncs(TestCase):
                                          [False, False, False]])
         self.assertTrue(torch.all(union_07 == correct_union_07))
 
+def _predict_dummy(tensor: torch.Tensor, classes = 1000):
+    return torch.ones([tensor.shape[0], classes])/classes
 
 class TestMetrics(TestCase):
-    pass
+    binary_plus_2d = torch.Tensor([[0, 1, 0],
+                                   [1, 1, 1],
+                                   [0, 1, 0]])
+    binary_cross_2d = torch.Tensor([[1, 0, 1],
+                                    [0, 1, 0],
+                                    [1, 0, 1]])
+    plus_mask = binary_plus_2d.unsqueeze(0)
+    cross_mask = binary_cross_2d.unsqueeze(0)
+    plus_expl = binary_plus_2d.unsqueeze(0).unsqueeze(0)
+    cross_expl = binary_cross_2d.unsqueeze(0).unsqueeze(0)
+    half_plus_expl = plus_expl/2
+    def test_consistency(self):
+        ones = torch.Tensor([1]).repeat(3, 4, 10, 10)
+        consist = Metrics.consistency(ones)
+        self.assertTrue(consist == 1)
+        twos = 2*torch.Tensor([1]).repeat(3, 4, 10, 10)
+        oneandtwo = torch.cat([ones, twos])
+        consist2 = Metrics.consistency(oneandtwo)
+        self.assertAlmostEqual(consist2, 0.0909, 4)
+
+    def test_stability(self):
+        self.assertTrue(False)
+
+    def test_impact_ratio_helper_simple(self):
+        n = 100
+        images_tensor = torch.ones([n, 3, 32, 32])
+        expls = torch.randn([n, 1, 32, 32])
+        baseline = 0
+        threshold = 0.5
+        org, mod = Metrics._impact_ratio_helper(images_tensor, _predict_dummy, expls, threshold, baseline)
+        self.assertIsInstance(org, torch.Tensor)
+        self.assertIsInstance(mod, torch.Tensor)
+        self.assertTrue(torch.all(org == 0.0010))
+        self.assertTrue(torch.all(mod == 0.0010))
+
+    def test_impact_ratio_helper_complex(self):
+        self.assertTrue(False)
+
+    def test_decision_impact_ratio_simple(self):
+        n = 100
+        images_tensor = torch.ones([n, 3, 32, 32])
+        expls = torch.randn([n, 1, 32, 32])
+        baseline = 0
+        threshold = 0.5
+        value = Metrics.decision_impact_ratio(images_tensor, _predict_dummy, expls, threshold, baseline)
+        self.assertEqual(value, 0)
+
+    def test_decision_impact_ratio_complex(self):
+        self.assertTrue(False)
+
+    def test_confidence_impact_ratio_simple(self):
+        n = 100
+        images_tensor = torch.ones([n, 3, 32, 32])
+        expls = torch.randn([n, 1, 32, 32])
+        baseline = 0
+        threshold = 0.5
+        value = Metrics.confidence_impact_ratio(images_tensor, _predict_dummy, expls, threshold, baseline)
+        self.assertEqual(value, 0)
+
+    def test_confidence_impact_ratio_complex(self):
+        self.assertTrue(False)
+
+    def test_accordance_recall(self):
+        val1 = Metrics.accordance_recall(self.plus_expl, self.plus_mask).item()
+        self.assertAlmostEqual(val1, 1, 4)
+        val2 = Metrics.accordance_recall(self.plus_expl, self.cross_mask).item()
+        self.assertAlmostEqual(val2, 0.2, 4)
+        val3 = Metrics.accordance_recall(self.cross_expl, self.plus_mask).item()
+        self.assertAlmostEqual(val3, 0.2, 4)
+
+    def test_accordance_recall_threshold(self):
+        val = Metrics.accordance_recall(self.half_plus_expl, self.plus_mask, threshold=0.6).item()
+        self.assertAlmostEqual(val, 0, 4)
+
+    def test_accordance_precision(self):
+        val1 = Metrics.accordance_precision(self.plus_expl, self.plus_mask).item()
+        self.assertAlmostEqual(val1, 1, 4)
+        val2 = Metrics.accordance_precision(self.plus_expl, self.cross_mask).item()
+        self.assertAlmostEqual(val2, 0.2, 4)
+        val3 = Metrics.accordance_precision(self.cross_expl, self.plus_mask).item()
+        self.assertAlmostEqual(val3, 0.2, 4)
+
+    def test_accordance_precision_threshold(self):
+        val = Metrics.accordance_precision(1.5*self.half_plus_expl, self.plus_mask, threshold=0.5).item()
+        self.assertAlmostEqual(val, 1, 4)
+
+    def test_f1_score(self):
+        explanations = torch.cat((self.plus_expl, self.cross_expl))
+        masks = torch.cat((self.cross_mask, self.plus_mask))
+        val = Metrics.F1_score(explanations, masks)
+        self.assertAlmostEqual(val, 0.2, 4)
+
+    def test_iou(self):
+        explanations = torch.cat((self.plus_expl, self.cross_expl))
+        masks = torch.cat((self.cross_mask, self.plus_mask))
+        val = Metrics.intersection_over_union(explanations, masks)
+        self.assertAlmostEqual(val, 0.11111, 4)
+
+    def test_ensemble_score(self):
+        Metrics.ensemble_score()
+        self.assertTrue(False)

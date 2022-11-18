@@ -63,7 +63,7 @@ def consistency(explanations: torch.Tensor) -> torch.Tensor:
         _matrix_norm_2(exp1, exp2)
         for exp1, exp2 in itertools.combinations(explanations_list, 2)
     ]
-    return 1 / max(diffs) + 1
+    return (1 / (max(diffs) + 1)).item()
 
 
 def stability(
@@ -85,18 +85,21 @@ def stability(
     image_explanation = explanator(image.unsqueeze(dim=0)).squeeze()
     image_dists = _matrix_norm_2(close_images_tensor, image, sum_dim=-1)
     expl_dists = _matrix_norm_2(close_images_explanations, image_explanation)
-    return torch.max(image_dists/(expl_dists + 1))
+    return torch.max(image_dists/(expl_dists + 1)).item()
 
 
 def _impact_ratio_helper(
     images_tensor: torch.Tensor,
     predictor: Callable[..., torch.Tensor],
     explanations: torch.Tensor,
-    baseline: int,
+    explanation_threshold: float,
+    baseline: int = 0
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     """"""
     probabilities_original = predictor(images_tensor)
-    modified_images = replace_masks(images_tensor, explanations, baseline)
+    #one explanation per image
+    explanations_flat_bool = explanations[:, 0, :, :] > explanation_threshold
+    modified_images = replace_masks(images_tensor, explanations_flat_bool, baseline)
     probabilities_modified = predictor(modified_images)
     return probabilities_original, probabilities_modified
 
@@ -105,7 +108,8 @@ def decision_impact_ratio(
     image_tensors: torch.Tensor,
     predictor: Callable[..., torch.Tensor],
     explanations: torch.Tensor,
-    baseline: int,
+    explanation_threshold: float,
+    baseline: int
 ) -> torch.Tensor:
     """
     Opis: Jest to odsetek obserwacji, dla których po usunięciu obszaru wrażliwości (wskazanego przez wyjaśnienie)
@@ -117,18 +121,19 @@ def decision_impact_ratio(
     """
     n = image_tensors.shape[0]
     # predictor returns probabilities in a tensor format
-    probs_original, probs_modified = _impact_ratio_helper(image_tensors, predictor, explanations, baseline)
-    preds_original = torch.max(probs_original)
-    preds_modified = torch.max(probs_modified)
-    value = torch.sum(preds_original != preds_modified)/n
-    return value
+    probs_original, probs_modified = _impact_ratio_helper(image_tensors, predictor, explanations, explanation_threshold, baseline)
+    _, preds_original = torch.max(probs_original, 1)
+    _, preds_modified = torch.max(probs_modified, 1)
+    value = torch.sum((preds_original != preds_modified).float())/n
+    return value.item()
 
 
 def confidence_impact_ratio(
     images_tensor: torch.Tensor,
     predictor: Callable[..., torch.Tensor],
     explanations: torch.Tensor,
-    baseline: int = 0,
+    explanation_threshold: float,
+    baseline: int = 0
 ) -> torch.Tensor:
     """
     Opis: Średni spadek estymowanego prawdopodobieństwa klasyfikacji po zasłonięciu obszaru wrażliwości.
@@ -137,13 +142,15 @@ def confidence_impact_ratio(
     :return:
     CIR = Suma po i max(C(x_i)-C(x_i-c_i), 0)/N , C to probabilities, c_i obszar krytyczny
     """
-    probs_original, probs_modified = _impact_ratio_helper(images_tensor, predictor, explanations, baseline)
-    value = torch.max(probs_original - probs_modified)/images_tensor.shape[0]
-    return value
+    probs_original, probs_modified = _impact_ratio_helper(images_tensor, predictor, explanations, explanation_threshold, baseline)
+    probs_max_original, _ = torch.max(probs_original, 1)
+    probs_max_modified, _ = torch.max(probs_modified, 1)
+    value = torch.sum(probs_max_original - probs_max_modified)/images_tensor.shape[0]
+    return value.item()
 
 
 def accordance_recall(
-    masks: torch.Tensor, explanations: torch.Tensor, threshold: float = 0.5
+    explanations: torch.Tensor, masks: torch.Tensor, threshold: float = 0.0
 ) -> torch.Tensor:
     """
         Opis: Mierzy jaką część maski wykryło wyjaśnienie.
@@ -162,11 +169,13 @@ def accordance_recall(
     # dla jednego wyjasnienia, wiec wymiar explanations.shape = (n, 1, width, height) mask = (n, width, height)
     squeezed_expl = explanations.squeeze(dim=1)
     overlaping_area = _intersection_mask(squeezed_expl, masks, threshold1=threshold)
-    return torch.sum(overlaping_area, dim=(-2, -1)) / torch.sum(torch.abs(masks) != 0, dim=(-2, -1))
+    divisor = torch.sum(torch.abs(masks) != 0, dim=(-2, -1))
+    value = torch.sum(overlaping_area, dim=(-2, -1)) / divisor
+    return value
 
 
 def accordance_precision(
-    masks: torch.Tensor, explanations: torch.Tensor, threshold: float = 0.5
+    explanations: torch.Tensor, masks: torch.Tensor, threshold: float = 0.0
 ) -> torch.Tensor:
     """
         Opis: mierzy jaką część wyjaśnienia stanowiła maska.
@@ -184,12 +193,14 @@ def accordance_precision(
     # maska logiczna, jest czy nie jest w masce
     squeezed_expl = explanations.squeeze(dim=1)
     overlaping_area = _intersection_mask(squeezed_expl, masks, threshold1=threshold)
-    return torch.sum(overlaping_area, dim=(-2, -1)) / torch.sum(torch.abs(squeezed_expl) > threshold, dim=(-2, -1))
+    divisor = torch.sum(torch.abs(squeezed_expl) > threshold, dim=(-2, -1))
+    value = torch.sum(overlaping_area, dim=(-2, -1)) / divisor
+    return value
 
 
 def F1_score(
-    masks: torch.Tensor, explanations: torch.Tensor, threshold: float = 0.5
-) -> torch.Tensor:
+    explanations: torch.Tensor, masks: torch.Tensor, threshold: float = 0.0
+) -> float:
     """
         Opis: Średnia harmoniczna Accordance recall i Accordance precision.
         Argumenty wejściowe: torch.Tensor (maska obrazu), torch.Tensor (wyjasnienie/obszar krytyczny),
@@ -202,15 +213,16 @@ def F1_score(
     is identified by the interpretation method
         Accordance F1 = 1/N * sum_i (2*(recall_i + precision_i)/(recall_i*precision_i))
     """
-    acc_recall = accordance_recall(masks, explanations, threshold=threshold)
-    acc_prec = accordance_precision(masks, explanations, threshold=threshold)
+    acc_recall = accordance_recall(explanations, masks, threshold=threshold)
+    acc_prec = accordance_precision(explanations, masks, threshold=threshold)
     values = 2 * (acc_recall * acc_prec) / (acc_recall + acc_prec)
-    return torch.sum(values) / values.shape[0]
+    value = torch.sum(values) / values.shape[0]
+    return value.item()
 
 
 def intersection_over_union(
-    masks: torch.Tensor, explanations: torch.Tensor, threshold: float = 0.5
-) -> torch.Tensor:
+    explanations: torch.Tensor, masks: torch.Tensor, threshold: float = 0.5
+) -> float:
     """
         Opis: Pole iloczynu maski i wyjaśnienia podzielone przez pole sumy maski i wyjaśnienia.
         Argumenty wejściowe: torch.Tensor (maska obrazu), torch.Tensor (wyjasnienie/obszar krytyczny),
@@ -226,8 +238,8 @@ def intersection_over_union(
     squeezed_expl = explanations.squeeze(dim=1)
     values = torch.sum(_intersection_mask(squeezed_expl, masks, threshold1=threshold), dim=(-2, -1)) \
              / torch.sum(_union_mask(squeezed_expl, masks, threshold1=threshold), dim=(-2, -1))
-
-    return torch.sum(values) / values.shape[0]
+    value = torch.sum(values) / values.shape[0]
+    return value.item()
 
 
 def ensemble_score(
