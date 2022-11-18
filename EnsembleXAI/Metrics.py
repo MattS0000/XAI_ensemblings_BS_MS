@@ -1,18 +1,17 @@
-from torch import Tensor
 from typing import Callable, Union, List, Tuple
 import itertools
 import torch
 
 
-def replace_mask(image: torch.Tensor, mask: torch.Tensor, value: Union[int, float]) -> torch.Tensor:
-    temp_image = torch.clone(image)
-    reshaped_mask = mask.unsqueeze(dim=1).repeat(1, 3, 1, 1)
-    temp_image[reshaped_mask] = value
-    return temp_image
+def replace_masks(images: torch.Tensor, masks: torch.Tensor, value: Union[int, float] = 0) -> torch.Tensor:
+    temp_images = torch.clone(images)
+    reshaped_masks = masks.unsqueeze(dim=1).repeat(1, 3, 1, 1)
+    temp_images[reshaped_masks] = value
+    return temp_images
 
 
-def tensor_to_list_tensors(explanations: torch.Tensor, depth: int) -> List[torch.Tensor]:
-    tensor_list = [x.squeeze() for x in torch.tensor_split(explanations, explanations.shape[0], dim=0)]
+def tensor_to_list_tensors(tensors: torch.Tensor, depth: int) -> List[torch.Tensor]:
+    tensor_list = [x.squeeze() for x in torch.tensor_split(tensors, tensors.shape[0], dim=0)]
     for i in range(depth-1):
         tensor_list = [y.squeeze() for x in tensor_list for y in torch.tensor_split(x, x.shape[0], dim=0)]
     return tensor_list
@@ -28,7 +27,7 @@ def _matrix_norm_2(matrix1: torch.Tensor, matrix2: torch.Tensor, sum_dim: int = 
     return norm
 
 
-def _intersection(
+def _intersection_mask(
     tensor1: torch.Tensor,
     tensor2: torch.Tensor,
     threshold1: float = 0.0,
@@ -39,7 +38,7 @@ def _intersection(
     )
 
 
-def _union(
+def _union_mask(
     tensor1: torch.Tensor,
     tensor2: torch.Tensor,
     threshold1: float = 0.0,
@@ -79,6 +78,7 @@ def stability(
     https://github.com/sbobek/inxai/blob/main/inxai/global_metrics.py
     """
     images_list = tensor_to_list_tensors(images_to_compare, depth=1)
+    #matrix_norm_2 over all 3 dimensions
     close_images = [other_image for other_image in images_list if _matrix_norm_2(image, other_image, sum_dim=-1).item() < epsilon]
     close_images_tensor = torch.Tensor(close_images)
     close_images_explanations = explanator(close_images_tensor)
@@ -93,10 +93,10 @@ def _impact_ratio_helper(
     predictor: Callable[..., torch.Tensor],
     explanations: torch.Tensor,
     baseline: int,
-) -> Tuple[Tensor, Tensor]:
+) -> Tuple[torch.Tensor, torch.Tensor]:
     """"""
     probabilities_original = predictor(images_tensor)
-    modified_images = replace_mask(images_tensor, explanations, baseline)
+    modified_images = replace_masks(images_tensor, explanations, baseline)
     probabilities_modified = predictor(modified_images)
     return probabilities_original, probabilities_modified
 
@@ -161,7 +161,7 @@ def accordance_recall(
     # maska logiczna, jest czy nie jest w masce
     # dla jednego wyjasnienia, wiec wymiar explanations.shape = (n, 1, width, height) mask = (n, width, height)
     squeezed_expl = explanations.squeeze(dim=1)
-    overlaping_area = _intersection(squeezed_expl, masks, threshold1=threshold)
+    overlaping_area = _intersection_mask(squeezed_expl, masks, threshold1=threshold)
     return torch.sum(overlaping_area, dim=(-2, -1)) / torch.sum(torch.abs(masks) != 0, dim=(-2, -1))
 
 
@@ -183,7 +183,7 @@ def accordance_precision(
     """
     # maska logiczna, jest czy nie jest w masce
     squeezed_expl = explanations.squeeze(dim=1)
-    overlaping_area = _intersection(squeezed_expl, masks, threshold1=threshold)
+    overlaping_area = _intersection_mask(squeezed_expl, masks, threshold1=threshold)
     return torch.sum(overlaping_area, dim=(-2, -1)) / torch.sum(torch.abs(squeezed_expl) > threshold, dim=(-2, -1))
 
 
@@ -224,8 +224,8 @@ def intersection_over_union(
         IOU=1/N * sum_i(S(x_i) cz. wspolna F(x_i)/S(x_i) suma F(x_i))
     """
     squeezed_expl = explanations.squeeze(dim=1)
-    values = torch.sum(_intersection(squeezed_expl, masks, threshold1=threshold), dim=(-2, -1)) \
-             / torch.sum(_union(squeezed_expl, masks, threshold1=threshold), dim=(-2, -1))
+    values = torch.sum(_intersection_mask(squeezed_expl, masks, threshold1=threshold), dim=(-2, -1)) \
+             / torch.sum(_union_mask(squeezed_expl, masks, threshold1=threshold), dim=(-2, -1))
 
     return torch.sum(values) / values.shape[0]
 
