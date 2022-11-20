@@ -2,6 +2,9 @@ import torch
 
 from copy import deepcopy
 from EnsembleXAI.Metrics import ensemble_score
+import numpy as np
+from sklearn.model_selection import KFold
+from sklearn.kernel_ridge import KernelRidge
 from torch import Tensor, stack
 from typing import TypeVar, Tuple, List, Callable, Union
 
@@ -92,5 +95,43 @@ def ensemble(inputs: TensorOrTupleOfTensorsGeneric, metrics: List[Callable], wei
 
     return torch.stack(results)
 
-def ensembleXAI(inputs: Tensor, masks: Tensor) -> Tensor:
-    pass
+
+def ensembleXAI(inputs: TensorOrTupleOfTensorsGeneric, masks: TensorOrTupleOfTensorsGeneric, n_folds: int = 3,
+                random_state=None, shuffle=False) -> Tensor:
+
+    assert len(inputs) == len(masks)
+    # reshape do 1d array for each observation
+    parsed_inputs = _reformat_input_tensors(inputs).numpy().reshape((len(inputs), -1))
+    labels = _reformat_input_tensors(masks).numpy()
+    labels_size = labels.shape
+    labels = labels.reshape((len(inputs), -1))
+
+    kf = KFold(n_splits=n_folds, random_state=random_state, shuffle=shuffle)
+
+    ensembled = [0] * n_folds
+    indices = np.empty(1, dtype=int)
+
+    for idx, (train_index, test_index) in enumerate(kf.split(parsed_inputs, labels)):
+        # get observations split by k-fold
+        X_train, X_test = (parsed_inputs[train_index]), (parsed_inputs[test_index])
+        y_train = labels[train_index]
+        # train KRR
+        krr = KernelRidge(
+            alpha=1,  # regularization
+            kernel='polynomial'  # choose one from:
+            # https://github.com/scikit-learn/scikit-learn/blob/main/sklearn/metrics/pairwise.py#L2050
+        )
+        krr.fit(X_train, y_train)
+        # predict masks for observations currently in test group
+        y_predicted = krr.predict(X_test)
+        # reshape predictions and save them and indices to recreate original order later
+        ensembled[idx] = y_predicted.reshape((tuple([len(X_test)]) + labels_size[2:4]))
+        indices = np.concatenate([indices, test_index])
+
+    # sort output to match input order
+    indices = indices[1:]
+    ensembled = np.concatenate(ensembled)
+    ensembled_ind = indices.argsort()
+    ensembled = ensembled[ensembled_ind[::1]]
+
+    return torch.from_numpy(ensembled)

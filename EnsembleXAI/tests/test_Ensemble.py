@@ -1,4 +1,3 @@
-import torch
 import torch as t
 
 from EnsembleXAI import Ensemble
@@ -15,12 +14,22 @@ def _dummy_metric2(x: t.Tensor) -> t.Tensor:
     return 2 * _dummy_metric(x)
 
 
+class TestEnsembleXAI(TestCase):
+    def test_ensemble(self):
+        inputs = t.rand([90, 3, 32, 32])
+        masks = t.randint(low=0, high=2, size=[90, 32, 32])
+        ensembled = Ensemble.ensembleXAI(inputs, masks, shuffle=False)
+        self.assertTrue(ensembled.shape == (90, 32, 32))
+        # hard to predict outcome of this algorithm to check exact correctness, even on not random data
+        # for now testing only result's shape
+
+
 class TestNormalize(TestCase):
     def test_normalization(self):
-        x = torch.tensor([[[[1, 2], [2, 1]], [[3, 4], [3, 4]]],
+        x = t.tensor([[[[1, 2], [2, 1]], [[3, 4], [3, 4]]],
                           [[[3, 5], [5, 3]], [[0, 1], [1, 0]]]], dtype=t.float64)
         normalized = _normalize_across_dataset(x)
-        expected = torch.tensor([[[[-1.1068, 0.0000],
+        expected = t.tensor([[[[-1.1068, 0.0000],
                                    [-0.4743, -0.5916]],
 
                                   [[0.1581, 1.1832],
@@ -35,7 +44,7 @@ class TestNormalize(TestCase):
 
 
 class TestEnsemble(TestCase):
-    x = torch.tensor([[[[0, 1], [1, 0]], [[0, 1], [1, 0]]],
+    x = t.tensor([[[[0, 1], [1, 0]], [[0, 1], [1, 0]]],
                       [[[0, 1], [1, 0]], [[0, 1], [1, 0]]]], dtype=t.float)
 
     def test_ensemble_multiple_obs_single_metric(self):
