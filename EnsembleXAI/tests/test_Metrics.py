@@ -53,18 +53,22 @@ class TestHelperFuncs(TestCase):
         )
 
     def test_matrix_norm_2_basic(self):
-        value = Metrics.matrix_norm_2(torch.ones(3, 3), torch.zeros(3, 3))
+        value = Metrics.matrix_2_norm(torch.ones(3, 3), torch.zeros(3, 3))
         self.assertEqual(value, 3)
 
     def test_matrix_norm_2_tensor(self):
-        values = Metrics.matrix_norm_2(torch.ones(3, 3, 3), torch.zeros(3, 3, 3))
+        values = Metrics.matrix_2_norm(torch.ones(3, 3, 3), torch.zeros(3, 3, 3))
         self.assertTrue(torch.all(values == 3))
 
     def test_matrix_norm_2_deep(self):
-        value = Metrics.matrix_norm_2(
+        value = Metrics.matrix_2_norm(
+            2 * torch.ones(4, 4, 4), torch.zeros(4, 4, 4), sum_dim=0
+        )
+        value2 = Metrics.matrix_2_norm(
             2 * torch.ones(4, 4, 4), torch.zeros(4, 4, 4), sum_dim=-1
         )
         self.assertEqual(value, 16)
+        self.assertEqual(value2, 16)
 
     def test_intersection(self):
         intersect = Metrics._intersection_mask(

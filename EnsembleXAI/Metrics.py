@@ -3,8 +3,10 @@ import itertools
 import torch
 
 function = lambda x, y: (x, y)
+
+
 def replace_masks(
-    images: torch.Tensor, masks: torch.Tensor, value: Union[int, float] = 0
+        images: torch.Tensor, masks: torch.Tensor, value: Union[int, float] = 0
 ) -> torch.Tensor:
     """
     Replaces values in images where masks exist.
@@ -33,10 +35,11 @@ def replace_masks(
 
     Examples
     --------
-    >>> replace_masks(x, y)
+    >>> function(x, y)
     answer
     """
     temp_images = torch.clone(images)
+    # mask needs to be reshaped over RGB channel for the indexing of images
     reshaped_masks = masks.unsqueeze(dim=1).repeat(1, 3, 1, 1)
     temp_images[reshaped_masks] = value
     return temp_images
@@ -72,6 +75,7 @@ def tensor_to_list_tensors(tensors: torch.Tensor, depth: int) -> List[torch.Tens
     >>> function(x, y)
     answer
     """
+    # returned tensors have reduced dimensions
     tensor_list = [
         x.squeeze() for x in torch.tensor_split(tensors, tensors.shape[0], dim=0)
     ]
@@ -84,8 +88,8 @@ def tensor_to_list_tensors(tensors: torch.Tensor, depth: int) -> List[torch.Tens
     return tensor_list
 
 
-def matrix_norm_2(
-    matrix1: torch.Tensor, matrix2: torch.Tensor, sum_dim: int = None
+def matrix_2_norm(
+        matrix1: torch.Tensor, matrix2: torch.Tensor, sum_dim: int = None
 ) -> torch.Tensor:
     """
     Computes the 2-norm of two matrices.
@@ -120,7 +124,8 @@ def matrix_norm_2(
     """
     difference = (matrix1 - matrix2).float()
     norm = torch.linalg.matrix_norm(difference, ord=2)
-    if sum_dim:
+    # manual extension of the norm calculation to RGB channel
+    if sum_dim is not None:
         norm = torch.pow(norm, 2)
         norm = torch.sum(norm, dim=sum_dim)
         norm = torch.sqrt(norm)
@@ -128,8 +133,8 @@ def matrix_norm_2(
 
 
 def _intersection_mask(
-    tensor1: torch.Tensor, tensor2: torch.Tensor,
-    threshold1: float = 0.0, threshold2: float = 0.0,
+        tensor1: torch.Tensor, tensor2: torch.Tensor,
+        threshold1: float = 0.0, threshold2: float = 0.0,
 ) -> torch.Tensor:
     """
     Calculates the intersection of two masks.
@@ -171,8 +176,8 @@ def _intersection_mask(
 
 
 def _union_mask(
-    tensor1: torch.Tensor, tensor2: torch.Tensor,
-    threshold1: float = 0.0, threshold2: float = 0.0,
+        tensor1: torch.Tensor, tensor2: torch.Tensor,
+        threshold1: float = 0.0, threshold2: float = 0.0,
 ) -> torch.Tensor:
     """
     Calculates the union of two masks.
@@ -211,7 +216,7 @@ def _union_mask(
     return logical_mask
 
 
-def consistency(explanations: torch.Tensor) -> torch.Tensor:
+def consistency(explanations: torch.Tensor) -> float:
     """
     Metric representing how similar are explanations of one photo.
 
@@ -232,7 +237,7 @@ def consistency(explanations: torch.Tensor) -> torch.Tensor:
     --------
     stability : function description.
     tensor_to_list_tensors :
-    _matrix_norm_2 :
+    matrix_2_norm :
 
     Examples
     --------
@@ -253,15 +258,15 @@ def consistency(explanations: torch.Tensor) -> torch.Tensor:
     """
     explanations_list = tensor_to_list_tensors(explanations, depth=2)
     diffs = [
-        matrix_norm_2(exp1, exp2)
+        matrix_2_norm(exp1, exp2)
         for exp1, exp2 in itertools.combinations(explanations_list, 2)
     ]
     return (1 / (max(diffs) + 1)).item()
 
 
 def stability(explanator: Callable, image: torch.Tensor,
-    images_to_compare: torch.Tensor, epsilon: float = 0.1,
-) -> torch.Tensor:
+              images_to_compare: torch.Tensor, epsilon: float = 0.1,
+              ) -> torch.Tensor:
     """
     Short description
 
@@ -287,7 +292,7 @@ def stability(explanator: Callable, image: torch.Tensor,
     --------
     consistency : function description.
     tensor_to_list_tensors :
-    _matrix_norm_2 :
+    matrix_2_norm :
 
     Examples
     --------
@@ -306,26 +311,27 @@ def stability(explanator: Callable, image: torch.Tensor,
     https://github.com/sbobek/inxai/blob/main/inxai/global_metrics.py
     """
     images_list = tensor_to_list_tensors(images_to_compare, depth=1)
-    # matrix_norm_2 over all 3 dimensions
+    # matrix 2-norm over all 3 dimensions
     close_images = [
         other_image
         for other_image in images_list
-        if matrix_norm_2(image, other_image, sum_dim=-1).item() < epsilon
+        if matrix_2_norm(image, other_image, sum_dim=0).item() < epsilon
     ]
-    close_images_tensor = torch.Tensor(close_images)
+    close_images_tensor = torch.stack(close_images)
     close_images_explanations = explanator(close_images_tensor)
     image_explanation = explanator(image.unsqueeze(dim=0)).squeeze()
-    image_dists = matrix_norm_2(close_images_tensor, image, sum_dim=-1)
-    expl_dists = matrix_norm_2(close_images_explanations, image_explanation)
+    # matrix_2_norm works if one tensor is of one shape bigger, casts the other to the correct size
+    image_dists = matrix_2_norm(close_images_tensor, image, sum_dim=1)
+    expl_dists = matrix_2_norm(close_images_explanations, image_explanation)
     return torch.max(image_dists / (expl_dists + 1)).item()
 
 
 def _impact_ratio_helper(
-    images_tensor: torch.Tensor,
-    predictor: Callable[..., torch.Tensor],
-    explanations: torch.Tensor,
-    explanation_threshold: float,
-    baseline: int = 0,
+        images_tensor: torch.Tensor,
+        predictor: Callable[..., torch.Tensor],
+        explanations: torch.Tensor,
+        explanation_threshold: float,
+        baseline: int = 0,
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     """
     Short description
@@ -368,11 +374,11 @@ def _impact_ratio_helper(
 
 
 def decision_impact_ratio(
-    images_tensors: torch.Tensor,
-    predictor: Callable[..., torch.Tensor],
-    explanations: torch.Tensor,
-    explanation_threshold: float,
-    baseline: int,
+        images_tensors: torch.Tensor,
+        predictor: Callable[..., torch.Tensor],
+        explanations: torch.Tensor,
+        explanation_threshold: float,
+        baseline: int,
 ) -> torch.Tensor:
     """
     Short description
@@ -428,11 +434,11 @@ def decision_impact_ratio(
 
 
 def confidence_impact_ratio(
-    images_tensors: torch.Tensor,
-    predictor: Callable[..., torch.Tensor],
-    explanations: torch.Tensor,
-    explanation_threshold: float,
-    baseline: int = 0,
+        images_tensors: torch.Tensor,
+        predictor: Callable[..., torch.Tensor],
+        explanations: torch.Tensor,
+        explanation_threshold: float,
+        baseline: int = 0,
 ) -> torch.Tensor:
     """
     Short description
@@ -485,7 +491,7 @@ def confidence_impact_ratio(
 
 
 def accordance_recall(
-    explanations: torch.Tensor, masks: torch.Tensor, threshold: float = 0.0
+        explanations: torch.Tensor, masks: torch.Tensor, threshold: float = 0.0
 ) -> torch.Tensor:
     """
     Short description
@@ -529,18 +535,18 @@ def accordance_recall(
         recall_i=(S(x_i) czesc wspolna F(x_i))/S(x_i)
         recall = sum_i(recall_i)/N
     """
-    # maska logiczna, jest czy nie jest w masce
-    # dla jednego wyjasnienia, wiec
-    # wymiar explanations.shape = (n, 1, width, height) mask = (n, width, height)
+    # logical mask, one explanation per image
+    # explanations.shape = (n, 1, width, height), mask.shape = (n, width, height)
+    # squeeze explanation to be of same shape as masks
     squeezed_expl = explanations.squeeze(dim=1)
     overlaping_area = _intersection_mask(squeezed_expl, masks, threshold1=threshold)
-    divisor = torch.sum(torch.abs(masks) != 0, dim=(-2, -1))
+    divisor = torch.sum(masks != 0, dim=(-2, -1))
     value = torch.sum(overlaping_area, dim=(-2, -1)) / divisor
     return value
 
 
 def accordance_precision(
-    explanations: torch.Tensor, masks: torch.Tensor, threshold: float = 0.0
+        explanations: torch.Tensor, masks: torch.Tensor, threshold: float = 0.0
 ) -> torch.Tensor:
     """
     Short description
@@ -584,7 +590,6 @@ def accordance_precision(
         precision_i=(S(x_i) czesc wspolna F(x_i))/F(x_i)
         precision = sum_i (precision_i)/N
     """
-    # maska logiczna, jest czy nie jest w masce
     squeezed_expl = explanations.squeeze(dim=1)
     overlaping_area = _intersection_mask(squeezed_expl, masks, threshold1=threshold)
     divisor = torch.sum(torch.abs(squeezed_expl) > threshold, dim=(-2, -1))
@@ -593,7 +598,7 @@ def accordance_precision(
 
 
 def F1_score(
-    explanations: torch.Tensor, masks: torch.Tensor, threshold: float = 0.0
+        explanations: torch.Tensor, masks: torch.Tensor, threshold: float = 0.0
 ) -> float:
     """
     Short description
@@ -644,7 +649,7 @@ def F1_score(
 
 
 def intersection_over_union(
-    explanations: torch.Tensor, masks: torch.Tensor, threshold: float = 0.5
+        explanations: torch.Tensor, masks: torch.Tensor, threshold: float = 0.5
 ) -> float:
     """
     Short description
@@ -687,6 +692,7 @@ def intersection_over_union(
     is identified by the interpretation method
         IOU=1/N * sum_i(S(x_i) cz. wspolna F(x_i)/S(x_i) suma F(x_i))
     """
+    # one explanation per image
     squeezed_expl = explanations.squeeze(dim=1)
     intersections = _intersection_mask(squeezed_expl, masks, threshold1=threshold)
     union_masks = _union_mask(squeezed_expl, masks, threshold1=threshold)
@@ -698,8 +704,8 @@ def intersection_over_union(
 
 
 def ensemble_score(
-    weights: Union[List, torch.Tensor],
-    metrics_scores: Union[List[torch.Tensor], torch.Tensor, List[float]],
+        weights: Union[List, torch.Tensor],
+        metrics_scores: Union[List[torch.Tensor], torch.Tensor, List[float]],
 ) -> torch.Tensor:
     """
     Short description
