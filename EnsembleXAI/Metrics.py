@@ -2,7 +2,7 @@ from typing import Callable, Union, List, Tuple
 import itertools
 import torch
 
-
+function = lambda x, y: (x, y)
 def replace_masks(
     images: torch.Tensor, masks: torch.Tensor, value: Union[int, float] = 0
 ) -> torch.Tensor:
@@ -27,7 +27,9 @@ def replace_masks(
 
     See Also
     --------
-    replacetext : function description.
+    _impact_ratio_helper : function description.
+    decision_impact_ratio : function description.
+    confidence_impact_ratio : function description.
 
     Examples
     --------
@@ -62,6 +64,8 @@ def tensor_to_list_tensors(tensors: torch.Tensor, depth: int) -> List[torch.Tens
     See Also
     --------
     replacetext : function description.
+    consistency : function description.
+    stability : function description.
 
     Examples
     --------
@@ -80,7 +84,7 @@ def tensor_to_list_tensors(tensors: torch.Tensor, depth: int) -> List[torch.Tens
     return tensor_list
 
 
-def _matrix_norm_2(
+def matrix_norm_2(
     matrix1: torch.Tensor, matrix2: torch.Tensor, sum_dim: int = None
 ) -> torch.Tensor:
     """
@@ -106,7 +110,8 @@ def _matrix_norm_2(
 
     See Also
     --------
-    replacetext : function description.
+    consistency : function description.
+    stability :
 
     Examples
     --------
@@ -149,7 +154,10 @@ def _intersection_mask(
 
     See Also
     --------
-    replacetext : function description.
+    accordance_recall : function description.
+    accordance_precision :
+    intersection_over_union :
+    _union_mask :
 
     Examples
     --------
@@ -189,7 +197,8 @@ def _union_mask(
 
     See Also
     --------
-    replacetext : function description.
+    intersection_over_union : function description.
+    _intersection_mask :
 
     Examples
     --------
@@ -221,7 +230,9 @@ def consistency(explanations: torch.Tensor) -> torch.Tensor:
 
     See Also
     --------
-    replacetext : function description.
+    stability : function description.
+    tensor_to_list_tensors :
+    _matrix_norm_2 :
 
     Examples
     --------
@@ -242,7 +253,7 @@ def consistency(explanations: torch.Tensor) -> torch.Tensor:
     """
     explanations_list = tensor_to_list_tensors(explanations, depth=2)
     diffs = [
-        _matrix_norm_2(exp1, exp2)
+        matrix_norm_2(exp1, exp2)
         for exp1, exp2 in itertools.combinations(explanations_list, 2)
     ]
     return (1 / (max(diffs) + 1)).item()
@@ -258,17 +269,25 @@ def stability(explanator: Callable, image: torch.Tensor,
 
     Parameters
     ----------
-    parameter1: parameter_type
+    explanator: Callable
+        parameter_description
+    image: torch.Tensor
+        parameter_description
+    images_to_compare: torch.Tensor
+        parameter_description
+    epsilon: float
         parameter_description
 
     Returns
     -------
-    return_object: return_type
+    torch.Tensor
         return_description
 
     See Also
     --------
-    replacetext : function description.
+    consistency : function description.
+    tensor_to_list_tensors :
+    _matrix_norm_2 :
 
     Examples
     --------
@@ -291,13 +310,13 @@ def stability(explanator: Callable, image: torch.Tensor,
     close_images = [
         other_image
         for other_image in images_list
-        if _matrix_norm_2(image, other_image, sum_dim=-1).item() < epsilon
+        if matrix_norm_2(image, other_image, sum_dim=-1).item() < epsilon
     ]
     close_images_tensor = torch.Tensor(close_images)
     close_images_explanations = explanator(close_images_tensor)
     image_explanation = explanator(image.unsqueeze(dim=0)).squeeze()
-    image_dists = _matrix_norm_2(close_images_tensor, image, sum_dim=-1)
-    expl_dists = _matrix_norm_2(close_images_explanations, image_explanation)
+    image_dists = matrix_norm_2(close_images_tensor, image, sum_dim=-1)
+    expl_dists = matrix_norm_2(close_images_explanations, image_explanation)
     return torch.max(image_dists / (expl_dists + 1)).item()
 
 
@@ -315,12 +334,20 @@ def _impact_ratio_helper(
 
     Parameters
     ----------
-    parameter1: parameter_type
+    images_tensor: torch.Tensor
+        parameter_description
+    predictor: Callable[..., torch.Tensor]
+        parameter_description
+    explanations: torch.Tensor
+        parameter_description
+    explanation_threshold: float
+        parameter_description
+    baseline: int
         parameter_description
 
     Returns
     -------
-    return_object: return_type
+    Tuple[torch.Tensor, torch.Tensor]
         return_description
 
     See Also
@@ -341,7 +368,7 @@ def _impact_ratio_helper(
 
 
 def decision_impact_ratio(
-    image_tensors: torch.Tensor,
+    images_tensors: torch.Tensor,
     predictor: Callable[..., torch.Tensor],
     explanations: torch.Tensor,
     explanation_threshold: float,
@@ -354,12 +381,20 @@ def decision_impact_ratio(
 
     Parameters
     ----------
-    parameter1: parameter_type
+    image_tensors: torch.Tensor
+        parameter_description
+    predictor: Callable[..., torch.Tensor]
+        parameter_description
+    explanations: torch.Tensor
+        parameter_description
+    explanation_threshold: float
+        parameter_description
+    baseline: int
         parameter_description
 
     Returns
     -------
-    return_object: return_type
+    torch.Tensor
         return_description
 
     Opis: Jest to odsetek obserwacji, dla których po usunięciu
@@ -381,10 +416,10 @@ def decision_impact_ratio(
     >>> function(x, y)
     answer
     """
-    n = image_tensors.shape[0]
+    n = images_tensors.shape[0]
     # predictor returns probabilities in a tensor format
     probs_original, probs_modified = _impact_ratio_helper(
-        image_tensors, predictor, explanations, explanation_threshold, baseline
+        images_tensors, predictor, explanations, explanation_threshold, baseline
     )
     _, preds_original = torch.max(probs_original, 1)
     _, preds_modified = torch.max(probs_modified, 1)
@@ -393,7 +428,7 @@ def decision_impact_ratio(
 
 
 def confidence_impact_ratio(
-    images_tensor: torch.Tensor,
+    images_tensors: torch.Tensor,
     predictor: Callable[..., torch.Tensor],
     explanations: torch.Tensor,
     explanation_threshold: float,
@@ -406,12 +441,20 @@ def confidence_impact_ratio(
 
     Parameters
     ----------
-    parameter1: parameter_type
+    images_tensors: torch.Tensor
+        parameter_description
+    predictor: Callable[..., torch.Tensor]
+        parameter_description
+    explanations: torch.Tensor
+        parameter_description
+    explanation_threshold: float
+        parameter_description
+    baseline: int
         parameter_description
 
     Returns
     -------
-    return_object: return_type
+    torch.Tensor
         return_description
 
     See Also
@@ -433,11 +476,11 @@ def confidence_impact_ratio(
     CIR = Suma po i max(C(x_i)-C(x_i-c_i), 0)/N , C to probabilities, c_i obszar krytyczny
     """
     probs_original, probs_modified = _impact_ratio_helper(
-        images_tensor, predictor, explanations, explanation_threshold, baseline
+        images_tensors, predictor, explanations, explanation_threshold, baseline
     )
     probs_max_original, _ = torch.max(probs_original, 1)
     probs_max_modified, _ = torch.max(probs_modified, 1)
-    value = torch.sum(probs_max_original - probs_max_modified) / images_tensor.shape[0]
+    value = torch.sum(probs_max_original - probs_max_modified) / images_tensors.shape[0]
     return value.item()
 
 
@@ -451,12 +494,16 @@ def accordance_recall(
 
     Parameters
     ----------
-    parameter1: parameter_type
+    explanations: torch.Tensor
+        parameter_description
+    masks: torch.Tensor
+        parameter_description
+    threshold: float
         parameter_description
 
     Returns
     -------
-    return_object: return_type
+    torch.Tensor
         return_description
 
     See Also
@@ -502,12 +549,16 @@ def accordance_precision(
 
     Parameters
     ----------
-    parameter1: parameter_type
+    explanations: torch.Tensor
+        parameter_description
+    masks: torch.Tensor
+        parameter_description
+    threshold: float
         parameter_description
 
     Returns
     -------
-    return_object: return_type
+    torch.Tensor
         return_description
 
     See Also
@@ -551,12 +602,15 @@ def F1_score(
 
     Parameters
     ----------
-    parameter1: parameter_type
+    explanations: torch.Tensor
         parameter_description
+    masks: torch.Tensor
+
+    threshold: float
 
     Returns
     -------
-    return_object: return_type
+    float
         return_description
 
 
@@ -599,12 +653,15 @@ def intersection_over_union(
 
     Parameters
     ----------
-    parameter1: parameter_type
+    explanations: torch.Tensor
         parameter_description
+    masks: torch.Tensor
+
+    threshold: float
 
     Returns
     -------
-    return_object: return_type
+    float
         return_description
 
     See Also
@@ -651,7 +708,9 @@ def ensemble_score(
 
     Parameters
     ----------
-    parameter1: parameter_type
+    weights: Union[List, torch.Tensor]
+        parameter_description
+    metrics_scores: Union[List[torch.Tensor], torch.Tensor, List[float]]
         parameter_description
 
     Returns
