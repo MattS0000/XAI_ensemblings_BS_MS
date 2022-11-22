@@ -24,6 +24,15 @@ def replace_masks(
     -------
     torch.Tensor
         4D Tensor, copy of images with the replaced data
+
+    See Also
+    --------
+    replacetext : function description.
+
+    Examples
+    --------
+    >>> replace_masks(x, y)
+    answer
     """
     temp_images = torch.clone(images)
     reshaped_masks = masks.unsqueeze(dim=1).repeat(1, 3, 1, 1)
@@ -49,6 +58,15 @@ def tensor_to_list_tensors(tensors: torch.Tensor, depth: int) -> List[torch.Tens
     -------
     list of torch.Tensor
         A single list consisting of all the split Tensors.
+
+    See Also
+    --------
+    replacetext : function description.
+
+    Examples
+    --------
+    >>> function(x, y)
+    answer
     """
     tensor_list = [
         x.squeeze() for x in torch.tensor_split(tensors, tensors.shape[0], dim=0)
@@ -85,6 +103,15 @@ def _matrix_norm_2(
     torch.Tensor
         Tensor with value or values of the 2-norm. The shape is same as both of the input matrices,
         except for last two removed dimensions and the optional dimension specified in sum_dim parameter.
+
+    See Also
+    --------
+    replacetext : function description.
+
+    Examples
+    --------
+    >>> function(x, y)
+    answer
     """
     difference = (matrix1 - matrix2).float()
     norm = torch.linalg.matrix_norm(difference, ord=2)
@@ -119,6 +146,15 @@ def _intersection_mask(
     -------
     torch.Tensor
         Boolean Tensor with True values where the masks intersect with value over thresholds.
+
+    See Also
+    --------
+    replacetext : function description.
+
+    Examples
+    --------
+    >>> function(x, y)
+    answer
     """
     logical_mask = torch.logical_and(
         torch.abs(tensor1) > threshold1, torch.abs(tensor2) > threshold2
@@ -150,6 +186,15 @@ def _union_mask(
     -------
     torch.Tensor
         Boolean Tensor with True values on the union of the masks, where values are over thresholds.
+
+    See Also
+    --------
+    replacetext : function description.
+
+    Examples
+    --------
+    >>> function(x, y)
+    answer
     """
     logical_mask = torch.logical_or(
         torch.abs(tensor1) > threshold1, torch.abs(tensor2) > threshold2
@@ -174,6 +219,16 @@ def consistency(explanations: torch.Tensor) -> torch.Tensor:
     float
         Value of the consistency metric for the input explanations.
 
+    See Also
+    --------
+    replacetext : function description.
+
+    Examples
+    --------
+    >>> function(x, y)
+    answer
+    """
+    """
     Opis: Mierzy jak bardzo wyjaśnienia różnych modeli
     uczenia maszynowego są do siebie podobne.
     Argumenty wejściowe: Lista<torch.Tensor>
@@ -211,6 +266,16 @@ def stability(explanator: Callable, image: torch.Tensor,
     return_object: return_type
         return_description
 
+    See Also
+    --------
+    replacetext : function description.
+
+    Examples
+    --------
+    >>> function(x, y)
+    answer
+    """
+    """
     Opis: Mierzy jak podobne wyjaśnienia otrzymamy
     dla podobnych danych wejściowych.
     Argumenty wejściowe:
@@ -257,6 +322,15 @@ def _impact_ratio_helper(
     -------
     return_object: return_type
         return_description
+
+    See Also
+    --------
+    replacetext : function description.
+
+    Examples
+    --------
+    >>> function(x, y)
+    answer
     """
     probabilities_original = predictor(images_tensor)
     # one explanation per image
@@ -297,6 +371,15 @@ def decision_impact_ratio(
     :return:
     DIR = Suma po i (1 jeżeli D(x_i)=/=D(x_i-c_i) else 0)/N,
     D to klasyfikacja, c_i obszar krytyczny
+
+    See Also
+    --------
+    replacetext : function description.
+
+    Examples
+    --------
+    >>> function(x, y)
+    answer
     """
     n = image_tensors.shape[0]
     # predictor returns probabilities in a tensor format
@@ -331,6 +414,16 @@ def confidence_impact_ratio(
     return_object: return_type
         return_description
 
+    See Also
+    --------
+    replacetext : function description.
+
+    Examples
+    --------
+    >>> function(x, y)
+    answer
+    """
+    """
     Opis: Średni spadek estymowanego prawdopodobieństwa
     klasyfikacji po zasłonięciu obszaru wrażliwości.
     Argumenty wejściowe: dataset, funkcja na probsy z modelu,
@@ -366,6 +459,16 @@ def accordance_recall(
     return_object: return_type
         return_description
 
+    See Also
+    --------
+    replacetext : function description.
+
+    Examples
+    --------
+    >>> function(x, y)
+    answer
+    """
+    """
         Opis: Mierzy jaką część maski wykryło wyjaśnienie.
         Argumenty wejściowe: torch.Tensor (maska obrazu),
         torch.Tensor (wyjaśnienie/obszar krytyczny),
@@ -407,6 +510,16 @@ def accordance_precision(
     return_object: return_type
         return_description
 
+    See Also
+    --------
+    replacetext : function description.
+
+    Examples
+    --------
+    >>> function(x, y)
+    answer
+    """
+    """
         Opis: mierzy jaką część wyjaśnienia stanowiła maska.
         Argumenty wejściowe: torch.Tensor (maska obrazu),
         torch.Tensor (wyjasnienie/obszar krytyczny),
@@ -446,6 +559,17 @@ def F1_score(
     return_object: return_type
         return_description
 
+
+    See Also
+    --------
+    replacetext : function description.
+
+    Examples
+    --------
+    >>> function(x, y)
+    answer
+    """
+    """
         Opis: Średnia harmoniczna Accordance recall i Accordance precision.
         Argumenty wejściowe: torch.Tensor (maska obrazu),
         torch.Tensor (wyjasnienie/obszar krytyczny),
@@ -483,6 +607,16 @@ def intersection_over_union(
     return_object: return_type
         return_description
 
+    See Also
+    --------
+    replacetext : function description.
+
+    Examples
+    --------
+    >>> function(x, y)
+    answer
+    """
+    """
         Opis: Pole iloczynu maski i wyjaśnienia podzielone przez
         pole sumy maski i wyjaśnienia.
         Argumenty wejściowe: torch.Tensor (maska obrazu),
@@ -525,6 +659,16 @@ def ensemble_score(
     return_object: return_type
         return_description
 
+    See Also
+    --------
+    replacetext : function description.
+
+    Examples
+    --------
+    >>> function(x, y)
+    answer
+    """
+    """
     Opis: średnia ważona innych metryk. Ensemble_score(wagi, metryki) -> torch.tensor
     Argumenty wejściowe:
     torch.Tensor/Lista (lista z wagami dla poszczególnych metryk),
