@@ -35,6 +35,36 @@ def _reformat_input_tensors(inputs: TensorOrTupleOfTensorsGeneric) -> Tensor:
 
 def aggregate(inputs: TensorOrTupleOfTensorsGeneric,
               aggregating_func: Union[str, Callable[[Tensor], Tensor]]) -> Tensor:
+    """
+    Aggregate explanations in the simplest way.
+
+    Use provided aggregating functions or pass a custom callable. Combine explanations for every observation and get
+    one aggregated explanation for every observation.
+
+
+    Parameters
+    ----------
+    inputs : TensorOrTupleOfTensorsGeneric
+        Explanations in form of tuple of tensors or tensor. `inputs` dimensions correspond to no. of observations,
+        no. of explanations for each observation, and single explanation.
+    aggregating_func : Union[str, Callable[[Tensor], Tensor]]
+        Aggregating function. Can be string, one of 'avg', 'min', 'max',
+        or a function from a list of tensors to tensor.
+
+    Returns
+    -------
+    Tensor
+        Aggregated explanations. Dimensions correspond to no. of observations, aggregated explanation.
+
+    See Also
+    --------
+    ensemble : Aggregation weighted by quality of each explanation.
+    ensembleXAI : Use Kernel Ridge Regression for aggregation, suitable when masks are available.
+
+    Examples
+    --------
+    TODO
+    """
     # input tensor dims: observations x explanations x single explanation
     assert isinstance(aggregating_func, str) or isinstance(aggregating_func, Callable)
 
@@ -71,6 +101,48 @@ def _normalize_across_dataset(parsed_inputs, delta=0.00001):
 
 
 def ensemble(inputs: TensorOrTupleOfTensorsGeneric, metrics: List[Callable], weights: List[float]) -> Tensor:
+    """
+    Aggregate explanations weighted by their quality measured by metrics.
+
+    This function in an implementation of explanation ensemble algorithm published in [1]_. It uses
+    :func:`EnsembleXAI.Metrics.ensemble_score` to calculate quality of each explanation.
+
+    Parameters
+    ----------
+    inputs : TensorOrTupleOfTensorsGeneric
+        Explanations in form of tuple of tensors or tensor. `inputs` dimensions correspond to no. of observations,
+        no. of explanations for each observation, and single explanation.
+    metrics : List[Callable]
+        Metrics used to assess the quality of an explanation.
+    weights : List[float]
+        Weights used to calculate :func:`EnsembleXAI.Metrics.ensemble_score` of every explanation.
+    Returns
+    -------
+    Tensor
+        Weighted arithmetic mean of explanations, weighted by :func:`EnsembleXAI.Metrics.ensemble_score`.
+        Dimensions correspond to no. of observations, aggregated explanation.
+
+    See Also
+    --------
+    aggregate : Simple aggregation by function, like average.
+    ensembleXAI : Use Kernel Ridge Regression for aggregation, suitable when masks are available.
+
+    Notes
+    -----
+    Explanations are normalized by mean and standard deviation before aggregation to ensure comparable values.
+
+    References
+    ----------
+    ..  [1] Bobek, S., Bałaga, P., Nalepa, G.J. (2021), "Towards Model-Agnostic Ensemble Explanations."
+        In: Paszynski, M., Kranzlmüller, D., Krzhizhanovskaya, V.V., Dongarra, J.J., Sloot, P.M. (eds)
+        Computational Science – ICCS 2021. ICCS 2021. Lecture Notes in Computer Science(), vol 12745. Springer,
+        Cham. https://doi.org/10.1007/978-3-030-77970-2_4
+
+    Examples
+    --------
+    TODO
+
+    """
     parsed_inputs = _reformat_input_tensors(inputs)
 
     # calculate metrics and ensemble scores
@@ -97,9 +169,55 @@ def ensemble(inputs: TensorOrTupleOfTensorsGeneric, metrics: List[Callable], wei
 
 
 def ensembleXAI(inputs: TensorOrTupleOfTensorsGeneric, masks: TensorOrTupleOfTensorsGeneric, n_folds: int = 3,
-                random_state=None, shuffle=False) -> Tensor:
+                shuffle=False, random_state=None) -> Tensor:
+    """
+    Aggregate explanations by training supervised machine learning model.
+
+    This function in an implementation of explanation ensemble algorithm published in [1]_. It uses
+    :class:`sklearn.kernel_ridge.KernelRidge` to train the Kernel Ridge Regression (KRR) model with explanations
+    as inputs :math:`X` and masks as output :math:`y`.
+    K-Fold split is used to generate aggregated explanations without information leakage. Internally uses
+    :class:`sklearn.model_selection.KFold` to make the split.
+
+
+    Parameters
+    ----------
+    inputs : TensorOrTupleOfTensorsGeneric
+        Explanations in form of tuple of tensors or tensor. `inputs` dimensions correspond to no. of observations,
+        no. of explanations for each observation, and single explanation.
+    masks : TensorOrTupleOfTensorsGeneric
+        Masks used by KRR model as output. Should be the same shape as `inputs`.
+    n_folds : int, default 3
+        Number of folds used to train the KRR model. `n_folds` should be an `int` greater than 1. When `n_folds` is
+        equal to no. of observations in `inputs`, "leave one out" training is done.
+    shuffle: Any, default False
+        If `True` inputs and masks will be shuffled before k-fold split. Internally passed
+        to :class:`sklearn.model_selection.KFold`.
+    random_state: Any, default None
+        Used only when `shuffle` is `True`. Internally passed to :class:`sklearn.model_selection.KFold`.
+    Returns
+    -------
+    Tensor
+        Tensor of KRR model outputs, which are the aggregated explanations.
+
+    See Also
+    --------
+    aggregate : Simple aggregation by function, like average.
+    ensemble : Aggregation weighted by quality of each explanation.
+
+    References
+    ----------
+    ..  [1] L. Zou et al., "Ensemble image explainable AI (XAI) algorithm for severe community-acquired
+        pneumonia and COVID-19 respiratory infections,"
+        in IEEE Transactions on Artificial Intelligence, doi: 10.1109/TAI.2022.3153754.
+
+    Examples
+    --------
+    TODO
+    """
 
     assert len(inputs) == len(masks)
+    assert n_folds > 1
     # reshape do 1d array for each observation
     parsed_inputs = _reformat_input_tensors(inputs).numpy().reshape((len(inputs), -1))
     labels = _reformat_input_tensors(masks).numpy()
