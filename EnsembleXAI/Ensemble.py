@@ -33,6 +33,7 @@ def _reformat_input_tensors(inputs: TensorOrTupleOfTensorsGeneric) -> Tensor:
     return parsed_inputs
 
 
+# basic
 def aggregate(inputs: TensorOrTupleOfTensorsGeneric,
               aggregating_func: Union[str, Callable[[Tensor], Tensor]]) -> Tensor:
     """
@@ -100,6 +101,7 @@ def _normalize_across_dataset(parsed_inputs, delta=0.00001):
     return (parsed_inputs - mean) / torch.sqrt(var)
 
 
+# autoweighted
 def ensemble(inputs: TensorOrTupleOfTensorsGeneric, metrics: List[Callable], weights: List[float]) -> Tensor:
     """
     Aggregate explanations weighted by their quality measured by metrics.
@@ -168,6 +170,7 @@ def ensemble(inputs: TensorOrTupleOfTensorsGeneric, metrics: List[Callable], wei
     return torch.stack(results)
 
 
+# supervisedXAI
 def ensembleXAI(inputs: TensorOrTupleOfTensorsGeneric, masks: TensorOrTupleOfTensorsGeneric, n_folds: int = 3,
                 shuffle=False, random_state=None) -> Tensor:
     """
