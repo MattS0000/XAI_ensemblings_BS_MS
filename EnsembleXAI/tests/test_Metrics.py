@@ -65,7 +65,7 @@ class TestHelperFuncs(TestCase):
             2 * torch.ones(4, 4, 4), torch.zeros(4, 4, 4), sum_dim=0
         )
         value2 = Metrics.matrix_2_norm(
-            2 * torch.ones(4, 4, 4), torch.zeros(4, 4, 4), sum_dim=-1
+            2 * torch.ones(4, 4, 4), torch.zeros(4, 4, 4), sum_dim=-3
         )
         self.assertEqual(value, 16)
         self.assertEqual(value2, 16)
@@ -135,13 +135,13 @@ class TestMetrics(TestCase):
     half_plus_expl = plus_expl / 2
 
     def test_consistency(self):
-        ones = torch.Tensor([1]).repeat(1, 4, 10, 10)
+        ones = torch.Tensor([1]).repeat(4, 3, 10, 10)
         consist = Metrics.consistency(ones)
         self.assertTrue(consist == 1)
-        twos = 2 * torch.Tensor([1]).repeat(1, 4, 10, 10)
-        oneandtwo = torch.cat([ones, twos], dim=1)
+        twos = 2 * torch.Tensor([1]).repeat(4, 3, 10, 10)
+        oneandtwo = torch.cat([ones, twos], dim=0)
         consist2 = Metrics.consistency(oneandtwo)
-        self.assertAlmostEqual(consist2, 0.0909, 4)
+        self.assertAlmostEqual(consist2, 0.05458, 4)
 
     def test_stability(self):
         self.assertTrue(False)
@@ -149,7 +149,7 @@ class TestMetrics(TestCase):
     def test_impact_ratio_helper_simple(self):
         n = 100
         images_tensor = torch.ones([n, 3, 32, 32])
-        expls = torch.randn([n, 1, 32, 32])
+        expls = torch.randn([n, 3, 32, 32])
         baseline = 0
         threshold = 0.5
         org, mod = Metrics._impact_ratio_helper(
@@ -166,7 +166,7 @@ class TestMetrics(TestCase):
     def test_decision_impact_ratio_simple(self):
         n = 100
         images_tensor = torch.ones([n, 3, 32, 32])
-        expls = torch.randn([n, 1, 32, 32])
+        expls = torch.randn([n, 3, 32, 32])
         baseline = 0
         threshold = 0.5
         value = Metrics.decision_impact_ratio(
@@ -180,7 +180,7 @@ class TestMetrics(TestCase):
     def test_confidence_impact_ratio_simple(self):
         n = 100
         images_tensor = torch.ones([n, 3, 32, 32])
-        expls = torch.randn([n, 1, 32, 32])
+        expls = torch.randn([n, 3, 32, 32])
         baseline = 0
         threshold = 0.5
         value = Metrics.confidence_impact_ratio(
@@ -233,4 +233,5 @@ class TestMetrics(TestCase):
 
     def test_ensemble_score(self):
         # Metrics.ensemble_score()
-        self.assertTrue(False)
+        self.assertEqual(Metrics.ensemble_score([1, 2], [3, 5]), 13)
+        self.assertEqual(Metrics.ensemble_score([1, 2], [5, 3]), 11)

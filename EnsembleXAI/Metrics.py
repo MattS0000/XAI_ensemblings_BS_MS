@@ -3,10 +3,11 @@ import itertools
 import torch
 
 function = lambda x, y: (x, y)
-
+x=1
+y=2
 
 def replace_masks(
-        images: torch.Tensor, masks: torch.Tensor, value: Union[int, float] = 0
+        images: torch.Tensor, replacement_index: torch.Tensor, value: Union[int, float] = 0
 ) -> torch.Tensor:
     """
     Replaces values in images where masks exist.
@@ -16,16 +17,17 @@ def replace_masks(
     Parameters
     ----------
     images: torch.Tensor
-        4D Tensor of the images with shape (number of photos, RGB channel, height, width)
-    masks: torch.Tensor
-        3D torch Boolean Tensor of the masks where true corresponds to mask present with shape (num of photos, height, width)
+        Tensor of any shape, in most cases 4D Tensor of the images with shape (number of photos, RGB channel, height, width)
+    replacement_index: torch.Tensor
+        Boolean Tensor of shape same as images or in case of the 4D images Tensor
+        3D Tensor where true corresponds index to be replaced with shape (number of photos, height, width)
     value: int or float
-        Value to use for replacing the data with
+        Value to use for replacing the data with.
 
     Returns
     -------
     torch.Tensor
-        4D Tensor, copy of images with the replaced data
+        Tensor of same shape as input with the replaced data.
 
     See Also
     --------
@@ -39,9 +41,10 @@ def replace_masks(
     answer
     """
     temp_images = torch.clone(images)
-    # mask needs to be reshaped over RGB channel for the indexing of images
-    reshaped_masks = masks.unsqueeze(dim=1).repeat(1, 3, 1, 1)
-    temp_images[reshaped_masks] = value
+    # 3D Tensor needs to be reshaped over RGB channel for the indexing of images
+    if len(replacement_index.shape) == 3 and len(temp_images.shape) == 4:
+        replacement_index = replacement_index.unsqueeze(dim=1).repeat(1, temp_images.shape[1], 1, 1)
+    temp_images[replacement_index] = value
     return temp_images
 
 
@@ -66,7 +69,6 @@ def tensor_to_list_tensors(tensors: torch.Tensor, depth: int) -> List[torch.Tens
 
     See Also
     --------
-    replacetext : function description.
     consistency : function description.
     stability : function description.
 
@@ -75,7 +77,7 @@ def tensor_to_list_tensors(tensors: torch.Tensor, depth: int) -> List[torch.Tens
     >>> function(x, y)
     answer
     """
-    # returned tensors have reduced dimensions
+    # squeezing couses returned tensors to have reduced dimensions
     tensor_list = [
         x.squeeze() for x in torch.tensor_split(tensors, tensors.shape[0], dim=0)
     ]
@@ -122,9 +124,11 @@ def matrix_2_norm(
     >>> function(x, y)
     answer
     """
+    if sum_dim is not None and sum_dim < 0:
+        sum_dim = sum_dim+2
     difference = (matrix1 - matrix2).float()
     norm = torch.linalg.matrix_norm(difference, ord=2)
-    # manual extension of the norm calculation to RGB channel
+    # manual extension of the norm calculation to the sum_dim dimension
     if sum_dim is not None:
         norm = torch.pow(norm, 2)
         norm = torch.sum(norm, dim=sum_dim)
@@ -256,16 +260,16 @@ def consistency(explanations: torch.Tensor) -> float:
     phi_j-wyjasnienie j tego zdjęcia lub
     [max_{a,b}(||phi_{j}^{e_a->m} - phi_{j}^{e_b->m}||_2) + 1]^{-1}
     """
-    explanations_list = tensor_to_list_tensors(explanations, depth=2)
+    explanations_list = tensor_to_list_tensors(explanations, depth=1)
     diffs = [
-        matrix_2_norm(exp1, exp2)
+        matrix_2_norm(exp1, exp2, sum_dim=0)
         for exp1, exp2 in itertools.combinations(explanations_list, 2)
     ]
     return (1 / (max(diffs) + 1)).item()
 
 
 def stability(explanator: Callable, image: torch.Tensor,
-              images_to_compare: torch.Tensor, epsilon: float = 0.1,
+              images_to_compare: torch.Tensor, epsilon: float = 500.0,
               ) -> torch.Tensor:
     """
     Short description
@@ -319,10 +323,10 @@ def stability(explanator: Callable, image: torch.Tensor,
     ]
     close_images_tensor = torch.stack(close_images)
     close_images_explanations = explanator(close_images_tensor)
-    image_explanation = explanator(image.unsqueeze(dim=0)).squeeze()
+    image_explanation = explanator(image.unsqueeze(dim=0)).squeeze(dim=0)
     # matrix_2_norm works if one tensor is of one shape bigger, casts the other to the correct size
     image_dists = matrix_2_norm(close_images_tensor, image, sum_dim=1)
-    expl_dists = matrix_2_norm(close_images_explanations, image_explanation)
+    expl_dists = matrix_2_norm(close_images_explanations, image_explanation, sum_dim=1)
     return torch.max(image_dists / (expl_dists + 1)).item()
 
 
@@ -367,8 +371,8 @@ def _impact_ratio_helper(
     """
     probabilities_original = predictor(images_tensor)
     # one explanation per image
-    explanations_flat_bool = explanations[:, 0, :, :] > explanation_threshold
-    modified_images = replace_masks(images_tensor, explanations_flat_bool, baseline)
+    explanations_boolean = explanations > explanation_threshold
+    modified_images = replace_masks(images_tensor, explanations_boolean, baseline)
     probabilities_modified = predictor(modified_images)
     return probabilities_original, probabilities_modified
 
@@ -536,12 +540,12 @@ def accordance_recall(
         recall = sum_i(recall_i)/N
     """
     # logical mask, one explanation per image
-    # explanations.shape = (n, 1, width, height), mask.shape = (n, width, height)
+    # explanations.shape = (n, x, width, height), mask.shape = (n, width, height)
     # squeeze explanation to be of same shape as masks
-    squeezed_expl = explanations.squeeze(dim=1)
-    overlaping_area = _intersection_mask(squeezed_expl, masks, threshold1=threshold)
-    divisor = torch.sum(masks != 0, dim=(-2, -1))
-    value = torch.sum(overlaping_area, dim=(-2, -1)) / divisor
+    reshaped_mask = masks.unsqueeze(dim=1).repeat(1, explanations.shape[1], 1, 1)
+    overlapping_area = _intersection_mask(explanations, reshaped_mask, threshold1=threshold)
+    divisor = torch.sum(reshaped_mask != 0, dim=(-3, -2, -1))
+    value = torch.sum(overlapping_area, dim=(-3, -2, -1)) / divisor
     return value
 
 
@@ -590,10 +594,10 @@ def accordance_precision(
         precision_i=(S(x_i) czesc wspolna F(x_i))/F(x_i)
         precision = sum_i (precision_i)/N
     """
-    squeezed_expl = explanations.squeeze(dim=1)
-    overlaping_area = _intersection_mask(squeezed_expl, masks, threshold1=threshold)
-    divisor = torch.sum(torch.abs(squeezed_expl) > threshold, dim=(-2, -1))
-    value = torch.sum(overlaping_area, dim=(-2, -1)) / divisor
+    reshaped_mask = masks.unsqueeze(dim=1).repeat(1, explanations.shape[1], 1, 1)
+    overlapping_area = _intersection_mask(explanations, reshaped_mask, threshold1=threshold)
+    divisor = torch.sum(torch.abs(explanations) > threshold, dim=(-3, -2, -1))
+    value = torch.sum(overlapping_area, dim=(-3, -2, -1)) / divisor
     return value
 
 
@@ -693,9 +697,9 @@ def intersection_over_union(
         IOU=1/N * sum_i(S(x_i) cz. wspolna F(x_i)/S(x_i) suma F(x_i))
     """
     # one explanation per image
-    squeezed_expl = explanations.squeeze(dim=1)
-    intersections = _intersection_mask(squeezed_expl, masks, threshold1=threshold)
-    union_masks = _union_mask(squeezed_expl, masks, threshold1=threshold)
+    reshaped_mask = masks.unsqueeze(dim=1).repeat(1, explanations.shape[1], 1, 1)
+    intersections = _intersection_mask(explanations, reshaped_mask, threshold1=threshold)
+    union_masks = _union_mask(explanations, reshaped_mask, threshold1=threshold)
     values = torch.sum(intersections, dim=(-2, -1)) / torch.sum(
         union_masks, dim=(-2, -1)
     )
@@ -721,7 +725,7 @@ def ensemble_score(
 
     Returns
     -------
-    return_object: return_type
+    Torch.Tensor
         return_description
 
     See Also
@@ -730,17 +734,14 @@ def ensemble_score(
 
     Examples
     --------
-    >>> function(x, y)
-    answer
-    """
-    """
-    Opis: średnia ważona innych metryk. Ensemble_score(wagi, metryki) -> torch.tensor
-    Argumenty wejściowe:
-    torch.Tensor/Lista (lista z wagami dla poszczególnych metryk),
-    torch.Tensor/Lista (lista z wynikami poszczególnych metryk)
-    Wartości wyjściowe: torch.Tensor (wynik metryki)
-    :return:
-    ES(w, M) = sum_{i}(w_i * M_i)
+    >>> 1 * 3 + 2 * 5
+    13
+    >>> ensemble_score([1, 2], [3, 5])
+    13
+    >>> 1 * 5 + 2 * 3
+    11
+    >>> ensemble_score([1, 2], [5, 3])
+    11
     """
     return sum(
         [
