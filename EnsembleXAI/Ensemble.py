@@ -18,15 +18,21 @@ def _apply_over_axis(x: torch.Tensor, function: Callable, axis: int) -> torch.Te
 
 
 def _reformat_input_tensors(inputs: TensorOrTupleOfTensorsGeneric) -> Tensor:
-    # change tuple of tensors into one standard 4d tensor
+    # change tuple of tensors into one standard 5d tensor
+    # with dim:
+    # 0 - observations
+    # 1 - different explanations for one observation
+    # 2 - channels (colors) of one explanation
+    # 3 - height of channel
+    # 4 - width of channel
     parsed_inputs = deepcopy(inputs)
     if isinstance(inputs, tuple) or isinstance(inputs, list):
-        if inputs[0].dim() <= 3:
+        if inputs[0].dim() <= 4:
             # multiple observations with explanations as tensor
             parsed_inputs = stack(inputs)
-    if parsed_inputs.dim() == 2:
-        parsed_inputs = parsed_inputs[None, :]
     if parsed_inputs.dim() == 3:
+        parsed_inputs = parsed_inputs[None, :]
+    if parsed_inputs.dim() == 4:
         # single observation with multiple explanations
         parsed_inputs = parsed_inputs[None, :]
 
@@ -76,7 +82,7 @@ def aggregate(inputs: TensorOrTupleOfTensorsGeneric,
 
     input_size = parsed_inputs.size()
     n_explanations = input_size[1]
-    new_size = (input_size[0], 1, input_size[2], input_size[3])
+    new_size = (input_size[0], 1, input_size[2], input_size[3], input_size[4])
 
     if aggregating_func == 'avg':
         output = torch.squeeze(1 / n_explanations * parsed_inputs.sum_to_size(new_size), dim=1)
@@ -95,7 +101,7 @@ def aggregate(inputs: TensorOrTupleOfTensorsGeneric,
 
 def _normalize_across_dataset(parsed_inputs, delta=0.00001):
     # mean, std normalization
-    var, mean = torch.var_mean(parsed_inputs, dim=[0, 2, 3], unbiased=True)
+    var, mean = torch.var_mean(parsed_inputs, dim=[0, 2, 3, 4], unbiased=True)
     if torch.min(var.abs()) < delta:
         raise ZeroDivisionError("Variance close to 0. Can't normalize")
     return (parsed_inputs - mean) / torch.sqrt(var)
@@ -222,10 +228,10 @@ def ensembleXAI(inputs: TensorOrTupleOfTensorsGeneric, masks: TensorOrTupleOfTen
     assert len(inputs) == len(masks)
     assert n_folds > 1
     # reshape do 1d array for each observation
-    parsed_inputs = _reformat_input_tensors(inputs).numpy().reshape((len(inputs), -1))
-    labels = _reformat_input_tensors(masks).numpy()
-    labels_size = labels.shape
-    labels = labels.reshape((len(inputs), -1))
+    parsed_inputs = _reformat_input_tensors(inputs)
+    input_shape = parsed_inputs.shape
+    parsed_inputs = parsed_inputs.numpy().reshape((len(inputs), -1))
+    labels = _reformat_input_tensors(masks).squeeze().numpy().reshape((len(inputs), -1))
 
     kf = KFold(n_splits=n_folds, random_state=random_state, shuffle=shuffle)
 
@@ -246,7 +252,7 @@ def ensembleXAI(inputs: TensorOrTupleOfTensorsGeneric, masks: TensorOrTupleOfTen
         # predict masks for observations currently in test group
         y_predicted = krr.predict(X_test)
         # reshape predictions and save them and indices to recreate original order later
-        ensembled[idx] = y_predicted.reshape((tuple([len(X_test)]) + labels_size[2:4]))
+        ensembled[idx] = np.concatenate([y_predicted] * 3).reshape((tuple([len(X_test)]) + input_shape[2:5]))
         indices = np.concatenate([indices, test_index])
 
     # sort output to match input order

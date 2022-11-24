@@ -16,45 +16,45 @@ def _dummy_metric2(x: t.Tensor) -> t.Tensor:
 
 class TestEnsembleXAI(TestCase):
     def test_ensemble(self):
-        inputs = t.rand([90, 3, 32, 32])
+        inputs = t.rand([90, 3, 3, 32, 32])
         masks = t.randint(low=0, high=2, size=[90, 32, 32])
         ensembled = Ensemble.ensembleXAI(inputs, masks, shuffle=False)
-        self.assertTrue(ensembled.shape == (90, 32, 32))
+        self.assertTrue(ensembled.shape == (90, 3, 32, 32))
         # hard to predict outcome of this algorithm to check exact correctness, even on not random data
         # for now testing only result's shape
 
 
 class TestNormalize(TestCase):
     def test_normalization(self):
-        x = t.tensor([[[[1, 2], [2, 1]], [[3, 4], [3, 4]]],
-                          [[[3, 5], [5, 3]], [[0, 1], [1, 0]]]], dtype=t.float64)
+        x = t.tensor([[[[[1, 2], [2, 1]]], [[[3, 4], [3, 4]]]],
+                      [[[[3, 5], [5, 3]]], [[[0, 1], [1, 0]]]]], dtype=t.float64)
         normalized = _normalize_across_dataset(x)
-        expected = t.tensor([[[[-1.1068, 0.0000],
-                                   [-0.4743, -0.5916]],
+        expected = t.tensor([[[[[-1.1068, 0.0000],
+                                [-0.4743, -0.5916]]],
 
-                                  [[0.1581, 1.1832],
-                                   [0.1581, 1.1832]]],
+                              [[[0.1581, 1.1832],
+                                [0.1581, 1.1832]]]],
 
-                                 [[[0.1581, 1.7748],
-                                   [1.4230, 0.5916]],
+                             [[[[0.1581, 1.7748],
+                                [1.4230, 0.5916]]],
 
-                                  [[-1.7393, -0.5916],
-                                   [-1.1068, -1.1832]]]], dtype=t.float64)
+                              [[[-1.7393, -0.5916],
+                                [-1.1068, -1.1832]]]]], dtype=t.float64)
         self.assertTrue(t.allclose(normalized, expected, atol=0.001))
 
 
 class TestEnsemble(TestCase):
-    x = t.tensor([[[[0, 1], [1, 0]], [[0, 1], [1, 0]]],
-                      [[[0, 1], [1, 0]], [[0, 1], [1, 0]]]], dtype=t.float)
+    x = t.tensor([[[[[0, 1], [1, 0]], [[0, 1], [1, 0]]],
+                   [[[0, 1], [1, 0]], [[0, 1], [1, 0]]]]], dtype=t.float)
 
-    def test_ensemble_multiple_obs_single_metric(self):
+    def test_ensemble_single_obs_single_metric_mult_channel(self):
         ensemble = Ensemble.ensemble(self.x, [_dummy_metric], [1])
         self.assertIsInstance(ensemble, t.Tensor)
 
-        expected = t.tensor([[[-0.9354, 0.9354],
+        expected = t.tensor([[[[-0.9354, 0.9354],
                               [0.9354, -0.9354]],
                              [[-0.9354, 0.9354],
-                              [0.9354, -0.9354]]])
+                              [0.9354, -0.9354]]]])
 
         self.assertTrue(t.allclose(ensemble, expected, atol=.01))
 
@@ -69,39 +69,46 @@ class TestEnsemble(TestCase):
 
         self.assertTrue(t.allclose(ensemble, expected, atol=.01))
 
-    def test_ensemble_one_obs(self):
-        exp1 = t.tensor([[[0, 1], [1, 0]], [[0, 1], [1, 0]]], dtype=t.float)
+    def test_ensemble_one_obs_one_channel(self):
+        exp1 = t.tensor([[[[0, 1], [1, 0]]], [[[0, 1], [1, 0]]]], dtype=t.float)
         ensemble = Ensemble.ensemble(tuple(exp1), [_dummy_metric], [1])
-        expected = t.tensor([[[[-0.8660, 0.8660],
-                               [0.8660, -0.8660]]]])
+        expected = t.tensor([[[[[-0.8660, 0.8660],
+                               [0.8660, -0.8660]]]]])
         self.assertTrue(t.allclose(ensemble, expected, atol=.01))
 
 
 class TestAggregate(TestCase):
-    exp1 = t.ones([2, 2])
-    exp3 = 3 * t.ones([2, 2])
+    exp1 = t.ones([1, 2, 2])
+    exp3 = 3 * t.ones([1, 2, 2])
     obs1_tensor = t.stack((exp1, exp3))
-    exp0 = t.zeros([2, 2])
+    exp0 = t.zeros([1, 2, 2])
     obs2_tensor = t.stack([exp0, exp3])
 
+    obs3_tensor = t.stack((exp1, exp0, exp3)).squeeze()
     mult_obs_tensor = t.stack([obs1_tensor, obs2_tensor])
 
-    def test_one_obs_avg(self):
+    def test_one_obs_mult_channels(self):
+        ensembled = Ensemble.aggregate(self.obs3_tensor, 'avg')
+        self.assertIsInstance(ensembled, t.Tensor)
+
+        self.assertTrue(t.equal(ensembled, self.obs3_tensor[None, :]))
+
+    def test_one_obs_one_channel_avg(self):
         # tuple input
         ensembled = Ensemble.aggregate((self.exp1, self.exp3), 'avg')
         self.assertIsInstance(ensembled, t.Tensor)
 
-        expected = 2 * t.ones([1, 2, 2])
+        expected = 2 * t.ones([1, 1, 2, 2])
         self.assertTrue(t.equal(ensembled, expected))
         # tensor input
         ensembled = Ensemble.aggregate(self.obs1_tensor, 'avg')
         self.assertTrue(t.equal(ensembled, expected))
 
-    def test_one_obs_max(self):
+    def test_one_obs_one_channel_max(self):
         ensembled = Ensemble.aggregate((self.exp1, self.exp3), 'max')
         self.assertIsInstance(ensembled, t.Tensor)
 
-        expected = 3 * t.ones([1, 2, 2])
+        expected = 3 * t.ones([1, 1, 2, 2])
         self.assertTrue(t.equal(ensembled, expected))
         # tensor input
         ensembled = Ensemble.aggregate(self.obs1_tensor, 'max')
@@ -111,7 +118,7 @@ class TestAggregate(TestCase):
         ensembled = Ensemble.aggregate((self.exp1, self.exp3), 'min')
         self.assertIsInstance(ensembled, t.Tensor)
 
-        expected = t.ones([1, 2, 2])
+        expected = t.ones([1, 1, 2, 2])
         self.assertTrue(t.equal(ensembled, expected))
         # tensor input
         ensembled = Ensemble.aggregate(self.obs1_tensor, 'min')
@@ -121,7 +128,7 @@ class TestAggregate(TestCase):
         # tuple input
         ensembled = Ensemble.aggregate((self.obs1_tensor, self.obs2_tensor), 'avg')
         self.assertIsInstance(ensembled, t.Tensor)
-        expected = t.stack([2 * t.ones([2, 2]), 1.5 * t.ones([2, 2])])
+        expected = t.stack([2 * t.ones([1, 2, 2]), 1.5 * t.ones([1, 2, 2])])
         self.assertTrue(t.equal(ensembled, expected))
 
         # tensor input
@@ -145,19 +152,19 @@ class TestAggregate(TestCase):
 
         self.assertIsInstance(ensembled, t.Tensor)
 
-        expected = 2 * t.ones([1, 2, 2])
+        expected = 2 * t.ones([1, 1, 2, 2])
         self.assertTrue(t.equal(ensembled, expected))
 
         # 2 observations
         ensembled = Ensemble.aggregate((self.obs1_tensor, self.obs2_tensor), custom_avg)
         self.assertIsInstance(ensembled, t.Tensor)
 
-        expected = t.stack([2 * t.ones([2, 2]), 1.5 * t.ones([2, 2])])
+        expected = t.stack([2 * t.ones([1, 2, 2]), 1.5 * t.ones([1, 2, 2])])
         self.assertTrue(t.equal(ensembled, expected))
 
         def custom_func(x):
             return (3 * x[0] + x[1]) / 6
 
         ensembled = Ensemble.aggregate(self.obs1_tensor, custom_func)
-        expected = t.ones([1, 2, 2])
+        expected = t.ones([1, 1, 2, 2])
         self.assertTrue(t.equal(ensembled, expected))
