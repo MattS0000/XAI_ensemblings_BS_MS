@@ -3,24 +3,26 @@ import itertools
 import torch
 
 function = lambda x, y: (x, y)
-x=1
-y=2
+x = 1
+y = 2
+
 
 def replace_masks(
         images: torch.Tensor, replacement_index: torch.Tensor, value: Union[int, float] = 0
 ) -> torch.Tensor:
     """
-    Replaces values in images where masks exist.
+    Replaces values in Tensor indexed by a boolean tensor.
 
-    Replaces data in the images Tensor with one value in the spots where masks Tensor is True.
+    Replaces data in the Tensor with one value in the spots where boolean index Tensor is True.
+    In the case when a 4D tensor with a 3D index is given, index is repeated along the second dimension to fit the data shape.
 
     Parameters
     ----------
     images: torch.Tensor
         Tensor of any shape, in most cases 4D Tensor of the images with shape (number of photos, RGB channel, height, width)
     replacement_index: torch.Tensor
-        Boolean Tensor of shape same as images or in case of the 4D images Tensor
-        3D Tensor where true corresponds index to be replaced with shape (number of photos, height, width)
+        Boolean Tensor of shape same as images or in case of the 4D images Tensor, a
+        3D boolean Tensor where true corresponds index to be replaced with shape (number of photos, height, width)
     value: int or float
         Value to use for replacing the data with.
 
@@ -53,11 +55,12 @@ def tensor_to_list_tensors(tensors: torch.Tensor, depth: int) -> List[torch.Tens
     Splits first n dimensions of a Tensor into a list of Tensors.
 
     Splits the first n Tensor dimensions into a list of Tensors of length equal to product of the split dimensions sizes.
+    Resulting Tensors have dimensions reduced by a factor of n.
 
     Parameters
     ----------
     tensors: torch.Tensor
-        Tensor to be split into a list.
+        Tensor to be split into a list. Number of dimensions greater than depth parameter.
     depth: int
         Value representing the depth to which to split the tensors, starting from the first dimension.
         Therefore, depth=1 represents splitting only the first dimension. Thus depth cannot be larger than the length of the Tensors shape.
@@ -97,21 +100,23 @@ def matrix_2_norm(
     Computes the 2-norm of two matrices.
 
     Computes the 2-norm of two matrices. By default works on the last two dimensions of the Tensor,
-    which can be extended by the sum_dim parameter to one of the left dimensions of the Tensor.
+    which can be extended by the sum_dim parameter to one of the remaining dimensions of the Tensor.
 
     Parameters
     ----------
     matrix1: torch.Tensor
         Tensor with one of the matrices to compute the norm.
     matrix2: torch.Tensor
-        Tensor with the second of the matrices to compute the norm.
+        Tensor with the second of the matrices to compute the norm. Shape has to be either equal to the first matrix,
+        only the first dimension of the first matrix can be omitted.
     sum_dim: int
-        Optional dimension to extend the calculation to
+        Optional dimension to extend the calculation to. Indexed as in the original matrix,
+        therefore supports both positive and negative indexing.
 
     Returns
     -------
     torch.Tensor
-        Tensor with value or values of the 2-norm. The shape is same as both of the input matrices,
+        Tensor with value or values of the 2-norm. The shape is similar to both of the input matrices,
         except for last two removed dimensions and the optional dimension specified in sum_dim parameter.
 
     See Also
@@ -143,7 +148,8 @@ def _intersection_mask(
     """
     Calculates the intersection of two masks.
 
-    Calculates the logical 'and' intersections of two n-dimensional masks where the absolute value of data is greater than the thresholds.
+    Calculates the logical 'and' intersections of two n-dimensional masks
+    where the absolute values of data are greater than the thresholds.
 
     Parameters
     ----------
@@ -159,7 +165,7 @@ def _intersection_mask(
     Returns
     -------
     torch.Tensor
-        Boolean Tensor with True values where the masks intersect with value over thresholds.
+        Boolean Tensor with True values where the masks intersect with values over the thresholds.
 
     See Also
     --------
@@ -186,7 +192,8 @@ def _union_mask(
     """
     Calculates the union of two masks.
 
-    Calculates the logical 'or' union of two n-dimensional masks where the absolute value of data is greater than the thresholds.
+    Calculates the logical 'or' union of two n-dimensional masks where the absolute
+    values of data are greater than the thresholds.
 
     Parameters
     ----------
@@ -222,15 +229,17 @@ def _union_mask(
 
 def consistency(explanations: torch.Tensor) -> float:
     """
-    Metric representing how similar are explanations of one photo.
+    Metric representing how similar are different explanations of one photo.
 
     Metric representing how much do different explanations for the same model or same explanation for different models diverge.
     Maximal value of 1 represents identical explanations and values close to 0 represent greatly differing explanations.
+    Metric is calculated as proposed in [1]_.
 
     Parameters
     ----------
     explanations: torch.Tensor
-
+        Explanations Tensor for the single image. Therefore the required shape is (n, channels, width, height),
+        where n stands for the number of explanations and channels stands for a depth of the image (RGB channel in most cases).
 
     Returns
     -------
@@ -243,22 +252,17 @@ def consistency(explanations: torch.Tensor) -> float:
     tensor_to_list_tensors :
     matrix_2_norm :
 
+    References
+    ----------
+    ..  [1] Bobek, S., Bałaga, P., Nalepa, G.J. (2021), "Towards Model-Agnostic Ensemble Explanations."
+        In: Paszynski, M., Kranzlmüller, D., Krzhizhanovskaya, V.V., Dongarra, J.J., Sloot, P.M. (eds)
+        Computational Science – ICCS 2021. ICCS 2021. Lecture Notes in Computer Science(), vol 12745. Springer,
+        Cham. https://doi.org/10.1007/978-3-030-77970-2_4
+
     Examples
     --------
     >>> function(x, y)
     answer
-    """
-    """
-    Opis: Mierzy jak bardzo wyjaśnienia różnych modeli
-    uczenia maszynowego są do siebie podobne.
-    Argumenty wejściowe: Lista<torch.Tensor>
-    (lista wyjaśnień które chcemy ze sobą porównać)
-    Wartości wyjściowe: torch.Tensor (wynik metryki)
-    :return:
-    C(phi,...) =
-    [max_{a,b}(||phi_{j}^{e->m_a} - phi_{j}^{e->m_b}||_2) + 1]^{-1},
-    phi_j-wyjasnienie j tego zdjęcia lub
-    [max_{a,b}(||phi_{j}^{e_a->m} - phi_{j}^{e_b->m}||_2) + 1]^{-1}
     """
     explanations_list = tensor_to_list_tensors(explanations, depth=1)
     diffs = [
@@ -269,28 +273,36 @@ def consistency(explanations: torch.Tensor) -> float:
 
 
 def stability(explanator: Callable, image: torch.Tensor,
-              images_to_compare: torch.Tensor, epsilon: float = 500.0,
-              ) -> torch.Tensor:
+              images_to_compare: torch.Tensor, epsilon: float = 500.0, **kwargs
+              ) -> float:
     """
-    Short description
+    Measures how similar are explanations of similar photos.
 
-    Long description
+    The metric measures the similarity of one type of explanation between similar photos. As explanations need to be
+    created for each of the images close enough to the compared image,
+    this may take a significant amount of processing power and memory.
+    The metrics is implemented as proposed in [1]_.
 
     Parameters
     ----------
     explanator: Callable
-        parameter_description
+        The function used to obtain explanations for both the single image
+        and the number of images in images_to_compare. Writing a wrapper to handle both options might be required.
+        All **kwargs are additionaly passed to this function.
     image: torch.Tensor
-        parameter_description
+        3D Tensor of the image for other images to be compared to. Shape has to be (channels, width, height).
     images_to_compare: torch.Tensor
-        parameter_description
+        4D Tensor of the images compared to the original image. Shape therefore has to be (n, channels, width, height),
+        where n stands for the number of images used.
     epsilon: float
-        parameter_description
+        Maximal value by which an image is considered to be close enough to the original image.
+        Choice of this parameter should be done carefully and
+        testing by calculating some distances manually is recommended, using the matrix 2 norm.
 
     Returns
     -------
-    torch.Tensor
-        return_description
+    float
+        Value of the metrics calculated for the images close to the original image.
 
     See Also
     --------
@@ -298,32 +310,28 @@ def stability(explanator: Callable, image: torch.Tensor,
     tensor_to_list_tensors :
     matrix_2_norm :
 
+    References
+    ----------
+    ..  [1] Bobek, S., Bałaga, P., Nalepa, G.J. (2021), "Towards Model-Agnostic Ensemble Explanations."
+        In: Paszynski, M., Kranzlmüller, D., Krzhizhanovskaya, V.V., Dongarra, J.J., Sloot, P.M. (eds)
+        Computational Science – ICCS 2021. ICCS 2021. Lecture Notes in Computer Science(), vol 12745. Springer,
+        Cham. https://doi.org/10.1007/978-3-030-77970-2_4
+
     Examples
     --------
     >>> function(x, y)
     answer
-    """
-    """
-    Opis: Mierzy jak podobne wyjaśnienia otrzymamy
-    dla podobnych danych wejściowych.
-    Argumenty wejściowe:
-    obiekt ‘callable’ (metoda zwracająca wyjaśnienie),
-    torch.tensor (obrazek który chcemy wyjaśnić)
-    Wartości wyjściowe: torch.Tensor (wynik metryki)
-    :return:
-    L(phi, X) = max_{x_j} (||x_i-x_j||_{2}/(||phi_i^{e->m} - phi_j^{e->m}||_{2}+1))
-    https://github.com/sbobek/inxai/blob/main/inxai/global_metrics.py
     """
     images_list = tensor_to_list_tensors(images_to_compare, depth=1)
     # matrix 2-norm over all 3 dimensions
     close_images = [
         other_image
         for other_image in images_list
-        if matrix_2_norm(image, other_image, sum_dim=0).item() < epsilon
+        if matrix_2_norm(image, other_image, sum_dim=0).item() <= epsilon
     ]
     close_images_tensor = torch.stack(close_images)
-    close_images_explanations = explanator(close_images_tensor)
-    image_explanation = explanator(image.unsqueeze(dim=0)).squeeze(dim=0)
+    close_images_explanations = explanator(close_images_tensor, **kwargs)
+    image_explanation = explanator(image.unsqueeze(dim=0), **kwargs).squeeze(dim=0)
     # matrix_2_norm works if one tensor is of one shape bigger, casts the other to the correct size
     image_dists = matrix_2_norm(close_images_tensor, image, sum_dim=1)
     expl_dists = matrix_2_norm(close_images_explanations, image_explanation, sum_dim=1)
@@ -335,34 +343,41 @@ def _impact_ratio_helper(
         predictor: Callable[..., torch.Tensor],
         explanations: torch.Tensor,
         explanation_threshold: float,
-        baseline: int = 0,
+        replace_value: float = 0,
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     """
-    Short description
+    Wrapper for predictions on the input and the input masked by explanations.
 
-    Long description
+    This wrapper return probabilites of the model calculated for both the input,
+    and the probabilites for input with significant area found by the explanation covered.
+    This calculations are required in both the decision_impact_ratio and confidence_impact_ratio.
 
     Parameters
     ----------
     images_tensor: torch.Tensor
-        parameter_description
+        The images for the prediction with shape of (n, channels, width, height), where n stands for the number of images.
     predictor: Callable[..., torch.Tensor]
-        parameter_description
+        Function returning a Tensor with probabilities for classification of each image to each class.
+        In typical cases it's the model prediction function, possibly wrapped in torch.nn.Softmax.
     explanations: torch.Tensor
-        parameter_description
+        Explanations for each of the images in images_tensor. Therefore the shape should be the same as that of images_tensor.
     explanation_threshold: float
-        parameter_description
-    baseline: int
-        parameter_description
+        Minimal value for the explanation to be considered the critical area of the image.
+    replace_value: float
+        The value with which data in critical area found by explanation in the image will be replaced by.
 
     Returns
     -------
-    Tuple[torch.Tensor, torch.Tensor]
-        return_description
+    probabilities_original: torch.Tensor
+        Probabilites of predictions calculated for the original images.
+    probabilities_modified: torch.Tensor
+        Probabilites of predictions calculated for the images modified by covering the critical area of explanations.
 
     See Also
     --------
-    replacetext : function description.
+    decision_impact_ratio: function description.
+    confidence_impact_ratio:
+    torch.nn.Softmax:
 
     Examples
     --------
@@ -372,7 +387,7 @@ def _impact_ratio_helper(
     probabilities_original = predictor(images_tensor)
     # one explanation per image
     explanations_boolean = explanations > explanation_threshold
-    modified_images = replace_masks(images_tensor, explanations_boolean, baseline)
+    modified_images = replace_masks(images_tensor, explanations_boolean, replace_value)
     probabilities_modified = predictor(modified_images)
     return probabilities_original, probabilities_modified
 
@@ -382,44 +397,44 @@ def decision_impact_ratio(
         predictor: Callable[..., torch.Tensor],
         explanations: torch.Tensor,
         explanation_threshold: float,
-        baseline: int,
-) -> torch.Tensor:
+        replace_value: float,
+) -> float:
     """
-    Short description
+    Measures the average number of changes in the predictions after hiding the critical area.
 
-    Long description
+    Measures the average number of changes in the predictions after hiding the critical area found by the explanation.
+    Uses the _impact_ratio_helper for obtaining the predictions probabilities. Implemented as proposed in [1]_.
 
     Parameters
     ----------
-    image_tensors: torch.Tensor
-        parameter_description
+    images_tensors: torch.Tensor
+        The images for the prediction with shape of (n, channels, width, height), where n stands for the number of images.
     predictor: Callable[..., torch.Tensor]
-        parameter_description
+        Function returning a Tensor with probabilities for classification of each image to each class.
+        In typical cases it's the model prediction function, possibly wrapped in torch.nn.Softmax.
     explanations: torch.Tensor
-        parameter_description
+        Explanations for each of the images in images_tensor. Therefore the shape should be the same as that of images_tensor.
     explanation_threshold: float
-        parameter_description
-    baseline: int
-        parameter_description
+        Minimal value for the explanation to be considered the critical area of the image.
+    replace_value: float
+        The value with which data in critical area found by explanation in the image will be replaced by.
 
     Returns
     -------
-    torch.Tensor
-        return_description
-
-    Opis: Jest to odsetek obserwacji, dla których po usunięciu
-    obszaru wrażliwości (wskazanego przez wyjaśnienie)
-    klasyfikacja modelu zmieniła się.
-    Argumenty wejściowe: dataset, forward z modelu,
-    funkcja wyjasnienia, baseline do podmiany pixeli
-    Wartości wyjściowe: torch.Tensor (wynik metryki)
-    :return:
-    DIR = Suma po i (1 jeżeli D(x_i)=/=D(x_i-c_i) else 0)/N,
-    D to klasyfikacja, c_i obszar krytyczny
+    float
+        The number of changes in the predictions after hiding the critica area found by the explanation.
+        Equals to number of changed predictions/number of predictions.
 
     See Also
     --------
-    replacetext : function description.
+    _impact_ratio_helper: function description.
+    confidence_impact_ratio:
+
+    References
+    ----------
+    ..  [1] L. Zou et al., "Ensemble image explainable AI (XAI) algorithm for severe community-acquired
+        pneumonia and COVID-19 respiratory infections,"
+        in IEEE Transactions on Artificial Intelligence, doi: 10.1109/TAI.2022.3153754.
 
     Examples
     --------
@@ -429,7 +444,7 @@ def decision_impact_ratio(
     n = images_tensors.shape[0]
     # predictor returns probabilities in a tensor format
     probs_original, probs_modified = _impact_ratio_helper(
-        images_tensors, predictor, explanations, explanation_threshold, baseline
+        images_tensors, predictor, explanations, explanation_threshold, replace_value
     )
     _, preds_original = torch.max(probs_original, 1)
     _, preds_modified = torch.max(probs_modified, 1)
@@ -442,51 +457,52 @@ def confidence_impact_ratio(
         predictor: Callable[..., torch.Tensor],
         explanations: torch.Tensor,
         explanation_threshold: float,
-        baseline: int = 0,
-) -> torch.Tensor:
+        replace_value: float = 0,
+) -> float:
     """
-    Short description
+    Measures the average change in probabilities after hiding the critical area.
 
-    Long description
+    Measures the average change in probabilities after hiding the critical area found by the explanation.
+    Uses the _impact_ratio_helper for obtaining the predictions probabilities. Implemented as proposed in [1]_.
 
     Parameters
     ----------
     images_tensors: torch.Tensor
-        parameter_description
+        The images for the prediction with shape of (n, channels, width, height), where n stands for the number of images.
     predictor: Callable[..., torch.Tensor]
-        parameter_description
+        Function returning a Tensor with probabilities for classification of each image to each class.
+        In typical cases it's the model prediction function, possibly wrapped in torch.nn.Softmax.
     explanations: torch.Tensor
-        parameter_description
+        Explanations for each of the images in images_tensor. Therefore the shape should be the same as that of images_tensor.
     explanation_threshold: float
-        parameter_description
-    baseline: int
-        parameter_description
+        Minimal value for the explanation to be considered the critical area of the image.
+    replace_value: float
+        The value with which data in critical area found by explanation in the image will be replaced by.
 
     Returns
     -------
-    torch.Tensor
-        return_description
+    float
+        The average change in probabilities after hiding the critical area.
+        Calculation is equal to average(probability_original - probability_hidden_area)
 
     See Also
     --------
-    replacetext : function description.
+    _impact_ratio_helper: function description.
+    decision_impact_ratio:
+
+    References
+    ----------
+    ..  [1] L. Zou et al., "Ensemble image explainable AI (XAI) algorithm for severe community-acquired
+        pneumonia and COVID-19 respiratory infections,"
+        in IEEE Transactions on Artificial Intelligence, doi: 10.1109/TAI.2022.3153754.
 
     Examples
     --------
     >>> function(x, y)
     answer
     """
-    """
-    Opis: Średni spadek estymowanego prawdopodobieństwa
-    klasyfikacji po zasłonięciu obszaru wrażliwości.
-    Argumenty wejściowe: dataset, funkcja na probsy z modelu,
-    funkcja wyjasnienia, baseline do podmiany pixeli
-    Wartości wyjściowe: torch.Tensor (wynik metryki)
-    :return:
-    CIR = Suma po i max(C(x_i)-C(x_i-c_i), 0)/N , C to probabilities, c_i obszar krytyczny
-    """
     probs_original, probs_modified = _impact_ratio_helper(
-        images_tensors, predictor, explanations, explanation_threshold, baseline
+        images_tensors, predictor, explanations, explanation_threshold, replace_value
     )
     probs_max_original, _ = torch.max(probs_original, 1)
     probs_max_modified, _ = torch.max(probs_modified, 1)
@@ -498,50 +514,45 @@ def accordance_recall(
         explanations: torch.Tensor, masks: torch.Tensor, threshold: float = 0.0
 ) -> torch.Tensor:
     """
-    Short description
+    Measures how much area of the mask has the explanation covered.
 
-    Long description
+    Measures how much area of the mask has the explanation covered for each of the explanation, mask pairs in the data.
+    Similar to the recall metric in standard classification task. Metric implemented as proposed in [1]_.
 
     Parameters
     ----------
     explanations: torch.Tensor
-        parameter_description
+        Tensor of the explanations with shape as such (n, channels, width, height),
+        where n represents the number of explanations and correlates masks and explanations.
     masks: torch.Tensor
-        parameter_description
+        Tensor of the masks with 1 representing presence of the mask. Shape of the tensor should be (n, width, height),
+        where n represents the number of masks and correlates masks and explanations.
     threshold: float
-        parameter_description
+        threshold value for the explanation to be considered a critical area.
+        Values greater or equal than the threshold are considered important.
 
     Returns
     -------
     torch.Tensor
-        return_description
+        Tensor with value of the metric for each of the pairs in explanations and masks.
 
     See Also
     --------
-    replacetext : function description.
+    accordance_precision: function description.
+    F1_score:
+
+    References
+    ----------
+    ..  [1] L. Zou et al., "Ensemble image explainable AI (XAI) algorithm for severe community-acquired
+        pneumonia and COVID-19 respiratory infections,"
+        in IEEE Transactions on Artificial Intelligence, doi: 10.1109/TAI.2022.3153754.
 
     Examples
     --------
     >>> function(x, y)
     answer
     """
-    """
-        Opis: Mierzy jaką część maski wykryło wyjaśnienie.
-        Argumenty wejściowe: torch.Tensor (maska obrazu),
-        torch.Tensor (wyjaśnienie/obszar krytyczny),
-        torch.Tensor/skalar (opcjonalnie,
-        jaka minimalna wartość w wyjaśnieniu ma być uznana za ważną)
-        Wartości wyjściowe: torch.Tensor (wynik metryki)
-        :return:
-        Let S(𝑥) be the suspicious pneumonia area that is annotated
-    by the clinician for image x and let F(𝑥) be the critical area that
-    is identified by the interpretation method
-        recall_i=(S(x_i) czesc wspolna F(x_i))/S(x_i)
-        recall = sum_i(recall_i)/N
-    """
-    # logical mask, one explanation per image
-    # explanations.shape = (n, x, width, height), mask.shape = (n, width, height)
-    # squeeze explanation to be of same shape as masks
+    # reshape mask to the same shape as explanation
     reshaped_mask = masks.unsqueeze(dim=1).repeat(1, explanations.shape[1], 1, 1)
     overlapping_area = _intersection_mask(explanations, reshaped_mask, threshold1=threshold)
     divisor = torch.sum(reshaped_mask != 0, dim=(-3, -2, -1))
@@ -553,46 +564,43 @@ def accordance_precision(
         explanations: torch.Tensor, masks: torch.Tensor, threshold: float = 0.0
 ) -> torch.Tensor:
     """
-    Short description
+    Measures how much area of the explanation is covered by the mask.
 
-    Long description
+    Measures how much area of the explanation is covered by the mask for each of the explanation, mask pairs in the data.
+    Similar to the recall metric in standard classification task. Metric implemented as proposed in [1]_.
 
     Parameters
     ----------
     explanations: torch.Tensor
-        parameter_description
+        Tensor of the explanations with shape as such (n, channels, width, height),
+        where n represents the number of explanations and correlates masks and explanations.
     masks: torch.Tensor
-        parameter_description
+        Tensor of the masks with 1 representing presence of the mask. Shape of the tensor should be (n, width, height),
+        where n represents the number of masks and correlates masks and explanations.
     threshold: float
-        parameter_description
+        threshold value for the explanation to be considered a critical area.
+        Values greater or equal than the threshold are considered important.
 
     Returns
     -------
     torch.Tensor
-        return_description
+        Tensor with value of the metric for each of the pairs in explanations and masks.
 
     See Also
     --------
-    replacetext : function description.
+    accordance_recall: function description.
+    F1_score:
+
+    References
+    ----------
+    ..  [1] L. Zou et al., "Ensemble image explainable AI (XAI) algorithm for severe community-acquired
+        pneumonia and COVID-19 respiratory infections,"
+        in IEEE Transactions on Artificial Intelligence, doi: 10.1109/TAI.2022.3153754.
 
     Examples
     --------
     >>> function(x, y)
     answer
-    """
-    """
-        Opis: mierzy jaką część wyjaśnienia stanowiła maska.
-        Argumenty wejściowe: torch.Tensor (maska obrazu),
-        torch.Tensor (wyjasnienie/obszar krytyczny),
-        torch.Tensor/skalar (opcjonalnie,
-        jaka minimalna wartość w wyjaśnieniu ma być uznana za ważną)
-        Wartości wyjściowe: torch.Tensor (wynik metryki)
-        :return:
-        Let S(𝑥) be the suspicious pneumonia area that is annotated
-    by the clinician for image x and let F(𝑥) be the critical area that
-    is identified by the interpretation method
-        precision_i=(S(x_i) czesc wspolna F(x_i))/F(x_i)
-        precision = sum_i (precision_i)/N
     """
     reshaped_mask = masks.unsqueeze(dim=1).repeat(1, explanations.shape[1], 1, 1)
     overlapping_area = _intersection_mask(explanations, reshaped_mask, threshold1=threshold)
@@ -605,45 +613,44 @@ def F1_score(
         explanations: torch.Tensor, masks: torch.Tensor, threshold: float = 0.0
 ) -> float:
     """
-    Short description
+    Measures the F1_score of recall and precision calculated on explanations and masks.
 
-    Long description
+    Measures the F1_score of recall and precision calculated on explanations and masks.
+    Average of harmonic averages of accordance_recall and accordance_precision. Metric implemented as proposed in [1]_.
 
     Parameters
     ----------
     explanations: torch.Tensor
-        parameter_description
+        Tensor of the explanations with shape as such (n, channels, width, height),
+        where n represents the number of explanations and correlates masks and explanations.
     masks: torch.Tensor
-
+        Tensor of the masks with 1 representing presence of the mask. Shape of the tensor should be (n, width, height),
+        where n represents the number of masks and correlates masks and explanations.
     threshold: float
+        threshold value for the explanation to be considered a critical area.
+        Values greater or equal than the threshold are considered important.
 
     Returns
     -------
     float
-        return_description
+        F1 metric calculated with accordance_recall and accordance_precision of each explanation, mask pair.
 
 
     See Also
     --------
-    replacetext : function description.
+    accordance_recall: function description.
+    accordance_precision:
+
+    References
+    ----------
+    ..  [1] L. Zou et al., "Ensemble image explainable AI (XAI) algorithm for severe community-acquired
+        pneumonia and COVID-19 respiratory infections,"
+        in IEEE Transactions on Artificial Intelligence, doi: 10.1109/TAI.2022.3153754.
 
     Examples
     --------
     >>> function(x, y)
     answer
-    """
-    """
-        Opis: Średnia harmoniczna Accordance recall i Accordance precision.
-        Argumenty wejściowe: torch.Tensor (maska obrazu),
-        torch.Tensor (wyjasnienie/obszar krytyczny),
-        torch.Tensor/skalar (opcjonalnie,
-        jaka minimalna wartość w wyjaśnieniu ma być uznana za ważną)
-        Wartości wyjściowe: torch.Tensor (wynik metryki)
-        :return:
-        Let S(𝑥) be the suspicious pneumonia area that is annotated
-    by the clinician for image x and let F(𝑥) be the critical area that
-    is identified by the interpretation method
-        Accordance F1 = 1/N * sum_i (2*(recall_i + precision_i)/(recall_i*precision_i))
     """
     acc_recall = accordance_recall(explanations, masks, threshold=threshold)
     acc_prec = accordance_precision(explanations, masks, threshold=threshold)
@@ -656,45 +663,43 @@ def intersection_over_union(
         explanations: torch.Tensor, masks: torch.Tensor, threshold: float = 0.5
 ) -> float:
     """
-    Short description
+    Measures the average division of intersection area over the union area.
 
-    Long description
+    Measures the average division of intersection area over the union area,
+    where explanation values are over the threshold. Metric implemented as proposed in [1]_.
 
     Parameters
     ----------
     explanations: torch.Tensor
-        parameter_description
+        Tensor of the explanations with shape as such (n, channels, width, height),
+        where n represents the number of explanations and correlates masks and explanations.
     masks: torch.Tensor
-
+        Tensor of the masks with 1 representing presence of the mask. Shape of the tensor should be (n, width, height),
+        where n represents the number of masks and correlates masks and explanations.
     threshold: float
+        threshold value for the explanation to be considered a critical area.
+        Values greater or equal than the threshold are considered important.
 
     Returns
     -------
     float
-        return_description
+        The calculated measure. Equal to average(intersection_area/union_area)
 
     See Also
     --------
-    replacetext : function description.
+    _intersection_mask: function description.
+    _union_mask:
+
+    References
+    ----------
+    ..  [1] L. Zou et al., "Ensemble image explainable AI (XAI) algorithm for severe community-acquired
+        pneumonia and COVID-19 respiratory infections,"
+        in IEEE Transactions on Artificial Intelligence, doi: 10.1109/TAI.2022.3153754.
 
     Examples
     --------
     >>> function(x, y)
     answer
-    """
-    """
-        Opis: Pole iloczynu maski i wyjaśnienia podzielone przez
-        pole sumy maski i wyjaśnienia.
-        Argumenty wejściowe: torch.Tensor (maska obrazu),
-        torch.Tensor (wyjasnienie/obszar krytyczny),
-        torch.Tensor/skalar (opcjonalnie,
-        jaka minimalna wartość w wyjaśnieniu ma być uznana za ważną)
-        Wartości wyjściowe: torch.Tensor (wynik metryki)
-        :return:
-        Let S(𝑥) be the suspicious pneumonia area that is annotated
-    by the clinician for image x and let F(𝑥) be the critical area that
-    is identified by the interpretation method
-        IOU=1/N * sum_i(S(x_i) cz. wspolna F(x_i)/S(x_i) suma F(x_i))
     """
     # one explanation per image
     reshaped_mask = masks.unsqueeze(dim=1).repeat(1, explanations.shape[1], 1, 1)
@@ -712,25 +717,28 @@ def ensemble_score(
         metrics_scores: Union[List[torch.Tensor], torch.Tensor, List[float]],
 ) -> torch.Tensor:
     """
-    Short description
+    Measure calculates the weighted sum of different metrics scores.
 
-    Long description
+    Measure calculates the weighted sum of different metrics scores. Metric implemented as proposed in [1]_.
 
     Parameters
     ----------
     weights: Union[List, torch.Tensor]
-        parameter_description
+        Weights for the corresponding metric scores.
     metrics_scores: Union[List[torch.Tensor], torch.Tensor, List[float]]
-        parameter_description
+        Scores to be weighted and summed.
 
     Returns
     -------
     Torch.Tensor
-        return_description
+        The weighted sum of weights times scores.
 
-    See Also
-    --------
-    replacetext : function description.
+    References
+    ----------
+    ..  [1] Bobek, S., Bałaga, P., Nalepa, G.J. (2021), "Towards Model-Agnostic Ensemble Explanations."
+        In: Paszynski, M., Kranzlmüller, D., Krzhizhanovskaya, V.V., Dongarra, J.J., Sloot, P.M. (eds)
+        Computational Science – ICCS 2021. ICCS 2021. Lecture Notes in Computer Science(), vol 12745. Springer,
+        Cham. https://doi.org/10.1007/978-3-030-77970-2_4
 
     Examples
     --------
