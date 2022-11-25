@@ -33,9 +33,9 @@ def replace_masks(
 
     See Also
     --------
-    _impact_ratio_helper : function description.
-    decision_impact_ratio : function description.
-    confidence_impact_ratio : function description.
+    _impact_ratio_helper: Wrapper for predicting on the input and the input masked by explanations.
+    decision_impact_ratio: Measures the average number of changes in the predictions after hiding the critical area.
+    confidence_impact_ratio: Measures the average change in probabilities after hiding the critical area.
 
     Examples
     --------
@@ -72,8 +72,8 @@ def tensor_to_list_tensors(tensors: torch.Tensor, depth: int) -> List[torch.Tens
 
     See Also
     --------
-    consistency : function description.
-    stability : function description.
+    consistency: Metric representing how similar are different explanations of one photo.
+    stability: Measures how similar/stable are explanations of similar photos.
 
     Examples
     --------
@@ -121,8 +121,8 @@ def matrix_2_norm(
 
     See Also
     --------
-    consistency : function description.
-    stability :
+    consistency: Metric representing how similar are different explanations of one photo.
+    stability: Measures how similar/stable are explanations of similar photos.
 
     Examples
     --------
@@ -169,10 +169,10 @@ def _intersection_mask(
 
     See Also
     --------
-    accordance_recall : function description.
-    accordance_precision :
-    intersection_over_union :
-    _union_mask :
+    accordance_recall: Measures how much area of the mask has the explanation covered.
+    accordance_precision: Measures how much area of the explanation is covered by the mask.
+    intersection_over_union: Measures the average division of intersection area over the union area.
+    _union_mask: Calculates the union of two masks.
 
     Examples
     --------
@@ -213,8 +213,8 @@ def _union_mask(
 
     See Also
     --------
-    intersection_over_union : function description.
-    _intersection_mask :
+    intersection_over_union: Measures the average division of intersection area over the union area.
+    _intersection_mask: Calculates the intersection of two masks.
 
     Examples
     --------
@@ -248,9 +248,9 @@ def consistency(explanations: torch.Tensor) -> float:
 
     See Also
     --------
-    stability : function description.
-    tensor_to_list_tensors :
-    matrix_2_norm :
+    stability: Measures how similar/stable are explanations of similar photos.
+    tensor_to_list_tensors: Splits first n dimensions of a Tensor into a list of Tensors.
+    matrix_2_norm: Computes the 2-norm of two matrices.
 
     References
     ----------
@@ -276,7 +276,7 @@ def stability(explanator: Callable, image: torch.Tensor,
               images_to_compare: torch.Tensor, epsilon: float = 500.0, **kwargs
               ) -> float:
     """
-    Measures how similar are explanations of similar photos.
+    Measures how similar/stable are explanations of similar photos.
 
     The metric measures the similarity of one type of explanation between similar photos. As explanations need to be
     created for each of the images close enough to the compared image,
@@ -306,9 +306,9 @@ def stability(explanator: Callable, image: torch.Tensor,
 
     See Also
     --------
-    consistency : function description.
-    tensor_to_list_tensors :
-    matrix_2_norm :
+    consistency: Metric representing how similar are different explanations of one photo.
+    tensor_to_list_tensors: Splits first n dimensions of a Tensor into a list of Tensors.
+    matrix_2_norm: Computes the 2-norm of two matrices.
 
     References
     ----------
@@ -346,7 +346,7 @@ def _impact_ratio_helper(
         replace_value: float = 0,
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     """
-    Wrapper for predictions on the input and the input masked by explanations.
+    Wrapper for predicting on the input and the input masked by explanations.
 
     This wrapper return probabilites of the model calculated for both the input,
     and the probabilites for input with significant area found by the explanation covered.
@@ -375,8 +375,9 @@ def _impact_ratio_helper(
 
     See Also
     --------
-    decision_impact_ratio: function description.
-    confidence_impact_ratio:
+    decision_impact_ratio: Measures the average number of changes in the predictions after hiding the critical area.
+    confidence_impact_ratio: Measures the average change in probabilities after hiding the critical area.
+    replace_masks: Replaces values in Tensor indexed by a boolean tensor.
     torch.nn.Softmax:
 
     Examples
@@ -427,8 +428,8 @@ def decision_impact_ratio(
 
     See Also
     --------
-    _impact_ratio_helper: function description.
-    confidence_impact_ratio:
+    _impact_ratio_helper: Wrapper for predicting on the input and the input masked by explanations.
+    confidence_impact_ratio: Measures the average change in probabilities after hiding the critical area.
 
     References
     ----------
@@ -487,8 +488,8 @@ def confidence_impact_ratio(
 
     See Also
     --------
-    _impact_ratio_helper: function description.
-    decision_impact_ratio:
+    _impact_ratio_helper: Wrapper for predicting on the input and the input masked by explanations.
+    decision_impact_ratio: Measures the average number of changes in the predictions after hiding the critical area.
 
     References
     ----------
@@ -538,8 +539,8 @@ def accordance_recall(
 
     See Also
     --------
-    accordance_precision: function description.
-    F1_score:
+    accordance_precision: Measures how much area of the explanation is covered by the mask.
+    F1_score: Measures the F1_score of recall and precision calculated on explanations and masks.
 
     References
     ----------
@@ -588,8 +589,9 @@ def accordance_precision(
 
     See Also
     --------
-    accordance_recall: function description.
-    F1_score:
+    accordance_recall: Measures how much area of the mask has the explanation covered.
+    _intersection_mask: Calculates the intersection of two masks.
+    F1_score: Measures the F1_score of recall and precision calculated on explanations and masks.
 
     References
     ----------
@@ -638,8 +640,8 @@ def F1_score(
 
     See Also
     --------
-    accordance_recall: function description.
-    accordance_precision:
+    accordance_recall: Measures how much area of the mask has the explanation covered.
+    accordance_precision: Measures how much area of the explanation is covered by the mask.
 
     References
     ----------
@@ -687,8 +689,8 @@ def intersection_over_union(
 
     See Also
     --------
-    _intersection_mask: function description.
-    _union_mask:
+    _intersection_mask: Calculates the intersection of two masks.
+    _union_mask: Calculates the union of two masks.
 
     References
     ----------
