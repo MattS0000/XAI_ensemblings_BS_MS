@@ -141,7 +141,7 @@ def ensemble(inputs: TensorOrTupleOfTensorsGeneric, metrics: List[Callable], wei
 
     References
     ----------
-    ..  [1] Bobek, S., Bałaga, P., Nalepa, G.J. (2021), "Towards Model-Agnostic Ensemble Explanations."
+    .. [1] Bobek, S., Bałaga, P., Nalepa, G.J. (2021), "Towards Model-Agnostic Ensemble Explanations."
         In: Paszynski, M., Kranzlmüller, D., Krzhizhanovskaya, V.V., Dongarra, J.J., Sloot, P.M. (eds)
         Computational Science – ICCS 2021. ICCS 2021. Lecture Notes in Computer Science(), vol 12745. Springer,
         Cham. https://doi.org/10.1007/978-3-030-77970-2_4
@@ -216,7 +216,7 @@ def ensembleXAI(inputs: TensorOrTupleOfTensorsGeneric, masks: TensorOrTupleOfTen
 
     References
     ----------
-    ..  [1] L. Zou et al., "Ensemble image explainable AI (XAI) algorithm for severe community-acquired
+    .. [1] L. Zou et al., "Ensemble image explainable AI (XAI) algorithm for severe community-acquired
         pneumonia and COVID-19 respiratory infections,"
         in IEEE Transactions on Artificial Intelligence, doi: 10.1109/TAI.2022.3153754.
 

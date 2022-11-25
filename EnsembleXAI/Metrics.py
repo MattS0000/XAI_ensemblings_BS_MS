@@ -254,7 +254,7 @@ def consistency(explanations: torch.Tensor) -> float:
 
     References
     ----------
-    ..  [1] Bobek, S., Bałaga, P., Nalepa, G.J. (2021), "Towards Model-Agnostic Ensemble Explanations."
+    .. [1] Bobek, S., Bałaga, P., Nalepa, G.J. (2021), "Towards Model-Agnostic Ensemble Explanations."
         In: Paszynski, M., Kranzlmüller, D., Krzhizhanovskaya, V.V., Dongarra, J.J., Sloot, P.M. (eds)
         Computational Science – ICCS 2021. ICCS 2021. Lecture Notes in Computer Science(), vol 12745. Springer,
         Cham. https://doi.org/10.1007/978-3-030-77970-2_4
@@ -312,7 +312,7 @@ def stability(explanator: Callable, image: torch.Tensor,
 
     References
     ----------
-    ..  [1] Bobek, S., Bałaga, P., Nalepa, G.J. (2021), "Towards Model-Agnostic Ensemble Explanations."
+    .. [1] Bobek, S., Bałaga, P., Nalepa, G.J. (2021), "Towards Model-Agnostic Ensemble Explanations."
         In: Paszynski, M., Kranzlmüller, D., Krzhizhanovskaya, V.V., Dongarra, J.J., Sloot, P.M. (eds)
         Computational Science – ICCS 2021. ICCS 2021. Lecture Notes in Computer Science(), vol 12745. Springer,
         Cham. https://doi.org/10.1007/978-3-030-77970-2_4
@@ -433,7 +433,7 @@ def decision_impact_ratio(
 
     References
     ----------
-    ..  [1] L. Zou et al., "Ensemble image explainable AI (XAI) algorithm for severe community-acquired
+    .. [1] L. Zou et al., "Ensemble image explainable AI (XAI) algorithm for severe community-acquired
         pneumonia and COVID-19 respiratory infections,"
         in IEEE Transactions on Artificial Intelligence, doi: 10.1109/TAI.2022.3153754.
 
@@ -493,7 +493,7 @@ def confidence_impact_ratio(
 
     References
     ----------
-    ..  [1] L. Zou et al., "Ensemble image explainable AI (XAI) algorithm for severe community-acquired
+    .. [1] L. Zou et al., "Ensemble image explainable AI (XAI) algorithm for severe community-acquired
         pneumonia and COVID-19 respiratory infections,"
         in IEEE Transactions on Artificial Intelligence, doi: 10.1109/TAI.2022.3153754.
 
@@ -544,7 +544,7 @@ def accordance_recall(
 
     References
     ----------
-    ..  [1] L. Zou et al., "Ensemble image explainable AI (XAI) algorithm for severe community-acquired
+    .. [1] L. Zou et al., "Ensemble image explainable AI (XAI) algorithm for severe community-acquired
         pneumonia and COVID-19 respiratory infections,"
         in IEEE Transactions on Artificial Intelligence, doi: 10.1109/TAI.2022.3153754.
 
@@ -595,7 +595,7 @@ def accordance_precision(
 
     References
     ----------
-    ..  [1] L. Zou et al., "Ensemble image explainable AI (XAI) algorithm for severe community-acquired
+    .. [1] L. Zou et al., "Ensemble image explainable AI (XAI) algorithm for severe community-acquired
         pneumonia and COVID-19 respiratory infections,"
         in IEEE Transactions on Artificial Intelligence, doi: 10.1109/TAI.2022.3153754.
 
@@ -615,9 +615,9 @@ def F1_score(
         explanations: torch.Tensor, masks: torch.Tensor, threshold: float = 0.0
 ) -> float:
     """
-    Measures the F1_score of recall and precision calculated on explanations and masks.
+    Measures the F1 score of recall and precision calculated on explanations and masks.
 
-    Measures the F1_score of recall and precision calculated on explanations and masks.
+    Measures the F1 score of recall and precision calculated on explanations and masks.
     Average of harmonic averages of accordance_recall and accordance_precision. Metric implemented as proposed in [1]_.
 
     Parameters
@@ -645,7 +645,7 @@ def F1_score(
 
     References
     ----------
-    ..  [1] L. Zou et al., "Ensemble image explainable AI (XAI) algorithm for severe community-acquired
+    .. [1] L. Zou et al., "Ensemble image explainable AI (XAI) algorithm for severe community-acquired
         pneumonia and COVID-19 respiratory infections,"
         in IEEE Transactions on Artificial Intelligence, doi: 10.1109/TAI.2022.3153754.
 
@@ -694,7 +694,7 @@ def intersection_over_union(
 
     References
     ----------
-    ..  [1] L. Zou et al., "Ensemble image explainable AI (XAI) algorithm for severe community-acquired
+    .. [1] L. Zou et al., "Ensemble image explainable AI (XAI) algorithm for severe community-acquired
         pneumonia and COVID-19 respiratory infections,"
         in IEEE Transactions on Artificial Intelligence, doi: 10.1109/TAI.2022.3153754.
 
@@ -737,7 +737,7 @@ def ensemble_score(
 
     References
     ----------
-    ..  [1] Bobek, S., Bałaga, P., Nalepa, G.J. (2021), "Towards Model-Agnostic Ensemble Explanations."
+    .. [1] Bobek, S., Bałaga, P., Nalepa, G.J. (2021), "Towards Model-Agnostic Ensemble Explanations."
         In: Paszynski, M., Kranzlmüller, D., Krzhizhanovskaya, V.V., Dongarra, J.J., Sloot, P.M. (eds)
         Computational Science – ICCS 2021. ICCS 2021. Lecture Notes in Computer Science(), vol 12745. Springer,
         Cham. https://doi.org/10.1007/978-3-030-77970-2_4
