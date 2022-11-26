@@ -2,13 +2,9 @@ from typing import Callable, Union, List, Tuple
 import itertools
 import torch
 
-function = lambda x, y: (x, y)
-x = 1
-y = 2
-
 
 def replace_masks(
-        images: torch.Tensor, replacement_index: torch.Tensor, value: Union[int, float] = 0
+        images: torch.Tensor, replacement_index: torch.BoolTensor, value: Union[int, float] = 0
 ) -> torch.Tensor:
     """
     Replaces values in Tensor indexed by a boolean tensor.
@@ -20,7 +16,7 @@ def replace_masks(
     ----------
     images: torch.Tensor
         Tensor of any shape, in most cases 4D Tensor of the images with shape (number of photos, RGB channel, height, width)
-    replacement_index: torch.Tensor
+    replacement_index: torch.BoolTensor
         Boolean Tensor of shape same as images or in case of the 4D images Tensor, a
         3D boolean Tensor where true corresponds index to be replaced with shape (number of photos, height, width)
     value: int or float
@@ -39,8 +35,39 @@ def replace_masks(
 
     Examples
     --------
-    >>> function(x, y)
-    answer
+    >>> import torch
+    >>> image = torch.ones([3,3])
+    >>> image
+    tensor([[1., 1., 1.],
+            [1., 1., 1.],
+            [1., 1., 1.]])
+    >>> index = torch.BoolTensor([False, True, False]).repeat(3,1)
+    >>> index
+    tensor([[False,  True, False],
+            [False,  True, False],
+            [False,  True, False]])
+    >>> replace_masks(image, index, 0)
+    tensor([[1., 0., 1.],
+            [1., 0., 1.],
+            [1., 0., 1.]])
+    >>> image_4D = torch.ones([1,3,4,4])
+    >>> image[0,0]
+    tensor([[1., 1., 1., 1.],
+            [1., 1., 1., 1.],
+            [1., 1., 1., 1.],
+            [1., 1., 1., 1.]])
+    >>> index_3D = torch.BoolTensor([False, True, True, False]).repeat(1,4,1)
+    >>> index_3D
+    tensor([[[False,  True,  True, False],
+             [False,  True,  True, False],
+             [False,  True,  True, False],
+             [False,  True,  True, False]]])
+    >>> replaced_image = replace_masks(image_4D, index_3D, 2)
+    >>> replaced_image[0,0]
+    tensor([[1., 2., 2., 1.],
+            [1., 2., 2., 1.],
+            [1., 2., 2., 1.],
+            [1., 2., 2., 1.]])
     """
     temp_images = torch.clone(images)
     # 3D Tensor needs to be reshaped over RGB channel for the indexing of images
@@ -77,8 +104,26 @@ def tensor_to_list_tensors(tensors: torch.Tensor, depth: int) -> List[torch.Tens
 
     Examples
     --------
-    >>> function(x, y)
-    answer
+    >>> import torch
+    >>> dim1 = torch.stack([torch.Tensor([1, 1, 1, 1]), torch.Tensor([2, 2, 2, 2])])
+    >>> dim2 = torch.stack([torch.Tensor([3, 3, 3, 3]), torch.Tensor([4, 4, 4, 4])])
+    >>> stacked_tensor = torch.stack([dim1, dim2])
+    >>> stacked_tensor
+    tensor([[[1., 1., 1., 1.],
+             [2., 2., 2., 2.]],
+
+            [[3., 3., 3., 3.],
+             [4., 4., 4., 4.]]])
+    >>> tensor_to_list_tensors(stacked_tensor, depth=1)
+    [tensor([[1., 1., 1., 1.],
+             [2., 2., 2., 2.]]),
+    tensor([[3., 3., 3., 3.],
+            [4., 4., 4., 4.]])]
+    >>> tensor_to_list_tensors(stacked_tensor, depth=2)
+    [tensor([1., 1., 1., 1.]),
+    tensor([2., 2., 2., 2.]),
+    tensor([3., 3., 3., 3.]),
+    tensor([4., 4., 4., 4.])]
     """
     # squeezing couses returned tensors to have reduced dimensions
     tensor_list = [
@@ -126,8 +171,23 @@ def matrix_2_norm(
 
     Examples
     --------
-    >>> function(x, y)
-    answer
+    >>> import torch
+    >>> onez_2D = torch.ones([3, 3])
+    >>> zeroz_2D = torch.zeros([3, 3])
+    >>> matrix_2_norm(onez_2D, zeroz_2D)
+    tensor(3.)
+    >>> onez_3D = torch.ones([4, 3, 2])
+    >>> zeroz_3D = torch.zeros([4, 3, 2])
+    >>> matrix_2_norm(onez_3D, zeroz_3D)
+    tensor([2.4495, 2.4495, 2.4495, 2.4495])
+    >>> matrix_2_norm(onez_3D, zeroz_3D, sum_dim=0)
+    tensor(4.8990)
+    >>> onez_4D = torch.ones([5, 4, 3, 2])
+    >>> zeroz_4D = torch.zeros([5, 4, 3, 2])
+    >>> matrix_2_norm(onez_4D, zeroz_4D, sum_dim=0)
+    tensor([5.4772, 5.4772, 5.4772, 5.4772])
+    >>> matrix_2_norm(onez_4D, zeroz_4D, sum_dim=1)
+    tensor([4.8990, 4.8990, 4.8990, 4.8990, 4.8990])
     """
     if sum_dim is not None and sum_dim < 0:
         sum_dim = sum_dim+2
@@ -144,7 +204,7 @@ def matrix_2_norm(
 def _intersection_mask(
         tensor1: torch.Tensor, tensor2: torch.Tensor,
         threshold1: float = 0.0, threshold2: float = 0.0,
-) -> torch.Tensor:
+) -> torch.BoolTensor:
     """
     Calculates the intersection of two masks.
 
@@ -164,7 +224,7 @@ def _intersection_mask(
 
     Returns
     -------
-    torch.Tensor
+    torch.BoolTensor
         Boolean Tensor with True values where the masks intersect with values over the thresholds.
 
     See Also
@@ -176,8 +236,27 @@ def _intersection_mask(
 
     Examples
     --------
-    >>> function(x, y)
-    answer
+    >>> import torch
+    >>> cross_2d = torch.Tensor([[1, 0, 1], [0, 1, 0], [1, 0, 1]])
+    >>> cross_2d
+    tensor([[1., 0., 1.],
+            [0., 1., 0.],
+            [1., 0., 1.]])
+    >>> plus_2d = torch.Tensor([[0, 1, 0], [1, 1, 1], [0, 1, 0]])
+    >>> plus_2d
+    tensor([[0., 1., 0.],
+            [1., 1., 1.],
+            [0., 1., 0.]])
+    >>> _intersection_mask(cross_2d, plus_2d)
+    tensor([[False, False, False],
+            [False,  True, False],
+            [False, False, False]])
+    >>> cross_2d_small = 0.4*cross_2d
+    >>> plus_2d_small = 0.7*plus_2d
+    >>> _intersection_mask(cross_2d_small, plus_2d_small, threshold1=0.5)
+    tensor([[False, False, False],
+            [False, False, False],
+            [False, False, False]])
     """
     logical_mask = torch.logical_and(
         torch.abs(tensor1) > threshold1, torch.abs(tensor2) > threshold2
@@ -188,7 +267,7 @@ def _intersection_mask(
 def _union_mask(
         tensor1: torch.Tensor, tensor2: torch.Tensor,
         threshold1: float = 0.0, threshold2: float = 0.0,
-) -> torch.Tensor:
+) -> torch.BoolTensor:
     """
     Calculates the union of two masks.
 
@@ -208,7 +287,7 @@ def _union_mask(
 
     Returns
     -------
-    torch.Tensor
+    torch.BoolTensor
         Boolean Tensor with True values on the union of the masks, where values are over thresholds.
 
     See Also
@@ -218,8 +297,31 @@ def _union_mask(
 
     Examples
     --------
-    >>> function(x, y)
-    answer
+    >>> import torch
+    >>> cross_2d = torch.Tensor([[1, 0, 1], [0, 1, 0], [1, 0, 1]])
+    >>> cross_2d
+    tensor([[1., 0., 1.],
+            [0., 1., 0.],
+            [1., 0., 1.]])
+    >>> plus_2d = torch.Tensor([[0, 1, 0], [1, 1, 1], [0, 1, 0]])
+    >>> plus_2d
+    tensor([[0., 1., 0.],
+            [1., 1., 1.],
+            [0., 1., 0.]])
+    >>> _union_mask(cross_2d, plus_2d)
+    tensor([[True, True, True],
+            [True, True, True],
+            [True, True, True]])
+    >>> cross_2d_small = 0.4*cross_2d
+    >>> plus_2d_small = 0.7*plus_2d
+    >>> _union_mask(cross_2d_small, plus_2d_small, threshold1=0.5)
+    tensor([[False,  True, False],
+        [ True,  True,  True],
+        [False,  True, False]])
+    >>> _union_mask(cross_2d_small, plus_2d_small, threshold1=0.0, threshold2=0.8)
+    tensor([[ True, False,  True],
+            [False,  True, False],
+            [ True, False,  True]])
     """
     logical_mask = torch.logical_or(
         torch.abs(tensor1) > threshold1, torch.abs(tensor2) > threshold2
@@ -261,8 +363,15 @@ def consistency(explanations: torch.Tensor) -> float:
 
     Examples
     --------
-    >>> function(x, y)
-    answer
+    >>> import torch
+    >>> onez = torch.ones([3,5,5])
+    >>> halfs = 0.5*torch.ones([3,5,5])
+    >>> stacked = torch.stack([onez, halfs])
+    >>> consistency(stacked)
+    0.18761281669139862
+    >>> onez2 = torch.ones([4,3,5,5])
+    >>> consistency(onez2)
+    1.0
     """
     explanations_list = tensor_to_list_tensors(explanations, depth=1)
     diffs = [
@@ -350,7 +459,7 @@ def _impact_ratio_helper(
 
     This wrapper return probabilites of the model calculated for both the input,
     and the probabilites for input with significant area found by the explanation covered.
-    This calculations are required in both the decision_impact_ratio and confidence_impact_ratio.
+    These calculations are required in both the decision_impact_ratio and confidence_impact_ratio.
 
     Parameters
     ----------
@@ -378,16 +487,30 @@ def _impact_ratio_helper(
     decision_impact_ratio: Measures the average number of changes in the predictions after hiding the critical area.
     confidence_impact_ratio: Measures the average change in probabilities after hiding the critical area.
     replace_masks: Replaces values in Tensor indexed by a boolean tensor.
-    torch.nn.Softmax:
+    torch.nn.Softmax: Applies the Softmax function to an n-dimensional input Tensor rescaling them so
+    that the elements of the n-dimensional output Tensor lie in the range [0,1] and sum to 1.
 
     Examples
     --------
-    >>> function(x, y)
-    answer
+    >>> import torch
+    >>> data = torch.stack([torch.ones(3, 5, 5), torch.zeros(3,5,5)])
+    >>> ex_explanation = torch.BoolTensor([True, False, False, False, False]).repeat(2, 3, 5, 1)
+    >>> def predictor(input_tensor):
+    ...     n = input_tensor.shape[0]
+    ...     if input_tensor[0,0,0,0].item() == 1:
+    ...         val = torch.Tensor([0.8, 0.2, 0]).repeat(n, 1)
+    ...     else:
+    ...         val = torch.Tensor([0, 0.8, 0.2]).repeat(n, 1)
+    ...     return val
+    >>> _impact_ratio_helper(data, predictor, ex_explanation, 0.5, 0)
+    (tensor([[0.8000, 0.2000, 0.0000],
+         [0.8000, 0.2000, 0.0000]]),
+    tensor([[0.0000, 0.8000, 0.2000],
+         [0.0000, 0.8000, 0.2000]]))
     """
     probabilities_original = predictor(images_tensor)
     # one explanation per image
-    explanations_boolean = explanations > explanation_threshold
+    explanations_boolean = explanations >= explanation_threshold
     modified_images = replace_masks(images_tensor, explanations_boolean, replace_value)
     probabilities_modified = predictor(modified_images)
     return probabilities_original, probabilities_modified
@@ -430,6 +553,8 @@ def decision_impact_ratio(
     --------
     _impact_ratio_helper: Wrapper for predicting on the input and the input masked by explanations.
     confidence_impact_ratio: Measures the average change in probabilities after hiding the critical area.
+    torch.nn.Softmax: Applies the Softmax function to an n-dimensional input Tensor rescaling them so
+    that the elements of the n-dimensional output Tensor lie in the range [0,1] and sum to 1.
 
     References
     ----------
@@ -439,8 +564,18 @@ def decision_impact_ratio(
 
     Examples
     --------
-    >>> function(x, y)
-    answer
+    >>> import torch
+    >>> data = torch.stack([torch.ones(3, 5, 5), torch.zeros(3,5,5)])
+    >>> ex_explanation = torch.BoolTensor([True, False, False, False, False]).repeat(2, 3, 5, 1)
+    >>> def predictor(input_tensor):
+    ...     n = input_tensor.shape[0]
+    ...     if input_tensor[0,0,0,0].item() == 1:
+    ...         val = torch.Tensor([0.8, 0.2, 0]).repeat(n, 1)
+    ...     else:
+    ...         val = torch.Tensor([0, 0.8, 0.2]).repeat(n, 1)
+    ...     return val
+    >>> decision_impact_ratio(data, predictor, ex_explanation, 0.5, 0)
+    1.0
     """
     n = images_tensors.shape[0]
     # predictor returns probabilities in a tensor format
@@ -490,6 +625,7 @@ def confidence_impact_ratio(
     --------
     _impact_ratio_helper: Wrapper for predicting on the input and the input masked by explanations.
     decision_impact_ratio: Measures the average number of changes in the predictions after hiding the critical area.
+    torch.nn.Softmax: Applies the Softmax function to an n-dimensional input Tensor rescaling them so that the elements of the n-dimensional output Tensor lie in the range [0,1] and sum to 1.
 
     References
     ----------
@@ -499,8 +635,18 @@ def confidence_impact_ratio(
 
     Examples
     --------
-    >>> function(x, y)
-    answer
+    >>> import torch
+    >>> data = torch.stack([torch.ones(3, 5, 5), torch.zeros(3,5,5)])
+    >>> ex_explanation = torch.BoolTensor([True, False, False, False, False]).repeat(2, 3, 5, 1)
+    >>> def predictor(input_tensor):
+    ...     n = input_tensor.shape[0]
+    ...     if input_tensor[0,0,0,0].item() == 1:
+    ...         val = torch.Tensor([0.8, 0.2, 0]).repeat(n, 1)
+    ...     else:
+    ...         val = torch.Tensor([0.2, 0.6, 0.2]).repeat(n, 1)
+    ...     return val
+    >>> confidence_impact_ratio(data, predictor, ex_explanation, 0.5, 0)
+    0.19999998807907104
     """
     probs_original, probs_modified = _impact_ratio_helper(
         images_tensors, predictor, explanations, explanation_threshold, replace_value
@@ -545,13 +691,18 @@ def accordance_recall(
     References
     ----------
     .. [1] L. Zou et al., "Ensemble image explainable AI (XAI) algorithm for severe community-acquired
-        pneumonia and COVID-19 respiratory infections,"
-        in IEEE Transactions on Artificial Intelligence, doi: 10.1109/TAI.2022.3153754.
+        pneumonia and COVID-19 respiratory infections," in IEEE Transactions on Artificial Intelligence,
+        doi: 10.1109/TAI.2022.3153754.
 
     Examples
     --------
-    >>> function(x, y)
-    answer
+    >>> import torch
+    >>> cross_2d = torch.Tensor([[1, 0, 1], [0, 1, 0], [1, 0, 1]])
+    >>> plus_2d = torch.Tensor([[0, 1, 0], [1, 1, 1], [0, 1, 0]])
+    >>> a = torch.stack([cross_2d.repeat(3,1,1), plus_2d.repeat(3,1,1)])
+    >>> b = torch.stack([plus_2d, cross_2d])
+    >>> accordance_recall(a, b)
+    tensor([0.2000, 0.2000])
     """
     # reshape mask to the same shape as explanation
     reshaped_mask = masks.unsqueeze(dim=1).repeat(1, explanations.shape[1], 1, 1)
@@ -567,20 +718,21 @@ def accordance_precision(
     """
     Measures how much area of the explanation is covered by the mask.
 
-    Measures how much area of the explanation is covered by the mask for each of the explanation, mask pairs in the data.
-    Similar to the recall metric in standard classification task. Metric implemented as proposed in [1]_.
+    Measures how much area of the explanation is covered by the mask for each of the explanation,
+    mask pairs in the data. Similar to the recall metric in standard classification task.
+    Metric implemented as proposed in [1]_.
 
     Parameters
     ----------
     explanations: torch.Tensor
-        Tensor of the explanations with shape as such (n, channels, width, height),
-        where n represents the number of explanations and correlates masks and explanations.
+        Tensor of the explanations with shape as such (n, channels, width, height), where n represents the number
+        of explanations and correlates masks and explanations.
     masks: torch.Tensor
         Tensor of the masks with 1 representing presence of the mask. Shape of the tensor should be (n, width, height),
         where n represents the number of masks and correlates masks and explanations.
     threshold: float
-        threshold value for the explanation to be considered a critical area.
-        Values greater or equal than the threshold are considered important.
+        threshold value for the explanation to be considered a critical area. Values greater or equal than
+        the threshold are considered important.
 
     Returns
     -------
@@ -595,14 +747,19 @@ def accordance_precision(
 
     References
     ----------
-    .. [1] L. Zou et al., "Ensemble image explainable AI (XAI) algorithm for severe community-acquired
-        pneumonia and COVID-19 respiratory infections,"
-        in IEEE Transactions on Artificial Intelligence, doi: 10.1109/TAI.2022.3153754.
+    .. [1] L. Zou et al., "Ensemble image explainable AI (XAI) algorithm for severe community-acquired pneumonia
+        and COVID-19 respiratory infections," in IEEE Transactions on Artificial Intelligence,
+        doi: 10.1109/TAI.2022.3153754.
 
     Examples
     --------
-    >>> function(x, y)
-    answer
+    >>> import torch
+    >>> cross_2d = torch.Tensor([[1, 0, 1], [0, 1, 0], [1, 0, 1]])
+    >>> plus_2d = torch.Tensor([[0, 1, 0], [1, 1, 1], [0, 1, 0]])
+    >>> a = torch.stack([cross_2d.repeat(3,1,1), plus_2d.repeat(3,1,1)])
+    >>> b = torch.stack([plus_2d, cross_2d])
+    >>> accordance_precision(a, b)
+    tensor([0.2000, 0.2000])
     """
     reshaped_mask = masks.unsqueeze(dim=1).repeat(1, explanations.shape[1], 1, 1)
     overlapping_area = _intersection_mask(explanations, reshaped_mask, threshold1=threshold)
@@ -618,13 +775,14 @@ def F1_score(
     Measures the F1 score of recall and precision calculated on explanations and masks.
 
     Measures the F1 score of recall and precision calculated on explanations and masks.
-    Average of harmonic averages of accordance_recall and accordance_precision. Metric implemented as proposed in [1]_.
+    Average of harmonic averages of ``accordance_recall`` and ``accordance_precision``.
+    Metric implemented as proposed in [1]_.
 
     Parameters
     ----------
     explanations: torch.Tensor
-        Tensor of the explanations with shape as such (n, channels, width, height),
-        where n represents the number of explanations and correlates masks and explanations.
+        Tensor of the explanations with shape as such (n, channels, width, height), where n represents the number of
+        explanations and correlates masks and explanations.
     masks: torch.Tensor
         Tensor of the masks with 1 representing presence of the mask. Shape of the tensor should be (n, width, height),
         where n represents the number of masks and correlates masks and explanations.
@@ -636,7 +794,6 @@ def F1_score(
     -------
     float
         F1 metric calculated with accordance_recall and accordance_precision of each explanation, mask pair.
-
 
     See Also
     --------
@@ -651,8 +808,13 @@ def F1_score(
 
     Examples
     --------
-    >>> function(x, y)
-    answer
+    >>> import torch
+    >>> cross_2d = torch.Tensor([[1, 0, 1], [0, 1, 0], [1, 0, 1]])
+    >>> plus_2d = torch.Tensor([[0, 1, 0], [1, 1, 1], [0, 1, 0]])
+    >>> a = torch.stack([cross_2d.repeat(3,1,1), plus_2d.repeat(3,1,1)])
+    >>> b = torch.stack([plus_2d, cross_2d])
+    >>> F1_score(a, b)
+    0.20000001788139343
     """
     acc_recall = accordance_recall(explanations, masks, threshold=threshold)
     acc_prec = accordance_precision(explanations, masks, threshold=threshold)
@@ -700,8 +862,13 @@ def intersection_over_union(
 
     Examples
     --------
-    >>> function(x, y)
-    answer
+    >>> import torch
+    >>> cross_2d = torch.Tensor([[1, 0, 1], [0, 1, 0], [1, 0, 1]])
+    >>> plus_2d = torch.Tensor([[0, 1, 0], [1, 1, 1], [0, 1, 0]])
+    >>> a = torch.stack([cross_2d.repeat(3,1,1), plus_2d.repeat(3,1,1)])
+    >>> b = torch.stack([plus_2d, cross_2d])
+    >>> intersection_over_union(a, b)
+    0.3333333432674408
     """
     # one explanation per image
     reshaped_mask = masks.unsqueeze(dim=1).repeat(1, explanations.shape[1], 1, 1)

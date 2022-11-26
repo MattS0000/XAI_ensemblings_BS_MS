@@ -125,6 +125,21 @@ def _predict_dummy(tensor: torch.Tensor, classes=1000):
     return torch.ones([tensor.shape[0], classes]) / classes
 
 
+def _predict_dummy2(input_tensor, n_classes=1000):
+    n = input_tensor.shape[0]
+    half_classes = n_classes // 2
+    third_classes = n_classes // 3
+    quarter_classes = n_classes // 4
+    if torch.sum(input_tensor).item() > 300000:
+        preds = torch.cat([torch.zeros([n, n_classes - quarter_classes]), 0.004 * torch.ones([n, quarter_classes])],
+                          dim=1)
+    elif torch.sum(input_tensor).item() > 200000:
+        preds = torch.cat([torch.zeros([n, n_classes - third_classes]), 0.0033 * torch.ones([n, third_classes])], dim=1)
+    else:
+        preds = torch.cat([torch.zeros([n, n_classes - half_classes]), 0.002 * torch.ones([n, half_classes])], dim=1)
+    return preds
+
+
 class TestMetrics(TestCase):
     binary_plus_2d = torch.Tensor([[0, 1, 0], [1, 1, 1], [0, 1, 0]])
     binary_cross_2d = torch.Tensor([[1, 0, 1], [0, 1, 0], [1, 0, 1]])
@@ -158,10 +173,20 @@ class TestMetrics(TestCase):
         self.assertIsInstance(org, torch.Tensor)
         self.assertIsInstance(mod, torch.Tensor)
         self.assertTrue(torch.all(org == 0.0010))
-        self.assertTrue(torch.all(mod == 0.0010))
+        self.assertTrue(torch.all(org == mod))
 
     def test_impact_ratio_helper_complex(self):
-        self.assertTrue(False)
+        n = 100
+        images_tensor = torch.ones([n, 3, 32, 32])
+        expls = torch.Tensor([0, 0.3, 0.6, 1]).repeat(8).repeat(n, 3, 32, 1)
+        org, mod = Metrics._impact_ratio_helper(
+            images_tensor, _predict_dummy2, expls, 0.4, 0
+        )
+        self.assertIsInstance(org, torch.Tensor)
+        self.assertIsInstance(mod, torch.Tensor)
+        self.assertTrue(torch.all(org[:, 750:] == 0.004))
+        self.assertTrue(torch.all(org[:, :750] == 0.0))
+        self.assertFalse(torch.all(mod == org))
 
     def test_decision_impact_ratio_simple(self):
         n = 100
@@ -175,7 +200,13 @@ class TestMetrics(TestCase):
         self.assertEqual(value, 0)
 
     def test_decision_impact_ratio_complex(self):
-        self.assertTrue(False)
+        n = 100
+        images_tensor = torch.ones([n, 3, 32, 32])
+        expls = torch.Tensor([0, 0.3, 0.6, 1]).repeat(8).repeat(n, 3, 32, 1)
+        val0 = Metrics.decision_impact_ratio(images_tensor, _predict_dummy2, expls, 0, 0)
+        val1 = Metrics.decision_impact_ratio(images_tensor, _predict_dummy2, expls, 0, 1)
+        self.assertEqual(val0, 1)
+        self.assertEqual(val1, 0)
 
     def test_confidence_impact_ratio_simple(self):
         n = 100
@@ -189,7 +220,15 @@ class TestMetrics(TestCase):
         self.assertEqual(value, 0)
 
     def test_confidence_impact_ratio_complex(self):
-        self.assertTrue(False)
+        n = 100
+        images_tensor = torch.ones([n, 3, 32, 32])
+        expls = torch.Tensor([0, 0.3, 0.6, 1]).repeat(8).repeat(n, 3, 32, 1)
+        val1 = Metrics.confidence_impact_ratio(images_tensor, _predict_dummy2, expls, 0, 0.4)
+        val2 = Metrics.confidence_impact_ratio(images_tensor, _predict_dummy2, expls, 0, 0.7)
+        val3 = Metrics.confidence_impact_ratio(images_tensor, _predict_dummy2, expls, 0, 1)
+        self.assertAlmostEqual(val1, 0.002, 4)
+        self.assertAlmostEqual(val2, 0.0007, 5)
+        self.assertAlmostEqual(val3, 0, 4)
 
     def test_accordance_recall(self):
         val1 = Metrics.accordance_recall(self.plus_expl, self.plus_mask).item()

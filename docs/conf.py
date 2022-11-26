@@ -17,7 +17,7 @@ release = '1.0'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.autosummary', 'sphinx.ext.napoleon', 'numpydoc']
+extensions = ['sphinx.ext.napoleon', 'sphinx.ext.autodoc', 'sphinx.ext.autosummary', 'numpydoc']
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '../EnsembleXAI/tests/']
@@ -29,3 +29,6 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '../EnsembleXAI/tests/']
 
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
+
+#sphinx-apidoc -o ./ .. ../EnsembleXAI/tests/ --separate
+#make html
