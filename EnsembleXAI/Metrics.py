@@ -204,7 +204,7 @@ def matrix_2_norm(
 def _intersection_mask(
         tensor1: torch.Tensor, tensor2: torch.Tensor,
         threshold1: float = 0.0, threshold2: float = 0.0,
-) -> torch.BoolTensor:
+) -> torch.Tensor:
     """
     Calculates the intersection of two masks.
 
@@ -224,7 +224,7 @@ def _intersection_mask(
 
     Returns
     -------
-    torch.BoolTensor
+    torch.Tensor
         Boolean Tensor with True values where the masks intersect with values over the thresholds.
 
     See Also
@@ -267,7 +267,7 @@ def _intersection_mask(
 def _union_mask(
         tensor1: torch.Tensor, tensor2: torch.Tensor,
         threshold1: float = 0.0, threshold2: float = 0.0,
-) -> torch.BoolTensor:
+) -> torch.Tensor:
     """
     Calculates the union of two masks.
 
@@ -287,7 +287,7 @@ def _union_mask(
 
     Returns
     -------
-    torch.BoolTensor
+    torch.Tensor
         Boolean Tensor with True values on the union of the masks, where values are over thresholds.
 
     See Also
@@ -381,7 +381,7 @@ def consistency(explanations: torch.Tensor) -> float:
     return (1 / (max(diffs) + 1)).item()
 
 
-def stability(explanator: Callable, image: torch.Tensor,
+def stability(explanator: Callable[..., torch.Tensor], image: torch.Tensor,
               images_to_compare: torch.Tensor, epsilon: float = 500.0, **kwargs
               ) -> float:
     """
@@ -394,7 +394,7 @@ def stability(explanator: Callable, image: torch.Tensor,
 
     Parameters
     ----------
-    explanator: Callable
+    explanator: Callable[..., torch.Tensor]
         The function used to obtain explanations for both the single image
         and the number of images in images_to_compare. Writing a wrapper to handle both options might be required.
         All **kwargs are additionaly passed to this function.
@@ -428,8 +428,19 @@ def stability(explanator: Callable, image: torch.Tensor,
 
     Examples
     --------
-    >>> function(x, y)
-    answer
+    >>> import torch
+    >>> images = torch.Tensor([0, 0.2, 0.4, 0.6, 0.8]).repeat(4, 3, 5, 1)
+    >>> image = torch.Tensor([0.1, 0.3, 0.5, 0.7, 0.9]).repeat(3, 5, 1)
+    >>> def explain_dummy(images_tensor):
+    ...     summed = torch.sum(images_tensor)
+    ...     n = images_tensor.shape[0]
+    ...     if summed > 100:
+    ...         explanation = torch.Tensor([0,0,0,1,1]).repeat(n, 3, 5, 1)
+    ...     else:
+    ...         explanation = torch.Tensor([0,0,1,1,0]).repeat(n, 3, 5, 1)
+    ...     return explanation
+    >>> stability(explain_dummy, image, images, 1)
+    0.13370312750339508
     """
     images_list = tensor_to_list_tensors(images_to_compare, depth=1)
     # matrix 2-norm over all 3 dimensions
@@ -441,7 +452,7 @@ def stability(explanator: Callable, image: torch.Tensor,
     close_images_tensor = torch.stack(close_images)
     close_images_explanations = explanator(close_images_tensor, **kwargs)
     image_explanation = explanator(image.unsqueeze(dim=0), **kwargs).squeeze(dim=0)
-    # matrix_2_norm works if one tensor is of one shape bigger, casts the other to the correct size
+    # matrix_2_norm works if one tensor is of one dimension bigger, casts the other to the correct size
     image_dists = matrix_2_norm(close_images_tensor, image, sum_dim=1)
     expl_dists = matrix_2_norm(close_images_explanations, image_explanation, sum_dim=1)
     return torch.max(image_dists / (expl_dists + 1)).item()
@@ -584,7 +595,7 @@ def decision_impact_ratio(
     )
     _, preds_original = torch.max(probs_original, 1)
     _, preds_modified = torch.max(probs_modified, 1)
-    value = torch.sum((preds_original != preds_modified).float()) / n
+    value = torch.sum(torch.not_equal(preds_original, preds_modified).float()) / n
     return value.item()
 
 

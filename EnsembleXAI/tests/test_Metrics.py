@@ -14,7 +14,7 @@ class TestHelperFuncs(TestCase):
         replace_masks = Metrics.replace_masks(self.images, masks, value=val)
         self.assertTrue(torch.all(replace_masks[:, :, :, 1] == val))
         self.assertTrue(
-            torch.all(replace_masks[:, :, :, [0, 2]] == self.images[:, :, :, [0, 2]])
+            torch.equal(replace_masks[:, :, :, [0, 2]], self.images[:, :, :, [0, 2]])
         )
 
     def test_tensor_to_list_depth1(self):
@@ -140,6 +140,16 @@ def _predict_dummy2(input_tensor, n_classes=1000):
     return preds
 
 
+def _explain_dummy(images_tensor):
+    summed = torch.sum(images_tensor)
+    n = images_tensor.shape[0]
+    if summed > 100:
+        explanation = torch.Tensor([0, 0, 0, 1, 1]).repeat(n, 3, 5, 1)
+    else:
+        explanation = torch.Tensor([0, 0, 1, 1, 0]).repeat(n, 3, 5, 1)
+    return explanation
+
+
 class TestMetrics(TestCase):
     binary_plus_2d = torch.Tensor([[0, 1, 0], [1, 1, 1], [0, 1, 0]])
     binary_cross_2d = torch.Tensor([[1, 0, 1], [0, 1, 0], [1, 0, 1]])
@@ -159,7 +169,10 @@ class TestMetrics(TestCase):
         self.assertAlmostEqual(consist2, 0.05458, 4)
 
     def test_stability(self):
-        self.assertTrue(False)
+        images = torch.Tensor([0, 0.2, 0.4, 0.6, 0.8]).repeat(4, 3, 5, 1)
+        image = torch.Tensor([0.1, 0.3, 0.5, 0.7, 0.9]).repeat(3, 5, 1)
+        value = Metrics.stability(_explain_dummy, image, images, 1)
+        self.assertAlmostEqual(value, 0.1337, 5)
 
     def test_impact_ratio_helper_simple(self):
         n = 100
