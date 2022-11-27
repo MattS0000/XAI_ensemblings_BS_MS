@@ -111,7 +111,6 @@ def tensor_to_list_tensors(tensors: torch.Tensor, depth: int) -> List[torch.Tens
     >>> stacked_tensor
     tensor([[[1., 1., 1., 1.],
              [2., 2., 2., 2.]],
-
             [[3., 3., 3., 3.],
              [4., 4., 4., 4.]]])
     >>> tensor_to_list_tensors(stacked_tensor, depth=1)
@@ -121,9 +120,9 @@ def tensor_to_list_tensors(tensors: torch.Tensor, depth: int) -> List[torch.Tens
             [4., 4., 4., 4.]])]
     >>> tensor_to_list_tensors(stacked_tensor, depth=2)
     [tensor([1., 1., 1., 1.]),
-    tensor([2., 2., 2., 2.]),
-    tensor([3., 3., 3., 3.]),
-    tensor([4., 4., 4., 4.])]
+     tensor([2., 2., 2., 2.]),
+     tensor([3., 3., 3., 3.]),
+     tensor([4., 4., 4., 4.])]
     """
     # squeezing couses returned tensors to have reduced dimensions
     tensor_list = [
@@ -364,13 +363,13 @@ def consistency(explanations: torch.Tensor) -> float:
     Examples
     --------
     >>> import torch
-    >>> onez = torch.ones([3,5,5])
+    >>> ones = torch.ones([3,5,5])
     >>> halfs = 0.5*torch.ones([3,5,5])
-    >>> stacked = torch.stack([onez, halfs])
+    >>> stacked = torch.stack([ones, halfs])
     >>> consistency(stacked)
     0.18761281669139862
-    >>> onez2 = torch.ones([4,3,5,5])
-    >>> consistency(onez2)
+    >>> ones2 = torch.ones([4,3,5,5])
+    >>> consistency(ones2)
     1.0
     """
     explanations_list = tensor_to_list_tensors(explanations, depth=1)
@@ -394,7 +393,7 @@ def stability(explanator: Callable[..., torch.Tensor], image: torch.Tensor,
 
     Parameters
     ----------
-    explanator: Callable[..., torch.Tensor]
+    explanator: Callable that returns torch.Tensor
         The function used to obtain explanations for both the single image
         and the number of images in images_to_compare. Writing a wrapper to handle both options might be required.
         All **kwargs are additionaly passed to this function.
@@ -476,9 +475,9 @@ def _impact_ratio_helper(
     ----------
     images_tensor: torch.Tensor
         The images for the prediction with shape of (n, channels, width, height), where n stands for the number of images.
-    predictor: Callable[..., torch.Tensor]
+    predictor: Callable that returns torch.Tensor
         Function returning a Tensor with probabilities for classification of each image to each class.
-        In typical cases it's the model prediction function, possibly wrapped in torch.nn.Softmax.
+        In typical cases it's the model prediction function, possibly wrapped in a softmax function.
     explanations: torch.Tensor
         Explanations for each of the images in images_tensor. Therefore the shape should be the same as that of images_tensor.
     explanation_threshold: float
@@ -498,8 +497,6 @@ def _impact_ratio_helper(
     decision_impact_ratio: Measures the average number of changes in the predictions after hiding the critical area.
     confidence_impact_ratio: Measures the average change in probabilities after hiding the critical area.
     replace_masks: Replaces values in Tensor indexed by a boolean tensor.
-    torch.nn.Softmax: Applies the Softmax function to an n-dimensional input Tensor rescaling them so
-    that the elements of the n-dimensional output Tensor lie in the range [0,1] and sum to 1.
 
     Examples
     --------
@@ -546,7 +543,7 @@ def decision_impact_ratio(
         The images for the prediction with shape of (n, channels, width, height), where n stands for the number of images.
     predictor: Callable[..., torch.Tensor]
         Function returning a Tensor with probabilities for classification of each image to each class.
-        In typical cases it's the model prediction function, possibly wrapped in torch.nn.Softmax.
+        In typical cases it's the model prediction function, possibly wrapped in a softmax function.
     explanations: torch.Tensor
         Explanations for each of the images in images_tensor. Therefore the shape should be the same as that of images_tensor.
     explanation_threshold: float
@@ -564,8 +561,6 @@ def decision_impact_ratio(
     --------
     _impact_ratio_helper: Wrapper for predicting on the input and the input masked by explanations.
     confidence_impact_ratio: Measures the average change in probabilities after hiding the critical area.
-    torch.nn.Softmax: Applies the Softmax function to an n-dimensional input Tensor rescaling them so
-    that the elements of the n-dimensional output Tensor lie in the range [0,1] and sum to 1.
 
     References
     ----------
@@ -636,7 +631,6 @@ def confidence_impact_ratio(
     --------
     _impact_ratio_helper: Wrapper for predicting on the input and the input masked by explanations.
     decision_impact_ratio: Measures the average number of changes in the predictions after hiding the critical area.
-    torch.nn.Softmax: Applies the Softmax function to an n-dimensional input Tensor rescaling them so that the elements of the n-dimensional output Tensor lie in the range [0,1] and sum to 1.
 
     References
     ----------

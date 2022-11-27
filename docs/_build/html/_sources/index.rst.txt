@@ -8,13 +8,13 @@ Welcome to EnsembleXAI's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Submodules:
 
+   EnsembleXAI.Metrics
+   EnsembleXAI.Ensemble
 .. automodule:: EnsembleXAI
 
-Indices and tables
+Index
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
