@@ -224,22 +224,23 @@ def ensembleXAI(inputs: TensorOrTupleOfTensorsGeneric, masks: TensorOrTupleOfTen
     TODO
     """
 
-    assert len(inputs) == len(masks)
     assert n_folds > 1
     # reshape do 1d array for each observation
     parsed_inputs = _reformat_input_tensors(inputs)
     input_shape = parsed_inputs.shape
-    parsed_inputs = parsed_inputs.numpy().reshape((len(inputs), -1))
-    labels = _reformat_input_tensors(masks).squeeze().numpy().reshape((len(inputs), -1))
-
+    n_channels = input_shape[-3]
+    numpy_inputs = parsed_inputs.numpy().reshape((len(inputs), -1))
+    labels = _reformat_input_tensors(masks).squeeze().numpy().reshape((len(parsed_inputs), -1))
+    assert len(parsed_inputs) == len(masks), "Inconsistent number of observations in masks and inputs"
+    assert len(parsed_inputs) > n_folds, "Number of observations should be greater than number of folds"
     kf = KFold(n_splits=n_folds, random_state=random_state, shuffle=shuffle)
 
     ensembled = [0] * n_folds
     indices = np.empty(1, dtype=int)
 
-    for idx, (train_index, test_index) in enumerate(kf.split(parsed_inputs, labels)):
+    for idx, (train_index, test_index) in enumerate(kf.split(numpy_inputs, labels)):
         # get observations split by k-fold
-        X_train, X_test = (parsed_inputs[train_index]), (parsed_inputs[test_index])
+        X_train, X_test = (numpy_inputs[train_index]), (numpy_inputs[test_index])
         y_train = labels[train_index]
         # train KRR
         krr = KernelRidge(
@@ -251,7 +252,7 @@ def ensembleXAI(inputs: TensorOrTupleOfTensorsGeneric, masks: TensorOrTupleOfTen
         # predict masks for observations currently in test group
         y_predicted = krr.predict(X_test)
         # reshape predictions and save them and indices to recreate original order later
-        ensembled[idx] = np.concatenate([y_predicted] * 3).reshape((tuple([len(X_test)]) + input_shape[2:5]))
+        ensembled[idx] = np.concatenate([y_predicted] * n_channels).reshape((tuple([len(X_test)]) + input_shape[2:5]))
         indices = np.concatenate([indices, test_index])
 
     # sort output to match input order
