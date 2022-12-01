@@ -100,7 +100,7 @@ Metric implemented as proposed in <a class="reference internal" href="#r728db6df
 <li><p><strong>explanations</strong> (<em>torch.Tensor</em>) – Tensor of the explanations with shape as such (n, channels, width, height), where n represents the number of
 explanations and correlates masks and explanations.</p></li>
 <li><p><strong>masks</strong> (<em>torch.Tensor</em>) – Tensor of the masks with 1 representing presence of the mask. Shape of the tensor should be (n, width, height),
-where n represents the number of masks and correlates masks and explanations.</p></li>
+where n represents the number of masks and correlates masks and explanations or the same shape as explanations.</p></li>
 <li><p><strong>threshold</strong> (<em>float</em>) – threshold value for the explanation to be considered a critical area.
 Values greater or equal than the threshold are considered important.</p></li>
 </ul>
@@ -154,7 +154,7 @@ Metric implemented as proposed in <a class="reference internal" href="#r5b801249
 <li><p><strong>explanations</strong> (<em>torch.Tensor</em>) – Tensor of the explanations with shape as such (n, channels, width, height), where n represents the number
 of explanations and correlates masks and explanations.</p></li>
 <li><p><strong>masks</strong> (<em>torch.Tensor</em>) – Tensor of the masks with 1 representing presence of the mask. Shape of the tensor should be (n, width, height),
-where n represents the number of masks and correlates masks and explanations.</p></li>
+where n represents the number of masks and correlates masks and explanations or the same shape as explanations.</p></li>
 <li><p><strong>threshold</strong> (<em>float</em>) – threshold value for the explanation to be considered a critical area. Values greater or equal than
 the threshold are considered important.</p></li>
 </ul>
@@ -209,7 +209,7 @@ Similar to the recall metric in standard classification task. Metric implemented
 <li><p><strong>explanations</strong> (<em>torch.Tensor</em>) – Tensor of the explanations with shape as such (n, channels, width, height),
 where n represents the number of explanations and correlates masks and explanations.</p></li>
 <li><p><strong>masks</strong> (<em>torch.Tensor</em>) – Tensor of the masks with 1 representing presence of the mask. Shape of the tensor should be (n, width, height),
-where n represents the number of masks and correlates masks and explanations.</p></li>
+where n represents the number of masks and correlates masks and explanations or the same shape as explanations.</p></li>
 <li><p><strong>threshold</strong> (<em>float</em>) – threshold value for the explanation to be considered a critical area.
 Values greater or equal than the threshold are considered important.</p></li>
 </ul>
@@ -533,7 +533,7 @@ where explanation values are over the threshold. Metric implemented as proposed 
 <li><p><strong>explanations</strong> (<em>torch.Tensor</em>) – Tensor of the explanations with shape as such (n, channels, width, height),
 where n represents the number of explanations and correlates masks and explanations.</p></li>
 <li><p><strong>masks</strong> (<em>torch.Tensor</em>) – Tensor of the masks with 1 representing presence of the mask. Shape of the tensor should be (n, width, height),
-where n represents the number of masks and correlates masks and explanations.</p></li>
+where n represents the number of masks and correlates masks and explanations or the same shape as explanations.</p></li>
 <li><p><strong>threshold</strong> (<em>float</em>) – threshold value for the explanation to be considered a critical area.
 Values greater or equal than the threshold are considered important.</p></li>
 </ul>

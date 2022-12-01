@@ -676,7 +676,7 @@ def accordance_recall(
         where n represents the number of explanations and correlates masks and explanations.
     masks: torch.Tensor
         Tensor of the masks with 1 representing presence of the mask. Shape of the tensor should be (n, width, height),
-        where n represents the number of masks and correlates masks and explanations.
+        where n represents the number of masks and correlates masks and explanations or the same shape as explanations.
     threshold: float
         threshold value for the explanation to be considered a critical area.
         Values greater or equal than the threshold are considered important.
@@ -708,7 +708,9 @@ def accordance_recall(
     tensor([0.2000, 0.2000])
     """
     # reshape mask to the same shape as explanation
-    reshaped_mask = masks.unsqueeze(dim=1).repeat(1, explanations.shape[1], 1, 1)
+    reshaped_mask = masks
+    if masks.shape != explanations.shape:
+        reshaped_mask = reshaped_mask.unsqueeze(dim=1).repeat(1, explanations.shape[1], 1, 1)
     overlapping_area = intersection_mask(explanations, reshaped_mask, threshold1=threshold)
     divisor = torch.sum(reshaped_mask != 0, dim=(-3, -2, -1))
     value = torch.sum(overlapping_area, dim=(-3, -2, -1)) / divisor
@@ -732,7 +734,7 @@ def accordance_precision(
         of explanations and correlates masks and explanations.
     masks: torch.Tensor
         Tensor of the masks with 1 representing presence of the mask. Shape of the tensor should be (n, width, height),
-        where n represents the number of masks and correlates masks and explanations.
+        where n represents the number of masks and correlates masks and explanations or the same shape as explanations.
     threshold: float
         threshold value for the explanation to be considered a critical area. Values greater or equal than
         the threshold are considered important.
@@ -764,7 +766,9 @@ def accordance_precision(
     >>> accordance_precision(a, b)
     tensor([0.2000, 0.2000])
     """
-    reshaped_mask = masks.unsqueeze(dim=1).repeat(1, explanations.shape[1], 1, 1)
+    reshaped_mask = masks
+    if masks.shape != explanations.shape:
+        reshaped_mask = reshaped_mask.unsqueeze(dim=1).repeat(1, explanations.shape[1], 1, 1)
     overlapping_area = intersection_mask(explanations, reshaped_mask, threshold1=threshold)
     divisor = torch.sum(torch.abs(explanations) > threshold, dim=(-3, -2, -1))
     value = torch.sum(overlapping_area, dim=(-3, -2, -1)) / divisor
@@ -788,7 +792,7 @@ def F1_score(
         explanations and correlates masks and explanations.
     masks: torch.Tensor
         Tensor of the masks with 1 representing presence of the mask. Shape of the tensor should be (n, width, height),
-        where n represents the number of masks and correlates masks and explanations.
+        where n represents the number of masks and correlates masks and explanations or the same shape as explanations.
     threshold: float
         threshold value for the explanation to be considered a critical area.
         Values greater or equal than the threshold are considered important.
@@ -842,7 +846,7 @@ def intersection_over_union(
         where n represents the number of explanations and correlates masks and explanations.
     masks: torch.Tensor
         Tensor of the masks with 1 representing presence of the mask. Shape of the tensor should be (n, width, height),
-        where n represents the number of masks and correlates masks and explanations.
+        where n represents the number of masks and correlates masks and explanations or the same shape as explanations.
     threshold: float
         threshold value for the explanation to be considered a critical area.
         Values greater or equal than the threshold are considered important.
