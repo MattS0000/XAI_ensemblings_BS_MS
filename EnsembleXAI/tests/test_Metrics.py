@@ -71,7 +71,7 @@ class TestHelperFuncs(TestCase):
         self.assertEqual(value2, 16)
 
     def test_intersection(self):
-        intersect = Metrics._intersection_mask(
+        intersect = Metrics.intersection_mask(
             self.binary_plus_2d, self.binary_cross_2d
         )
         self.assertTrue(torch.any(intersect))
@@ -84,27 +84,27 @@ class TestHelperFuncs(TestCase):
     def test_intersection_threshold(self):
         plus_threshold_2d = torch.Tensor([[0, 0.2, 0], [0.5, 0.7, 0.5], [0, 0.2, 0]])
         blus_threshold_2d = torch.Tensor([[0, 1, 0], [1, 1, 1], [0, 1, 0]])
-        intersect = Metrics._intersection_mask(
+        intersect = Metrics.intersection_mask(
             plus_threshold_2d, blus_threshold_2d, threshold1=0.3
         )
         self.assertTrue(torch.all(intersect[1]))
         self.assertFalse(torch.any(intersect[0, 2]))
-        reverse_call = Metrics._intersection_mask(
+        reverse_call = Metrics.intersection_mask(
             blus_threshold_2d, plus_threshold_2d, threshold2=0.3
         )
         self.assertTrue(torch.all(intersect == reverse_call))
 
     def test_union(self):
-        union = Metrics._union_mask(self.binary_plus_2d, self.binary_cross_2d)
+        union = Metrics.union_mask(self.binary_plus_2d, self.binary_cross_2d)
         self.assertTrue(torch.all(union))
 
     def test_union_threshold(self):
         union_threshold_a = torch.Tensor([[1, 0.4, 1], [1, 0.4, 1], [0, 0, 0]])
         union_threshold_b = torch.Tensor([[0, 0, 0], [0, 0, 0], [0.6, 0.6, 0.6]])
-        union_all = Metrics._union_mask(union_threshold_a, union_threshold_b)
+        union_all = Metrics.union_mask(union_threshold_a, union_threshold_b)
         self.assertTrue(torch.all(union_all))
 
-        union_05 = Metrics._union_mask(
+        union_05 = Metrics.union_mask(
             union_threshold_a, union_threshold_b, threshold1=0.5
         )
         correct_union_05 = torch.BoolTensor(
@@ -112,7 +112,7 @@ class TestHelperFuncs(TestCase):
         )
         self.assertTrue(torch.all(union_05 == correct_union_05))
 
-        union_07 = Metrics._union_mask(
+        union_07 = Metrics.union_mask(
             union_threshold_a, union_threshold_b, threshold1=0.5, threshold2=0.7
         )
         correct_union_07 = torch.BoolTensor(

@@ -48,7 +48,6 @@ def aggregate(inputs: TensorOrTupleOfTensorsGeneric,
     Use provided aggregating functions or pass a custom callable. Combine explanations for every observation and get
     one aggregated explanation for every observation.
 
-
     Parameters
     ----------
     inputs : TensorOrTupleOfTensorsGeneric

@@ -29,7 +29,6 @@ def replace_masks(
 
     See Also
     --------
-    _impact_ratio_helper: Wrapper for predicting on the input and the input masked by explanations.
     decision_impact_ratio: Measures the average number of changes in the predictions after hiding the critical area.
     confidence_impact_ratio: Measures the average change in probabilities after hiding the critical area.
 
@@ -200,7 +199,7 @@ def matrix_2_norm(
     return norm
 
 
-def _intersection_mask(
+def intersection_mask(
         tensor1: torch.Tensor, tensor2: torch.Tensor,
         threshold1: float = 0.0, threshold2: float = 0.0,
 ) -> torch.Tensor:
@@ -231,7 +230,7 @@ def _intersection_mask(
     accordance_recall: Measures how much area of the mask has the explanation covered.
     accordance_precision: Measures how much area of the explanation is covered by the mask.
     intersection_over_union: Measures the average division of intersection area over the union area.
-    _union_mask: Calculates the union of two masks.
+    union_mask: Calculates the union of two masks.
 
     Examples
     --------
@@ -246,13 +245,13 @@ def _intersection_mask(
     tensor([[0., 1., 0.],
             [1., 1., 1.],
             [0., 1., 0.]])
-    >>> _intersection_mask(cross_2d, plus_2d)
+    >>> intersection_mask(cross_2d, plus_2d)
     tensor([[False, False, False],
             [False,  True, False],
             [False, False, False]])
     >>> cross_2d_small = 0.4*cross_2d
     >>> plus_2d_small = 0.7*plus_2d
-    >>> _intersection_mask(cross_2d_small, plus_2d_small, threshold1=0.5)
+    >>> intersection_mask(cross_2d_small, plus_2d_small, threshold1=0.5)
     tensor([[False, False, False],
             [False, False, False],
             [False, False, False]])
@@ -263,7 +262,7 @@ def _intersection_mask(
     return logical_mask
 
 
-def _union_mask(
+def union_mask(
         tensor1: torch.Tensor, tensor2: torch.Tensor,
         threshold1: float = 0.0, threshold2: float = 0.0,
 ) -> torch.Tensor:
@@ -292,7 +291,7 @@ def _union_mask(
     See Also
     --------
     intersection_over_union: Measures the average division of intersection area over the union area.
-    _intersection_mask: Calculates the intersection of two masks.
+    intersection_mask: Calculates the intersection of two masks.
 
     Examples
     --------
@@ -307,17 +306,17 @@ def _union_mask(
     tensor([[0., 1., 0.],
             [1., 1., 1.],
             [0., 1., 0.]])
-    >>> _union_mask(cross_2d, plus_2d)
+    >>> union_mask(cross_2d, plus_2d)
     tensor([[True, True, True],
             [True, True, True],
             [True, True, True]])
     >>> cross_2d_small = 0.4*cross_2d
     >>> plus_2d_small = 0.7*plus_2d
-    >>> _union_mask(cross_2d_small, plus_2d_small, threshold1=0.5)
+    >>> union_mask(cross_2d_small, plus_2d_small, threshold1=0.5)
     tensor([[False,  True, False],
         [ True,  True,  True],
         [False,  True, False]])
-    >>> _union_mask(cross_2d_small, plus_2d_small, threshold1=0.0, threshold2=0.8)
+    >>> union_mask(cross_2d_small, plus_2d_small, threshold1=0.0, threshold2=0.8)
     tensor([[ True, False,  True],
             [False,  True, False],
             [ True, False,  True]])
@@ -535,7 +534,7 @@ def decision_impact_ratio(
     Measures the average number of changes in the predictions after hiding the critical area.
 
     Measures the average number of changes in the predictions after hiding the critical area found by the explanation.
-    Uses the _impact_ratio_helper for obtaining the predictions probabilities. Implemented as proposed in [1]_.
+    Implemented as proposed in [1]_.
 
     Parameters
     ----------
@@ -559,7 +558,6 @@ def decision_impact_ratio(
 
     See Also
     --------
-    _impact_ratio_helper: Wrapper for predicting on the input and the input masked by explanations.
     confidence_impact_ratio: Measures the average change in probabilities after hiding the critical area.
 
     References
@@ -605,7 +603,7 @@ def confidence_impact_ratio(
     Measures the average change in probabilities after hiding the critical area.
 
     Measures the average change in probabilities after hiding the critical area found by the explanation.
-    Uses the _impact_ratio_helper for obtaining the predictions probabilities. Implemented as proposed in [1]_.
+    Implemented as proposed in [1]_.
 
     Parameters
     ----------
@@ -711,7 +709,7 @@ def accordance_recall(
     """
     # reshape mask to the same shape as explanation
     reshaped_mask = masks.unsqueeze(dim=1).repeat(1, explanations.shape[1], 1, 1)
-    overlapping_area = _intersection_mask(explanations, reshaped_mask, threshold1=threshold)
+    overlapping_area = intersection_mask(explanations, reshaped_mask, threshold1=threshold)
     divisor = torch.sum(reshaped_mask != 0, dim=(-3, -2, -1))
     value = torch.sum(overlapping_area, dim=(-3, -2, -1)) / divisor
     return value
@@ -747,7 +745,7 @@ def accordance_precision(
     See Also
     --------
     accordance_recall: Measures how much area of the mask has the explanation covered.
-    _intersection_mask: Calculates the intersection of two masks.
+    intersection_mask: Calculates the intersection of two masks.
     F1_score: Measures the F1_score of recall and precision calculated on explanations and masks.
 
     References
@@ -767,7 +765,7 @@ def accordance_precision(
     tensor([0.2000, 0.2000])
     """
     reshaped_mask = masks.unsqueeze(dim=1).repeat(1, explanations.shape[1], 1, 1)
-    overlapping_area = _intersection_mask(explanations, reshaped_mask, threshold1=threshold)
+    overlapping_area = intersection_mask(explanations, reshaped_mask, threshold1=threshold)
     divisor = torch.sum(torch.abs(explanations) > threshold, dim=(-3, -2, -1))
     value = torch.sum(overlapping_area, dim=(-3, -2, -1)) / divisor
     return value
@@ -856,8 +854,8 @@ def intersection_over_union(
 
     See Also
     --------
-    _intersection_mask: Calculates the intersection of two masks.
-    _union_mask: Calculates the union of two masks.
+    intersection_mask: Calculates the intersection of two masks.
+    union_mask: Calculates the union of two masks.
 
     References
     ----------
@@ -877,8 +875,8 @@ def intersection_over_union(
     """
     # one explanation per image
     reshaped_mask = masks.unsqueeze(dim=1).repeat(1, explanations.shape[1], 1, 1)
-    intersections = _intersection_mask(explanations, reshaped_mask, threshold1=threshold)
-    union_masks = _union_mask(explanations, reshaped_mask, threshold1=threshold)
+    intersections = intersection_mask(explanations, reshaped_mask, threshold1=threshold)
+    union_masks = union_mask(explanations, reshaped_mask, threshold1=threshold)
     values = torch.sum(intersections, dim=(-2, -1)) / torch.sum(
         union_masks, dim=(-2, -1)
     )

@@ -5,4 +5,3 @@ EnsembleXAI.Metrics module
    :members:
    :undoc-members:
    :show-inheritance:
-   :private-members:
