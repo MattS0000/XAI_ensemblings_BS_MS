@@ -878,7 +878,9 @@ def intersection_over_union(
     0.3333333432674408
     """
     # one explanation per image
-    reshaped_mask = masks.unsqueeze(dim=1).repeat(1, explanations.shape[1], 1, 1)
+    reshaped_mask = masks
+    if masks.shape != explanations.shape:
+        reshaped_mask = reshaped_mask.unsqueeze(dim=1).repeat(1, explanations.shape[1], 1, 1)
     intersections = intersection_mask(explanations, reshaped_mask, threshold1=threshold)
     union_masks = union_mask(explanations, reshaped_mask, threshold1=threshold)
     values = torch.sum(intersections, dim=(-2, -1)) / torch.sum(
