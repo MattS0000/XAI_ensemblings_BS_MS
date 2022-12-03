@@ -5,6 +5,12 @@
 
 Welcome to EnsembleXAI's documentation!
 =======================================
+.. toctree::
+   :maxdepth: 1
+   :caption: Getting Started:
+
+   Installation
+   Usage_Example
 
 .. toctree::
    :maxdepth: 2
@@ -12,6 +18,7 @@ Welcome to EnsembleXAI's documentation!
 
    EnsembleXAI.Metrics
    EnsembleXAI.Ensemble
+
 .. automodule:: EnsembleXAI
 
 Index
