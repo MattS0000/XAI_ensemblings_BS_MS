@@ -711,9 +711,10 @@ def accordance_recall(
     reshaped_mask = masks
     if masks.shape != explanations.shape:
         reshaped_mask = reshaped_mask.unsqueeze(dim=1).repeat(1, explanations.shape[1], 1, 1)
-    overlapping_area = intersection_mask(explanations, reshaped_mask, threshold1=threshold)
+    overlapping_matrix = intersection_mask(explanations, reshaped_mask, threshold1=threshold)
     divisor = torch.sum(reshaped_mask != 0, dim=(-3, -2, -1))
-    value = torch.sum(overlapping_area, dim=(-3, -2, -1)) / divisor
+    overlapping_area = torch.sum(overlapping_matrix, dim=(-3, -2, -1))
+    value = overlapping_area / divisor
     return value
 
 
@@ -770,7 +771,7 @@ def accordance_precision(
     if masks.shape != explanations.shape:
         reshaped_mask = reshaped_mask.unsqueeze(dim=1).repeat(1, explanations.shape[1], 1, 1)
     overlapping_area = intersection_mask(explanations, reshaped_mask, threshold1=threshold)
-    divisor = torch.sum(torch.abs(explanations) > threshold, dim=(-3, -2, -1))
+    divisor = torch.sum(explanations > threshold, dim=(-3, -2, -1))
     value = torch.sum(overlapping_area, dim=(-3, -2, -1)) / divisor
     return value
 
