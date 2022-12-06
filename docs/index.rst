@@ -7,10 +7,11 @@ Welcome to EnsembleXAI's documentation!
 =======================================
 .. toctree::
    :maxdepth: 1
+   :titlesonly:
    :caption: Getting Started:
 
    Installation
-   Usage_Example
+   Example_notebook
 
 .. toctree::
    :maxdepth: 2

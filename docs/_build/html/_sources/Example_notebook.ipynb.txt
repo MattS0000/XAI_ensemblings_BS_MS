@@ -3,7 +3,17 @@
   {
    "cell_type": "markdown",
    "source": [
-    "# Imports and definitions"
+    "# Example notebook1\n",
+    "Some text goes here"
+   ],
+   "metadata": {
+    "collapsed": false
+   }
+  },
+  {
+   "cell_type": "markdown",
+   "source": [
+    "## Imports"
    ],
    "metadata": {
     "collapsed": false
@@ -52,26 +62,6 @@
    "execution_count": 3,
    "outputs": [],
    "source": [
-    "def download_class_images(class_id, masks_path):\n",
-    "    full_path = masks_path + class_id + \"\\\\\"\n",
-    "    kaggle_path = f\"/ILSVRC/Data/CLS-LOC/train/{class_id}/\"\n",
-    "    for file_name in os.listdir(full_path):\n",
-    "        file_name_jpeg = file_name[:-3] + 'JPEG'\n",
-    "        !kaggle competitions download -f {kaggle_path}{file_name_jpeg} -p ./images/{class_id}/ -c imagenet-object-localization-challenge\n",
-    "\n",
-    "\n",
-    "def download():\n",
-    "    skipped = []\n",
-    "    for class_id in os.listdir(masks_dir):\n",
-    "        image_class_path = os.path.join(images_dir, class_id)\n",
-    "        if os.path.exists(image_class_path) and len(os.listdir(image_class_path)) == 10:\n",
-    "            skipped.append(class_id)\n",
-    "            continue\n",
-    "        #download_class_images(class_id, masks_dir)\n",
-    "        print(f\"Downloaded {class_id}\")\n",
-    "    print(\"Full dirs: \" + str(len(skipped)))\n",
-    "\n",
-    "\n",
     "def images_list(image_path, resize=True):\n",
     "    _crop = CenterCrop(224).forward\n",
     "    _resize = Resize([232,232]).forward\n",
@@ -90,7 +80,7 @@
   {
    "cell_type": "markdown",
    "source": [
-    "# Images load"
+    "## Images load"
    ],
    "metadata": {
     "collapsed": false
@@ -104,25 +94,6 @@
     "input_dir = \"\\\\\".join(os.getcwd().split(sep=\"\\\\\")[:-2] + ['input'])\n",
     "masks_dir = input_dir + f'\\\\ImageNetS50\\\\train-semi-segmentation\\\\'\n",
     "images_dir = os.getcwd() + \"\\\\images\\\\\""
-   ],
-   "metadata": {
-    "collapsed": false
-   }
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 5,
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "['n01443537', 'n01491361', 'n01531178', 'n01644373', 'n02104029', 'n02119022', 'n02123597', 'n02133161', 'n02165456', 'n02281406', 'n02325366', 'n02342885', 'n02396427', 'n02483362', 'n02504458', 'n02510455', 'n02690373', 'n02747177', 'n02783161', 'n02814533', 'n02859443', 'n02917067', 'n02992529', 'n03014705', 'n03047690', 'n03095699', 'n03197337', 'n03201208', 'n03445777', 'n03452741', 'n03584829', 'n03630383', 'n03775546', 'n03791053', 'n03874599', 'n03891251', 'n04026417', 'n04335435', 'n04380533', 'n04404412', 'n04447861', 'n04507155', 'n04522168', 'n04557648', 'n04562935', 'n04612504', 'n06794110', 'n07749582', 'n07831146', 'n12998815']\n"
-     ]
-    }
-   ],
-   "source": [
-    "print(os.listdir(images_dir))"
    ],
    "metadata": {
     "collapsed": false
@@ -175,7 +146,7 @@
   {
    "cell_type": "markdown",
    "source": [
-    "# Model Loading"
+    "## Model Loading"
    ],
    "metadata": {
     "collapsed": false
@@ -222,7 +193,7 @@
   {
    "cell_type": "markdown",
    "source": [
-    "# Single Explanations"
+    "## Single Explanations"
    ],
    "metadata": {
     "collapsed": false
@@ -656,7 +627,7 @@
   {
    "cell_type": "markdown",
    "source": [
-    "# Ensembles"
+    "## Ensembles"
    ],
    "metadata": {
     "collapsed": false
@@ -836,35 +807,6 @@
     "col_names = [\"Original\", \"Gradients\", \"Occlusion 25\",\"Occlusion 15\", \"Max Aggregate\", \"Min Aggregate\", \"Avg\"]\n",
     "plot_explanations(all_images, explanations_three, col_names, predicted_names, method=\"blended_heat_map\")"
    ],
-   "metadata": {
-    "collapsed": false
-   }
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 65,
-   "outputs": [
-    {
-     "data": {
-      "text/plain": "torch.Size([10, 6, 3, 224, 224])"
-     },
-     "execution_count": 65,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
-   "source": [
-    "explanations_three.shape"
-   ],
-   "metadata": {
-    "collapsed": false
-   }
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "outputs": [],
-   "source": [],
    "metadata": {
     "collapsed": false
    }
