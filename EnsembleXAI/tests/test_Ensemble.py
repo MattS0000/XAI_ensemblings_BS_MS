@@ -193,6 +193,8 @@ class TestAggregate(TestCase):
     def test_max_abs_aggregation(self):
         ensembled = Ensemble.aggregate(self.obs1_tensor, 'max_abs')
         self.assertIsInstance(ensembled, t.Tensor)
+        expected = self.exp3.unsqueeze(0)
+        self.assertTrue(t.equal(ensembled, expected))
 
     def test_illegal_args(self):
         with self.assertRaises(AssertionError):

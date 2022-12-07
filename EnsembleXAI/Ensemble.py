@@ -75,7 +75,7 @@ def aggregate(inputs: TensorOrTupleOfTensorsGeneric,
     assert isinstance(aggregating_func, str) or isinstance(aggregating_func, Callable)
 
     if isinstance(aggregating_func, str):
-        assert aggregating_func in ['avg', 'min', 'max']
+        assert aggregating_func in ['avg', 'min', 'max', 'max_abs']
 
     parsed_inputs = _reformat_input_tensors(inputs)
 
@@ -91,6 +91,9 @@ def aggregate(inputs: TensorOrTupleOfTensorsGeneric,
 
     if aggregating_func == 'min':
         output = parsed_inputs.amin(1)
+
+    if aggregating_func == 'max_abs':
+        output = torch.abs(parsed_inputs).amax(1)
 
     if isinstance(aggregating_func, Callable):
         output = _apply_over_axis(parsed_inputs, aggregating_func, 0)
