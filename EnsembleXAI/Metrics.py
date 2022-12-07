@@ -202,6 +202,7 @@ def matrix_2_norm(
 def intersection_mask(
         tensor1: torch.Tensor, tensor2: torch.Tensor,
         threshold1: float = 0.0, threshold2: float = 0.0,
+        absolute_value: bool = False
 ) -> torch.Tensor:
     """
     Calculates the intersection of two masks.
@@ -219,6 +220,8 @@ def intersection_mask(
         Threshold value for the first mask.
     threshold2: float
         Threshold value for the second mask.
+    absolute_value: bool
+        Boolean deciding if the compared tensors should be taken as absolute value.
 
     Returns
     -------
@@ -256,8 +259,11 @@ def intersection_mask(
             [False, False, False],
             [False, False, False]])
     """
+    if absolute_value:
+        tensor1 = torch.abs(tensor1)
+        tensor2 = torch.abs(tensor2)
     logical_mask = torch.logical_and(
-        torch.abs(tensor1) > threshold1, torch.abs(tensor2) > threshold2
+        tensor1 > threshold1, tensor2 > threshold2
     )
     return logical_mask
 
@@ -265,6 +271,7 @@ def intersection_mask(
 def union_mask(
         tensor1: torch.Tensor, tensor2: torch.Tensor,
         threshold1: float = 0.0, threshold2: float = 0.0,
+        absolute_value: bool = False
 ) -> torch.Tensor:
     """
     Calculates the union of two masks.
@@ -282,6 +289,8 @@ def union_mask(
         Threshold value for the first mask.
     threshold2: float
         Threshold value for the second mask.
+    absolute_value: bool
+        Boolean deciding if the compared tensors should be taken as absolute value.
 
     Returns
     -------
@@ -321,8 +330,11 @@ def union_mask(
             [False,  True, False],
             [ True, False,  True]])
     """
+    if absolute_value:
+        tensor1 = torch.abs(tensor1)
+        tensor2 = torch.abs(tensor2)
     logical_mask = torch.logical_or(
-        torch.abs(tensor1) > threshold1, torch.abs(tensor2) > threshold2
+        tensor1 > threshold1, tensor2 > threshold2
     )
     return logical_mask
 
@@ -386,8 +398,9 @@ def stability(explanator: Callable[..., torch.Tensor], image: torch.Tensor,
     Measures how similar/stable are explanations of similar photos.
 
     The metric measures the similarity of one type of explanation between similar photos. As explanations need to be
-    created for each of the images close enough to the compared image,
-    this may take a significant amount of processing power and memory.
+    created for each of the images close enough (by some metric, norm 2 used here) to the compared image,
+    this may take a significant amount of processing power and memory. Values are always positive.
+
     The metrics is implemented as proposed in [1]_.
 
     Parameters
@@ -534,6 +547,8 @@ def decision_impact_ratio(
     Measures the average number of changes in the predictions after hiding the critical area.
 
     Measures the average number of changes in the predictions after hiding the critical area found by the explanation.
+    Values are in range [0,1], where 1 represents the best scenario,
+    that is when for all images the prediction has changed after hiding the critical area.
     Implemented as proposed in [1]_.
 
     Parameters
@@ -603,6 +618,8 @@ def confidence_impact_ratio(
     Measures the average change in probabilities after hiding the critical area.
 
     Measures the average change in probabilities after hiding the critical area found by the explanation.
+    Values are in range [0,1], where 1 represents the best scenario,
+    that is when for all images the prediction probability has changed from 1 to 0 after hiding the critical area.
     Implemented as proposed in [1]_.
 
     Parameters
@@ -667,7 +684,9 @@ def accordance_recall(
     Measures how much area of the mask has the explanation covered.
 
     Measures how much area of the mask has the explanation covered for each of the explanation, mask pairs in the data.
-    Similar to the recall metric in standard classification task. Metric implemented as proposed in [1]_.
+    Similar to the recall metric in standard classification task. Values are in range [0,1],
+    where 1 represents scenario when the explanation area over the threshold covers the whole mask.
+    Metric implemented as proposed in [1]_.
 
     Parameters
     ----------
@@ -726,6 +745,9 @@ def accordance_precision(
 
     Measures how much area of the explanation is covered by the mask for each of the explanation,
     mask pairs in the data. Similar to the recall metric in standard classification task.
+    Values are in range [0,1], where 1 represents scenario when the mask area covers
+    the whole explanation area over the threshold.
+    If no critical area is found in the explanation, returns 0.
     Metric implemented as proposed in [1]_.
 
     Parameters
@@ -773,6 +795,8 @@ def accordance_precision(
     overlapping_area = intersection_mask(explanations, reshaped_mask, threshold1=threshold)
     divisor = torch.sum(explanations > threshold, dim=(-3, -2, -1))
     value = torch.sum(overlapping_area, dim=(-3, -2, -1)) / divisor
+    #set nans to zero, since they indicate no value in explanation bigger than threshold
+    value[value != value] = 0
     return value
 
 
@@ -784,6 +808,8 @@ def F1_score(
 
     Measures the F1 score of recall and precision calculated on explanations and masks.
     Average of harmonic averages of ``accordance_recall`` and ``accordance_precision``.
+    Values  are in range [0,1], where 1 corresponds to the scenario where
+    critical areas in the explanations perfectly match the masks.
     Metric implemented as proposed in [1]_.
 
     Parameters
@@ -838,7 +864,10 @@ def intersection_over_union(
     Measures the average division of intersection area over the union area.
 
     Measures the average division of intersection area over the union area,
-    where explanation values are over the threshold. Metric implemented as proposed in [1]_.
+    where explanation values are over the threshold.
+    Values  are in range [0,1], where 1 corresponds to the scenario where
+    critical areas in the explanations perfectly match the masks.
+    Metric implemented as proposed in [1]_.
 
     Parameters
     ----------

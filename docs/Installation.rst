@@ -11,8 +11,9 @@ Clone the repository from github. Install the requirements in commandline using 
 
 To run documentation creation additional packages are required:
 
-`pip install sphinx sphinx_rtd_theme`
+`pip install sphinx sphinx_rtd_theme nbsphinx`
 
+nbsphinx extension to convert notebooks to html requires installed `pandocs`, installation with conda recommended.
 Then in the project directory run:
 
 `.\\docs\\make html`

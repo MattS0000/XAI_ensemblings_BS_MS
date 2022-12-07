@@ -107,8 +107,9 @@ Clone the repository from github. Install the requirements in commandline using 
 <p># To be tested, downloading as a package
 <cite>pip install git+https://github.com/MattS0000/XAI_ensemblings_BS_MS#egg=EnsembleXAI&amp;subdirectory=EnsembleXAI</cite></p>
 <p>To run documentation creation additional packages are required:</p>
-<p><cite>pip install sphinx sphinx_rtd_theme</cite></p>
-<p>Then in the project directory run:</p>
+<p><cite>pip install sphinx sphinx_rtd_theme nbsphinx</cite></p>
+<p>nbsphinx extension to convert notebooks to html requires installed <cite>pandocs</cite>, installation with conda recommended.
+Then in the project directory run:</p>
 <p><cite>.\docs\make html</cite></p>
 <p>For a clean install run <cite>.\docs\make clean</cite> before that.
 If using a virtual environment, it must be activated before the command.</p>
