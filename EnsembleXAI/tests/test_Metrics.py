@@ -227,21 +227,31 @@ class TestMetrics(TestCase):
         expls = torch.randn([n, 3, 32, 32])
         baseline = 0
         threshold = 0.5
-        value = Metrics.confidence_impact_ratio(
-            images_tensor, _predict_dummy, expls, threshold, baseline
+        value1 = Metrics.confidence_impact_ratio(
+            images_tensor, _predict_dummy, expls, threshold, baseline, "new_prediction"
         )
-        self.assertEqual(value, 0)
+        value2 = Metrics.confidence_impact_ratio(
+            images_tensor, _predict_dummy, expls, threshold, baseline, "same_prediction"
+        )
+        self.assertEqual(value1, 0)
+        self.assertEqual(value2, 0)
 
     def test_confidence_impact_ratio_complex(self):
         n = 100
         images_tensor = torch.ones([n, 3, 32, 32])
         expls = torch.Tensor([0, 0.3, 0.6, 1]).repeat(8).repeat(n, 3, 32, 1)
-        val1 = Metrics.confidence_impact_ratio(images_tensor, _predict_dummy2, expls, 0, 0.4)
-        val2 = Metrics.confidence_impact_ratio(images_tensor, _predict_dummy2, expls, 0, 0.7)
-        val3 = Metrics.confidence_impact_ratio(images_tensor, _predict_dummy2, expls, 0, 1)
-        self.assertAlmostEqual(val1, 0.002, 4)
+        val1 = Metrics.confidence_impact_ratio(images_tensor, _predict_dummy2, expls, 0, 0.4, "new_prediction")
+        val2 = Metrics.confidence_impact_ratio(images_tensor, _predict_dummy2, expls, 0, 0.7, "new_prediction")
+        val3 = Metrics.confidence_impact_ratio(images_tensor, _predict_dummy2, expls, 0, 1, "new_prediction")
+        self.assertAlmostEqual(val1, 0.002, 5)
         self.assertAlmostEqual(val2, 0.0007, 5)
-        self.assertAlmostEqual(val3, 0, 4)
+        self.assertAlmostEqual(val3, 0, 5)
+        val4 = Metrics.confidence_impact_ratio(images_tensor, _predict_dummy2, expls, 0, 0.4, "same_prediction")
+        val5 = Metrics.confidence_impact_ratio(images_tensor, _predict_dummy2, expls, 0, 0.7, "same_prediction")
+        val6 = Metrics.confidence_impact_ratio(images_tensor, _predict_dummy2, expls, 0, 1, "same_prediction")
+        self.assertAlmostEqual(val4, 0.002, 5)
+        self.assertAlmostEqual(val5, 0.0007, 5)
+        self.assertAlmostEqual(val6, 0, 5)
 
     def test_accordance_recall(self):
         val1 = Metrics.accordance_recall(self.plus_expl, self.plus_mask).item()
@@ -287,3 +297,5 @@ class TestMetrics(TestCase):
         # Metrics.ensemble_score()
         self.assertEqual(Metrics.ensemble_score([1, 2], [3, 5]), 13)
         self.assertEqual(Metrics.ensemble_score([1, 2], [5, 3]), 11)
+
+#%%

@@ -613,6 +613,7 @@ def confidence_impact_ratio(
         explanations: torch.Tensor,
         explanation_threshold: float,
         replace_value: float = 0,
+        compare_to: str = "same_prediction"
 ) -> float:
     """
     Measures the average change in probabilities after hiding the critical area.
@@ -635,6 +636,11 @@ def confidence_impact_ratio(
         Minimal value for the explanation to be considered the critical area of the image.
     replace_value: float
         The value with which data in critical area found by explanation in the image will be replaced by.
+    compare_to:  str
+        Argument deciding whether to compare the original maximum probability to the
+        new maximum (value: "new_prediction") or to the new probability for the same index/class as the original one
+        (value: "same_prediction").
+
 
     Returns
     -------
@@ -665,14 +671,22 @@ def confidence_impact_ratio(
     ...     else:
     ...         val = torch.Tensor([0.2, 0.6, 0.2]).repeat(n, 1)
     ...     return val
-    >>> confidence_impact_ratio(data, predictor, ex_explanation, 0.5, 0)
+    >>> confidence_impact_ratio(data, predictor, ex_explanation, 0.5, 0, "new_prediction")
     0.19999998807907104
+    >>> confidence_impact_ratio(data, predictor, ex_explanation, 0.5, 0, "same_prediction")
+    0.6000000238418579
     """
+    if compare_to not in ["new_prediction", "same_prediction"]:
+        raise Exception('Illegal value in "compare_to". Values should be one of: ["new_prediction", "same_prediction"]')
     probs_original, probs_modified = _impact_ratio_helper(
         images_tensors, predictor, explanations, explanation_threshold, replace_value
     )
-    probs_max_original, _ = torch.max(probs_original, 1)
-    probs_max_modified, _ = torch.max(probs_modified, 1)
+    probs_max_original, predictions_max_original = torch.max(probs_original, 1)
+    probs_max_modified = None
+    if compare_to == "new_prediction":
+        probs_max_modified, _ = torch.max(probs_modified, 1)
+    elif compare_to == "same_prediction":
+        probs_max_modified = probs_modified.gather(1, predictions_max_original.unsqueeze(dim=1)).squeeze(dim=1)
     value = torch.sum(probs_max_original - probs_max_modified) / images_tensors.shape[0]
     return value.item()
 
