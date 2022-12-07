@@ -43,7 +43,7 @@ class TestEnsembleXAI(TestCase):
     def test_ensemble_mult_channels_mult_obs(self):
         inputs = t.rand([90, 3, 3, 32, 32])
         masks = t.randint(low=0, high=2, size=[90, 32, 32])
-        ensembled = Ensemble.ensembleXAI(inputs, masks, shuffle=False)
+        ensembled = Ensemble.supervisedXAI(inputs, masks, shuffle=False)
         self.assertTrue(ensembled.shape == (90, 3, 32, 32))
         # hard to predict outcome of this algorithm to check exact correctness, even on not random data
         # for now testing only result's shape
@@ -51,7 +51,7 @@ class TestEnsembleXAI(TestCase):
     def test_ensemble_one_channel_mult_obs(self):
         inputs = t.rand([90, 3, 1, 32, 32])
         masks = t.randint(low=0, high=2, size=[90, 32, 32])
-        ensembled = Ensemble.ensembleXAI(inputs, masks, shuffle=False)
+        ensembled = Ensemble.supervisedXAI(inputs, masks, shuffle=False)
         self.assertTrue(ensembled.shape == (90, 1, 32, 32))
         # hard to predict outcome of this algorithm to check exact correctness, even on not random data
         # for now testing only result's shape
@@ -60,8 +60,8 @@ class TestEnsembleXAI(TestCase):
         inputs = t.rand([3, 1, 32, 32])
         masks = t.randint(low=0, high=2, size=[1, 32, 32])
         with self.assertRaises(AssertionError):
-            Ensemble.ensembleXAI(inputs, masks, shuffle=False)
-            Ensemble.ensembleXAI(inputs, masks, shuffle=False, n_folds=1)
+            Ensemble.supervisedXAI(inputs, masks, shuffle=False)
+            Ensemble.supervisedXAI(inputs, masks, shuffle=False, n_folds=1)
 
 
 class TestNormalize(TestCase):
@@ -89,7 +89,7 @@ class TestEnsemble(TestCase):
     y = t.squeeze(x, 0)
 
     def test_ensemble_single_obs_single_metric_mult_channel(self):
-        ensemble = Ensemble.ensemble(self.x, [_dummy_metric], [1])
+        ensemble = Ensemble.autoweighted(self.x, [_dummy_metric], [1])
         self.assertIsInstance(ensemble, t.Tensor)
 
         expected = t.tensor([[[[-0.9354, 0.9354],
@@ -100,7 +100,7 @@ class TestEnsemble(TestCase):
         self.assertTrue(t.allclose(ensemble, expected, atol=.01))
 
     def test_ensemble_mult_obs_mult_metric_single_channel(self):
-        ensemble = Ensemble.ensemble(self.x, [_dummy_metric, _dummy_metric], [0.5, 0.5])
+        ensemble = Ensemble.autoweighted(self.x, [_dummy_metric, _dummy_metric], [0.5, 0.5])
         self.assertIsInstance(ensemble, t.Tensor)
 
         expected = t.tensor([[[-0.9354, 0.9354],
@@ -112,13 +112,13 @@ class TestEnsemble(TestCase):
 
     def test_ensemble_one_obs_one_channel_one_metric(self):
         exp1 = t.tensor([[[[0, 1], [1, 0]]], [[[0, 1], [1, 0]]]], dtype=t.float)
-        ensemble = Ensemble.ensemble(tuple(exp1), [_dummy_metric], [1])
+        ensemble = Ensemble.autoweighted(tuple(exp1), [_dummy_metric], [1])
         expected = t.tensor([[[[[-0.8660, 0.8660],
                                [0.8660, -0.8660]]]]])
         self.assertTrue(t.allclose(ensemble, expected, atol=.01))
 
     def test_ensemble_multiple_obs_multiple_channel_single_metric(self):
-        ensemble = Ensemble.ensemble((self.y, self.y), [_dummy_metric], [1])
+        ensemble = Ensemble.autoweighted((self.y, self.y), [_dummy_metric], [1])
         expected = t.tensor([[[[-0.9682, 0.9682],
                                [0.9682, -0.9682]],
                               [[-0.9682, 0.9682],
@@ -143,69 +143,69 @@ class TestAggregate(TestCase):
     mult_obs_tensor = t.stack([obs1_tensor, obs2_tensor])
 
     def test_one_obs_mult_channels(self):
-        ensembled = Ensemble.aggregate(self.obs3_tensor, 'avg')
+        ensembled = Ensemble.basic(self.obs3_tensor, 'avg')
         self.assertIsInstance(ensembled, t.Tensor)
 
         self.assertTrue(t.equal(ensembled, self.obs3_tensor[None, :]))
 
     def test_one_obs_one_channel_avg(self):
         # tuple input
-        ensembled = Ensemble.aggregate((self.exp1, self.exp3), 'avg')
+        ensembled = Ensemble.basic((self.exp1, self.exp3), 'avg')
         self.assertIsInstance(ensembled, t.Tensor)
 
         expected = 2 * t.ones([1, 1, 2, 2])
         self.assertTrue(t.equal(ensembled, expected))
         # tensor input
-        ensembled = Ensemble.aggregate(self.obs1_tensor, 'avg')
+        ensembled = Ensemble.basic(self.obs1_tensor, 'avg')
         self.assertTrue(t.equal(ensembled, expected))
 
     def test_one_obs_one_channel_max(self):
-        ensembled = Ensemble.aggregate((self.exp1, self.exp3), 'max')
+        ensembled = Ensemble.basic((self.exp1, self.exp3), 'max')
         self.assertIsInstance(ensembled, t.Tensor)
 
         expected = 3 * t.ones([1, 1, 2, 2])
         self.assertTrue(t.equal(ensembled, expected))
         # tensor input
-        ensembled = Ensemble.aggregate(self.obs1_tensor, 'max')
+        ensembled = Ensemble.basic(self.obs1_tensor, 'max')
         self.assertTrue(t.equal(ensembled, expected))
 
     def test_one_obs_min(self):
-        ensembled = Ensemble.aggregate((self.exp1, self.exp3), 'min')
+        ensembled = Ensemble.basic((self.exp1, self.exp3), 'min')
         self.assertIsInstance(ensembled, t.Tensor)
 
         expected = t.ones([1, 1, 2, 2])
         self.assertTrue(t.equal(ensembled, expected))
         # tensor input
-        ensembled = Ensemble.aggregate(self.obs1_tensor, 'min')
+        ensembled = Ensemble.basic(self.obs1_tensor, 'min')
         self.assertTrue(t.equal(ensembled, expected))
 
     def test_multi_obs_avg(self):
         # tuple input
-        ensembled = Ensemble.aggregate((self.obs1_tensor, self.obs2_tensor), 'avg')
+        ensembled = Ensemble.basic((self.obs1_tensor, self.obs2_tensor), 'avg')
         self.assertIsInstance(ensembled, t.Tensor)
         expected = t.stack([2 * t.ones([1, 2, 2]), 1.5 * t.ones([1, 2, 2])])
         self.assertTrue(t.equal(ensembled, expected))
 
         # tensor input
-        ensembled = Ensemble.aggregate(self.mult_obs_tensor, 'avg')
+        ensembled = Ensemble.basic(self.mult_obs_tensor, 'avg')
         self.assertTrue(t.equal(ensembled, expected))
 
     def test_max_abs_aggregation(self):
-        ensembled = Ensemble.aggregate(self.obs1_tensor, 'max_abs')
+        ensembled = Ensemble.basic(self.obs1_tensor, 'max_abs')
         self.assertIsInstance(ensembled, t.Tensor)
         expected = self.exp3.unsqueeze(0)
         self.assertTrue(t.equal(ensembled, expected))
 
     def test_illegal_args(self):
         with self.assertRaises(AssertionError):
-            Ensemble.aggregate(self.obs1_tensor, 'asdf')
-            Ensemble.aggregate(self.obs1_tensor, 2)
+            Ensemble.basic(self.obs1_tensor, 'asdf')
+            Ensemble.basic(self.obs1_tensor, 2)
 
     def test_custom_func(self):
         def custom_avg(x):
             return sum(x) / len(x)
 
-        ensembled = Ensemble.aggregate(self.obs1_tensor, custom_avg)
+        ensembled = Ensemble.basic(self.obs1_tensor, custom_avg)
 
         self.assertIsInstance(ensembled, t.Tensor)
 
@@ -213,7 +213,7 @@ class TestAggregate(TestCase):
         self.assertTrue(t.equal(ensembled, expected))
 
         # 2 observations
-        ensembled = Ensemble.aggregate((self.obs1_tensor, self.obs2_tensor), custom_avg)
+        ensembled = Ensemble.basic((self.obs1_tensor, self.obs2_tensor), custom_avg)
         self.assertIsInstance(ensembled, t.Tensor)
 
         expected = t.stack([2 * t.ones([1, 2, 2]), 1.5 * t.ones([1, 2, 2])])
@@ -222,6 +222,6 @@ class TestAggregate(TestCase):
         def custom_func(x):
             return (3 * x[0] + x[1]) / 6
 
-        ensembled = Ensemble.aggregate(self.obs1_tensor, custom_func)
+        ensembled = Ensemble.basic(self.obs1_tensor, custom_func)
         expected = t.ones([1, 1, 2, 2])
         self.assertTrue(t.equal(ensembled, expected))

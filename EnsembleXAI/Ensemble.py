@@ -65,9 +65,8 @@ def _reformat_input_tensors(inputs: TensorOrTupleOfTensorsGeneric) -> Tensor:
     return parsed_inputs
 
 
-# basic
-def aggregate(inputs: TensorOrTupleOfTensorsGeneric,
-              aggregating_func: Union[str, Callable[[Tensor], Tensor]]) -> Tensor:
+def basic(inputs: TensorOrTupleOfTensorsGeneric,
+          aggregating_func: Union[str, Callable[[Tensor], Tensor]]) -> Tensor:
     """
     Aggregate explanations in the simplest way.
 
@@ -90,15 +89,15 @@ def aggregate(inputs: TensorOrTupleOfTensorsGeneric,
 
     See Also
     --------
-    ensemble : Aggregation weighted by quality of each explanation.
-    ensembleXAI : Use Kernel Ridge Regression for aggregation, suitable when masks are available.
+    autoweighted : Aggregation weighted by quality of each explanation.
+    supervisedXAI : Use Kernel Ridge Regression for aggregation, suitable when masks are available.
 
     Examples
     --------
 
     import torch
 
-    from EnsembleXAI.Ensemble import aggregate
+    from EnsembleXAI.Ensemble import basic
     from captum.attr import IntegratedGradients, GradientShap, Saliency
 
     input = torch.randn(1, 3, 32, 32)
@@ -110,7 +109,7 @@ def aggregate(inputs: TensorOrTupleOfTensorsGeneric,
 
     explanations = torch.stack([ig, gs, sal], dim=1)
 
-    agg = aggregate(explanations, 'avg')
+    agg = basic(explanations, 'avg')
 
     """
     # input tensor dims: observations x explanations x single explanation
@@ -167,8 +166,7 @@ def _normalize_across_dataset(parsed_inputs:Tensor, delta=0.00001):
     return (parsed_inputs - mean) / torch.sqrt(var)
 
 
-# autoweighted
-def ensemble(inputs: TensorOrTupleOfTensorsGeneric, metrics: List[Callable], weights: List[float]) -> Tensor:
+def autoweighted(inputs: TensorOrTupleOfTensorsGeneric, metrics: List[Callable], weights: List[float]) -> Tensor:
     """
     Aggregate explanations weighted by their quality measured by metrics.
 
@@ -192,8 +190,8 @@ def ensemble(inputs: TensorOrTupleOfTensorsGeneric, metrics: List[Callable], wei
 
     See Also
     --------
-    aggregate : Simple aggregation by function, like average.
-    ensembleXAI : Use Kernel Ridge Regression for aggregation, suitable when masks are available.
+    basic : Simple aggregation by function, like average.
+    supervisedXAI : Use Kernel Ridge Regression for aggregation, suitable when masks are available.
 
     Notes
     -----
@@ -236,9 +234,8 @@ def ensemble(inputs: TensorOrTupleOfTensorsGeneric, metrics: List[Callable], wei
     return torch.stack(results)
 
 
-# supervisedXAI
-def ensembleXAI(inputs: TensorOrTupleOfTensorsGeneric, masks: TensorOrTupleOfTensorsGeneric, n_folds: int = 3,
-                shuffle=False, random_state=None) -> Tensor:
+def supervisedXAI(inputs: TensorOrTupleOfTensorsGeneric, masks: TensorOrTupleOfTensorsGeneric, n_folds: int = 3,
+                  shuffle=False, random_state=None) -> Tensor:
     """
     Aggregate explanations by training supervised machine learning model.
 
@@ -271,8 +268,8 @@ def ensembleXAI(inputs: TensorOrTupleOfTensorsGeneric, masks: TensorOrTupleOfTen
 
     See Also
     --------
-    aggregate : Simple aggregation by function, like average.
-    ensemble : Aggregation weighted by quality of each explanation.
+    basic : Simple aggregation by function, like average.
+    autoweighted : Aggregation weighted by quality of each explanation.
 
     References
     ----------
@@ -284,7 +281,7 @@ def ensembleXAI(inputs: TensorOrTupleOfTensorsGeneric, masks: TensorOrTupleOfTen
     --------
     import torch
 
-    from EnsembleXAI.Ensemble import aggregate
+    from EnsembleXAI.Ensemble import basic
     from captum.attr import IntegratedGradients, GradientShap, Saliency
 
     input = torch.randn(15, 3, 32, 32)
@@ -297,7 +294,7 @@ def ensembleXAI(inputs: TensorOrTupleOfTensorsGeneric, masks: TensorOrTupleOfTen
 
     explanations = torch.stack([ig, gs, sal], dim=1)
 
-    krr_explanations = ensembleXAI(explanations, masks)
+    krr_explanations = supervisedXAI(explanations, masks)
     """
 
     assert n_folds > 1
