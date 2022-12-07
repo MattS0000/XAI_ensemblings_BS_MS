@@ -12,19 +12,45 @@ TensorOrTupleOfTensorsGeneric = TypeVar("TensorOrTupleOfTensorsGeneric", Tensor,
 
 
 def _apply_over_axis(x: torch.Tensor, function: Callable, axis: int) -> torch.Tensor:
+    """
+    Apply function over axis in tensor.
+
+    Reduces input by one dimension.
+
+    Parameters
+    ----------
+    x : Tensor
+        Tensor to apply function on.
+    function: Callable
+        Function to apply.
+    axis: int
+        Axis to apply function over.
+    Returns
+    -------
+    Tensor
+        Result of a function call.
+    """
     return torch.stack([
         function(x_i) for i, x_i in enumerate(torch.unbind(x, dim=axis), 0)
     ], dim=axis)
 
 
 def _reformat_input_tensors(inputs: TensorOrTupleOfTensorsGeneric) -> Tensor:
-    # change tuple of tensors into one standard 5d tensor
-    # with dim:
-    # 0 - observations
-    # 1 - different explanations for one observation
-    # 2 - channels (colors) of one explanation
-    # 3 - height of channel
-    # 4 - width of channel
+    """
+    Convert input into unified tensor.
+
+    Dimensions of the output tensor correspond to observations, explanations for one observation,
+    channels, height, width of single observation.
+
+    Parameters
+    ----------
+    inputs : TensorOrTupleOfTensorsGeneric
+        Tensor, list or tuple of tensors.
+    Returns
+    -------
+    Tensor
+        Tensor with unified dimensions.
+    """
     parsed_inputs = deepcopy(inputs)
     if isinstance(inputs, tuple) or isinstance(inputs, list):
         if inputs[0].dim() <= 4:
@@ -69,7 +95,23 @@ def aggregate(inputs: TensorOrTupleOfTensorsGeneric,
 
     Examples
     --------
-    TODO
+
+    import torch
+
+    from EnsembleXAI.Ensemble import aggregate
+    from captum.attr import IntegratedGradients, GradientShap, Saliency
+
+    input = torch.randn(1, 3, 32, 32)
+
+    ig = IntegratedGradients(net).attribute(input, target=3)
+    gs = GradientShap(net).attribute(input, target=3)
+    sal = Saliency(net).attribute(input, target=3)
+
+
+    explanations = torch.stack([ig, gs, sal], dim=1)
+
+    agg = aggregate(explanations, 'avg')
+
     """
     # input tensor dims: observations x explanations x single explanation
     assert isinstance(aggregating_func, str) or isinstance(aggregating_func, Callable)
@@ -101,8 +143,24 @@ def aggregate(inputs: TensorOrTupleOfTensorsGeneric,
     return output
 
 
-def _normalize_across_dataset(parsed_inputs, delta=0.00001):
-    # mean, std normalization
+def _normalize_across_dataset(parsed_inputs:Tensor, delta=0.00001):
+    """
+    Mean, variance normalization across all data in inputs.
+
+    When comparing different explanations it is mandatory to normalize values, since every XAI algorithm
+    has its own set of return values.
+
+    Parameters
+    ----------
+    parsed_inputs : Tensor
+        Inputs to be normalized in parsed form.
+    delta : Float
+        Minimal permitted variance. If variance is smaller than delta raises ZeroDivisionError.
+    Returns
+    -------
+    Tensor
+        Normalized explanations.
+    """
     var, mean = torch.var_mean(parsed_inputs, dim=[0, 2, 3, 4], unbiased=True)
     if torch.min(var.abs()) < delta:
         raise ZeroDivisionError("Variance close to 0. Can't normalize")
@@ -224,7 +282,22 @@ def ensembleXAI(inputs: TensorOrTupleOfTensorsGeneric, masks: TensorOrTupleOfTen
 
     Examples
     --------
-    TODO
+    import torch
+
+    from EnsembleXAI.Ensemble import aggregate
+    from captum.attr import IntegratedGradients, GradientShap, Saliency
+
+    input = torch.randn(15, 3, 32, 32)
+    masks = torch.randint(low=0, high=2, size=(15, 32, 32))
+
+    ig = IntegratedGradients(net).attribute(input, target=3)
+    gs = GradientShap(net).attribute(input, target=3)
+    sal = Saliency(net).attribute(input, target=3)
+
+
+    explanations = torch.stack([ig, gs, sal], dim=1)
+
+    krr_explanations = ensembleXAI(explanations, masks)
     """
 
     assert n_folds > 1
