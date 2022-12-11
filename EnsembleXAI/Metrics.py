@@ -619,8 +619,15 @@ def confidence_impact_ratio(
     Measures the average change in probabilities after hiding the critical area.
 
     Measures the average change in probabilities after hiding the critical area found by the explanation.
-    Values are in range [0,1], where 1 represents the best scenario,
-    that is when for all images the prediction probability has changed from 1 to 0 after hiding the critical area.
+    When using default value of "same_prediction" for argument `compare_to` the probabilities taken into account are
+    the ones correspoding to the same class, predicted on the original image. Then values are in range [0,1],
+    where 1 represents the best scenario, that is when for all images the prediction probability has changed
+    from 1 to 0 after hiding the critical area.
+    When using value of "new_prediction" for argument `compare_to` the probabilities taken into account are
+    maximal probabilities, where the classes predicted are irrelevant. Therefore the values are in range [-1,1], where
+    1 correspond to the situation when the model has probability of 1 on the original image and 0 on the modified image.
+    On the other hand, the metric returns -1 when the model has close to 0 probability for all classes in original image,
+    but after modifying it one class has probability of 1.
     Implemented as proposed in [1]_.
 
     Parameters
