@@ -39,7 +39,7 @@ class TestReformatInputs(TestCase):
         self.assertTrue(t.equal(actual, expected))
 
 
-class TestEnsembleXAI(TestCase):
+class TestSupervisedXAI(TestCase):
     def test_ensemble_mult_channels_mult_obs(self):
         inputs = t.rand([90, 3, 3, 32, 32])
         masks = t.randint(low=0, high=2, size=[90, 32, 32])
@@ -56,6 +56,31 @@ class TestEnsembleXAI(TestCase):
         # hard to predict outcome of this algorithm to check exact correctness, even on not random data
         # for now testing only result's shape
 
+    def test_ensemble_one_channel_mult_obs_weights_auto(self):
+        inputs = t.rand([90, 3, 1, 32, 32])
+        masks = t.randint(low=0, high=2, size=[90, 32, 32])
+        ensembled = Ensemble.supervisedXAI(inputs, masks, shuffle=False, weights='auto')
+        self.assertTrue(ensembled.shape == (90, 1, 32, 32))
+        # hard to predict outcome of this algorithm to check exact correctness, even on not random data
+        # for now testing only result's shape
+
+    def test_ensemble_one_channel_mult_obs_weights_tensor(self):
+        inputs = t.rand([90, 3, 1, 32, 32])
+        masks = t.randint(low=0, high=2, size=[90, 32, 32])
+        weights = t.rand(90)
+        ensembled = Ensemble.supervisedXAI(inputs, masks, shuffle=False, weights=weights)
+        self.assertTrue(ensembled.shape == (90, 1, 32, 32))
+        # hard to predict outcome of this algorithm to check exact correctness, even on not random data
+        # for now testing only result's shape
+
+    def test_ensemble_one_channel_mult_obs_weights_numpy(self):
+        inputs = t.rand([90, 3, 1, 32, 32])
+        masks = t.randint(low=0, high=2, size=[90, 32, 32])
+        weights = t.rand(90).numpy()
+        ensembled = Ensemble.supervisedXAI(inputs, masks, shuffle=False, weights=weights)
+        self.assertTrue(ensembled.shape == (90, 1, 32, 32))
+        # hard to predict outcome of this algorithm to check exact correctness, even on not random data
+        # for now testing only result's shape
     def test_ensemble_one_channel_one_obs(self):
         inputs = t.rand([3, 1, 32, 32])
         masks = t.randint(low=0, high=2, size=[1, 32, 32])
@@ -83,7 +108,7 @@ class TestNormalize(TestCase):
         self.assertTrue(t.allclose(normalized, expected, atol=0.001))
 
 
-class TestEnsemble(TestCase):
+class TestAutoweighted(TestCase):
     x = t.tensor([[[[[0, 1], [1, 0]], [[0, 1], [1, 0]]],
                    [[[0, 1], [1, 0]], [[0, 1], [1, 0]]]]], dtype=t.float)
     y = t.squeeze(x, 0)
@@ -132,7 +157,7 @@ class TestEnsemble(TestCase):
         self.assertTrue(t.allclose(ensemble, expected, atol=.01))
 
 
-class TestAggregate(TestCase):
+class TestBasic(TestCase):
     exp1 = t.ones([1, 2, 2])
     exp3 = 3 * t.ones([1, 2, 2])
     obs1_tensor = t.stack((exp1, exp3))

@@ -234,8 +234,14 @@ def autoweighted(inputs: TensorOrTupleOfTensorsGeneric, metrics: List[Callable],
     return torch.stack(results)
 
 
+def _auto_calculate_weights(masks: np.ndarray) -> np.ndarray:
+    size = masks.shape[1]
+    non_zero = np.count_nonzero(masks, axis=1)
+    return size / non_zero
+
+
 def supervisedXAI(inputs: TensorOrTupleOfTensorsGeneric, masks: TensorOrTupleOfTensorsGeneric, n_folds: int = 3,
-                  shuffle=False, random_state=None) -> Tensor:
+                  weights: Union[str, TensorOrTupleOfTensorsGeneric, np.ndarray, None]=None, shuffle=False, random_state=None) -> Tensor:
     """
     Aggregate explanations by training supervised machine learning model.
 
@@ -256,6 +262,10 @@ def supervisedXAI(inputs: TensorOrTupleOfTensorsGeneric, masks: TensorOrTupleOfT
     n_folds : int, default 3
         Number of folds used to train the KRR model. `n_folds` should be an `int` greater than 1. When `n_folds` is
         equal to no. of observations in `inputs`, "leave one out" training is done.
+    weights : Union[str, TensorOrTupleOfTensorsGeneric, np.ndarray, None], default None
+        Sample weights for training the KRR. If None, weights are uniform. If 'auto',
+        weight of an observation is inversely proportional to the area of the observation's mask. Can be also provided
+        as tensor, list, tuple or numpy array of custom values. Weights can be used to promote smaller masks.
     shuffle: Any, default False
         If `True` inputs and masks will be shuffled before k-fold split. Internally passed
         to :class:`sklearn.model_selection.KFold`.
@@ -299,13 +309,19 @@ def supervisedXAI(inputs: TensorOrTupleOfTensorsGeneric, masks: TensorOrTupleOfT
 
     assert n_folds > 1
     # reshape do 1d array for each observation
+
     parsed_inputs = _reformat_input_tensors(inputs)
     input_shape = parsed_inputs.shape
     n_channels = input_shape[-3]
     numpy_inputs = parsed_inputs.numpy().reshape((len(inputs), -1))
     labels = _reformat_input_tensors(masks).squeeze().numpy().reshape((len(parsed_inputs), -1))
+    if isinstance(weights, str):
+        assert weights == 'auto'
+        weights = _auto_calculate_weights(labels)
     assert len(parsed_inputs) == len(masks), "Inconsistent number of observations in masks and inputs"
     assert len(parsed_inputs) > n_folds, "Number of observations should be greater than number of folds"
+    if weights is not None:
+        assert len(weights) == len(masks)
     kf = KFold(n_splits=n_folds, random_state=random_state, shuffle=shuffle)
 
     ensembled = [0] * n_folds
@@ -315,13 +331,17 @@ def supervisedXAI(inputs: TensorOrTupleOfTensorsGeneric, masks: TensorOrTupleOfT
         # get observations split by k-fold
         X_train, X_test = (numpy_inputs[train_index]), (numpy_inputs[test_index])
         y_train = labels[train_index]
+        if weights is not None:
+            iter_weights = weights[train_index]
+        else:
+            iter_weights = None
         # train KRR
         krr = KernelRidge(
             alpha=1,  # regularization
             kernel='polynomial'  # choose one from:
             # https://github.com/scikit-learn/scikit-learn/blob/main/sklearn/metrics/pairwise.py#L2050
         )
-        krr.fit(X_train, y_train)
+        krr.fit(X_train, y_train, sample_weight=iter_weights)
         # predict masks for observations currently in test group
         y_predicted = krr.predict(X_test)
         # reshape predictions and save them and indices to recreate original order later
