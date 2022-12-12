@@ -6,7 +6,7 @@ import numpy as np
 from sklearn.model_selection import KFold
 from sklearn.kernel_ridge import KernelRidge
 from torch import Tensor, stack
-from typing import TypeVar, Tuple, List, Callable, Union
+from typing import TypeVar, Tuple, List, Callable, Union, Any
 
 TensorOrTupleOfTensorsGeneric = TypeVar("TensorOrTupleOfTensorsGeneric", Tensor, Tuple[Tensor, ...])
 
@@ -166,22 +166,31 @@ def _normalize_across_dataset(parsed_inputs:Tensor, delta=0.00001):
     return (parsed_inputs - mean) / torch.sqrt(var)
 
 
-def autoweighted(inputs: TensorOrTupleOfTensorsGeneric, metrics: List[Callable], weights: List[float]) -> Tensor:
+def autoweighted(inputs: TensorOrTupleOfTensorsGeneric,
+                 metric_weights: List[float],
+                 metrics: Union[List[Callable], None] = None,
+                 precomputed_metrics: Union[Any, np.ndarray, torch.Tensor] = None) -> Tensor:
     """
     Aggregate explanations weighted by their quality measured by metrics.
 
     This function in an implementation of explanation ensemble algorithm published in [1]_. It uses
-    :func:`EnsembleXAI.Metrics.ensemble_score` to calculate quality of each explanation.
+    :func:`EnsembleXAI.Metrics.ensemble_score` to calculate quality of each explanation. One of `metrics`
+    or `precomputed_metrics` should be passed.
 
     Parameters
     ----------
     inputs : TensorOrTupleOfTensorsGeneric
         Explanations in form of tuple of tensors or tensor. `inputs` dimensions correspond to no. of observations,
         no. of explanations for each observation, and single explanation.
-    metrics : List[Callable]
-        Metrics used to assess the quality of an explanation.
-    weights : List[float]
+    metrics : List[Callable], default None
+        Metrics used to assess the quality of an explanation. Ignored when precomputed_metrics is not None.
+    metric_weights : List[float]
         Weights used to calculate :func:`EnsembleXAI.Metrics.ensemble_score` of every explanation.
+    precomputed_metrics: Any, default None
+        Metrics' values can be precomputed and passed as an argument. Need to be in 3 dimensional format
+        where dimensions correspond to observations, explanations and metrics.
+        Supported formats are numpy ndarray and torch tensor.
+
     Returns
     -------
     Tensor
@@ -209,11 +218,20 @@ def autoweighted(inputs: TensorOrTupleOfTensorsGeneric, metrics: List[Callable],
     TODO
 
     """
-    parsed_inputs = _reformat_input_tensors(inputs)
 
-    # calculate metrics and ensemble scores
-    metric_vals = [[metric(explanation) for metric in metrics] for explanation in torch.unbind(parsed_inputs, dim=1)]
-    ensemble_scores = torch.stack([ensemble_score(weights, metric_val) for metric_val in metric_vals])
+    assert precomputed_metrics is not None or metrics is not None, "one of metrics or precomputed_metrics must not be None"
+    parsed_inputs = _reformat_input_tensors(inputs)
+    if precomputed_metrics is None:
+        # calculate metrics
+        metric_vals = [
+            [metric(explanation) for metric in metrics] for explanation in torch.unbind(parsed_inputs, dim=1)]
+    else:
+        if isinstance(precomputed_metrics, np.ndarray): metric_vals = torch.from_numpy(precomputed_metrics)
+        elif isinstance(precomputed_metrics, torch.Tensor): metric_vals = precomputed_metrics
+        else: raise ValueError("precomputed_metrics should be numpy ndarray or torch tensor")
+        assert metric_vals.dim() == 3, "precomputed_metrics should have 3 dims"
+        metric_vals = [y.unbind(0) for y in metric_vals.transpose(2, 0).transpose(1, 0).unbind(0)]
+    ensemble_scores = torch.stack([ensemble_score(metric_weights, metric_val) for metric_val in metric_vals])
     ensemble_scores.transpose_(0, 1)
 
     normalized_exp = _normalize_across_dataset(parsed_inputs)
@@ -241,7 +259,8 @@ def _auto_calculate_weights(masks: np.ndarray) -> np.ndarray:
 
 
 def supervisedXAI(inputs: TensorOrTupleOfTensorsGeneric, masks: TensorOrTupleOfTensorsGeneric, n_folds: int = 3,
-                  weights: Union[str, TensorOrTupleOfTensorsGeneric, np.ndarray, None]=None, shuffle=False, random_state=None) -> Tensor:
+                  weights: Union[str, TensorOrTupleOfTensorsGeneric, np.ndarray, None]=None,
+                  shuffle=False, random_state=None) -> Tensor:
     """
     Aggregate explanations by training supervised machine learning model.
 

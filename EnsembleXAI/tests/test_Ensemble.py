@@ -114,7 +114,19 @@ class TestAutoweighted(TestCase):
     y = t.squeeze(x, 0)
 
     def test_ensemble_single_obs_single_metric_mult_channel(self):
-        ensemble = Ensemble.autoweighted(self.x, [_dummy_metric], [1])
+        ensemble = Ensemble.autoweighted(self.x, [1], [_dummy_metric])
+        self.assertIsInstance(ensemble, t.Tensor)
+
+        expected = t.tensor([[[[-0.9354, 0.9354],
+                              [0.9354, -0.9354]],
+                             [[-0.9354, 0.9354],
+                              [0.9354, -0.9354]]]])
+
+        self.assertTrue(t.allclose(ensemble, expected, atol=.01))
+
+
+    def test_ensemble_single_obs_precomputed_metric_mult_channel(self):
+        ensemble = Ensemble.autoweighted(self.x, [1], precomputed_metrics=t.ones((1, 2, 1)))
         self.assertIsInstance(ensemble, t.Tensor)
 
         expected = t.tensor([[[[-0.9354, 0.9354],
@@ -125,7 +137,7 @@ class TestAutoweighted(TestCase):
         self.assertTrue(t.allclose(ensemble, expected, atol=.01))
 
     def test_ensemble_mult_obs_mult_metric_single_channel(self):
-        ensemble = Ensemble.autoweighted(self.x, [_dummy_metric, _dummy_metric], [0.5, 0.5])
+        ensemble = Ensemble.autoweighted(self.x, [0.5, 0.5], [_dummy_metric, _dummy_metric])
         self.assertIsInstance(ensemble, t.Tensor)
 
         expected = t.tensor([[[-0.9354, 0.9354],
@@ -137,13 +149,13 @@ class TestAutoweighted(TestCase):
 
     def test_ensemble_one_obs_one_channel_one_metric(self):
         exp1 = t.tensor([[[[0, 1], [1, 0]]], [[[0, 1], [1, 0]]]], dtype=t.float)
-        ensemble = Ensemble.autoweighted(tuple(exp1), [_dummy_metric], [1])
+        ensemble = Ensemble.autoweighted(tuple(exp1), [1], [_dummy_metric])
         expected = t.tensor([[[[[-0.8660, 0.8660],
                                [0.8660, -0.8660]]]]])
         self.assertTrue(t.allclose(ensemble, expected, atol=.01))
 
     def test_ensemble_multiple_obs_multiple_channel_single_metric(self):
-        ensemble = Ensemble.autoweighted((self.y, self.y), [_dummy_metric], [1])
+        ensemble = Ensemble.autoweighted((self.y, self.y), [1], [_dummy_metric])
         expected = t.tensor([[[[-0.9682, 0.9682],
                                [0.9682, -0.9682]],
                               [[-0.9682, 0.9682],
