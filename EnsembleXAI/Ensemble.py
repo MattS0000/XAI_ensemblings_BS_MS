@@ -95,21 +95,16 @@ def basic(inputs: TensorOrTupleOfTensorsGeneric,
     Examples
     --------
 
-    import torch
-
-    from EnsembleXAI.Ensemble import basic
-    from captum.attr import IntegratedGradients, GradientShap, Saliency
-
-    input = torch.randn(1, 3, 32, 32)
-
-    ig = IntegratedGradients(net).attribute(input, target=3)
-    gs = GradientShap(net).attribute(input, target=3)
-    sal = Saliency(net).attribute(input, target=3)
-
-
-    explanations = torch.stack([ig, gs, sal], dim=1)
-
-    agg = basic(explanations, 'avg')
+    >>> import torch
+    >>> from EnsembleXAI.Ensemble import basic
+    >>> from captum.attr import IntegratedGradients, GradientShap, Saliency
+    >>> net = ImageClassifier()
+    >>> inputs = torch.randn(1, 3, 32, 32)
+    >>> ig = IntegratedGradients(net).attribute(inputs, target=3)
+    >>> gs = GradientShap(net).attribute(inputs, target=3)
+    >>> sal = Saliency(net).attribute(inputs, target=3)
+    >>> explanations = torch.stack([ig, gs, sal], dim=1)
+    >>> agg = basic(explanations, 'avg')
 
     """
     # input tensor dims: observations x explanations x single explanation
@@ -215,7 +210,17 @@ def autoweighted(inputs: TensorOrTupleOfTensorsGeneric,
 
     Examples
     --------
-    TODO
+    >>> import torch
+    >>> from EnsembleXAI.Ensemble import autoweighted
+    # We have a tensor of 4 explanations for 15 observations,
+    # each with 3 channels and image size 32 x 32
+    >>> explanations = torch.randn(15, 4, 3, 32, 32)
+    # We use precomputed metrics
+    # 2 metrics to evaluate each of 4 explanation for 15 observations
+    >>> metrics = torch.rand(size=(15, 4, 2))
+    >>> ensembled_explanations = autoweighted(explanations,
+    ...                                       metric_weights=[0.2, 0.8],
+    ...                                       precomputed_metrics=metrics)
 
     """
 
@@ -308,22 +313,17 @@ def supervisedXAI(inputs: TensorOrTupleOfTensorsGeneric, masks: TensorOrTupleOfT
 
     Examples
     --------
-    import torch
-
-    from EnsembleXAI.Ensemble import basic
-    from captum.attr import IntegratedGradients, GradientShap, Saliency
-
-    input = torch.randn(15, 3, 32, 32)
-    masks = torch.randint(low=0, high=2, size=(15, 32, 32))
-
-    ig = IntegratedGradients(net).attribute(input, target=3)
-    gs = GradientShap(net).attribute(input, target=3)
-    sal = Saliency(net).attribute(input, target=3)
-
-
-    explanations = torch.stack([ig, gs, sal], dim=1)
-
-    krr_explanations = supervisedXAI(explanations, masks)
+    >>> import torch
+    >>> from EnsembleXAI.Ensemble import basic
+    >>> from captum.attr import IntegratedGradients, GradientShap, Saliency
+    >>> net = ImageClassifier()
+    >>> input = torch.randn(15, 3, 32, 32)
+    >>> masks = torch.randint(low=0, high=2, size=(15, 32, 32))
+    >>> ig = IntegratedGradients(net).attribute(input, target=3)
+    >>> gs = GradientShap(net).attribute(input, target=3)
+    >>> sal = Saliency(net).attribute(input, target=3)
+    >>> explanations = torch.stack([ig, gs, sal], dim=1)
+    >>> krr_explanations = supervisedXAI(explanations, masks)
     """
 
     assert n_folds > 1
