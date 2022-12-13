@@ -301,7 +301,8 @@ maximal probabilities, where the classes predicted are irrelevant. Therefore the
 1 correspond to the situation when the model has probability of 1 on the original image and 0 on the modified image.
 On the other hand, the metric returns -1 when the model has close to 0 probability for all classes in original image,
 but after modifying it one class has probability of 1.
-Implemented as proposed in <a class="reference internal" href="#r7a3687e26ec9-1" id="id4">[1]</a>.</p>
+For value “new_prediction”, implemented as proposed in <a class="reference internal" href="#r7a3687e26ec9-1" id="id4">[1]</a>, while for “same_prediction” the only difference is
+usage of always same class predictions probabilities.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">

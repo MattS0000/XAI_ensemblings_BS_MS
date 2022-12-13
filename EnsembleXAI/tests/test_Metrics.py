@@ -297,5 +297,3 @@ class TestMetrics(TestCase):
         # Metrics.ensemble_score()
         self.assertEqual(Metrics.ensemble_score([1, 2], [3, 5]), 13)
         self.assertEqual(Metrics.ensemble_score([1, 2], [5, 3]), 11)
-
-#%%
