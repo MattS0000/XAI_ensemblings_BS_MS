@@ -628,7 +628,9 @@ def confidence_impact_ratio(
     1 correspond to the situation when the model has probability of 1 on the original image and 0 on the modified image.
     On the other hand, the metric returns -1 when the model has close to 0 probability for all classes in original image,
     but after modifying it one class has probability of 1.
-    Implemented as proposed in [1]_.
+    For value "new_prediction", implemented as proposed in [1]_, while for "same_prediction" the only difference is
+    usage of always same class predictions probabilities.
+
 
     Parameters
     ----------

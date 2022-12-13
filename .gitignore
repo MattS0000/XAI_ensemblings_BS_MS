@@ -110,8 +110,8 @@ ENV/
 env.bak/
 venv.bak/
 .idea/
-images/
-
+notebooks/images/
+notebooks/results/
 # Spyder project settings
 .spyderproject
 .spyproject
