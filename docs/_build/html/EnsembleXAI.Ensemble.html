@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EnsembleXAI.Ensemble module &mdash; EnsembleXAI 1.0 documentation</title>
@@ -115,7 +115,7 @@
 <a class="reference internal" href="EnsembleXAI.Metrics.html#EnsembleXAI.Metrics.ensemble_score" title="EnsembleXAI.Metrics.ensemble_score"><code class="xref py py-func docutils literal notranslate"><span class="pre">EnsembleXAI.Metrics.ensemble_score()</span></code></a> to calculate quality of each explanation. One of <cite>metrics</cite>
 or <cite>precomputed_metrics</cite> should be passed.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>inputs</strong> (<em>TensorOrTupleOfTensorsGeneric</em>) – Explanations in form of tuple of tensors or tensor. <cite>inputs</cite> dimensions correspond to no. of observations,
 no. of explanations for each observation, and single explanation.</p></li>
@@ -126,11 +126,11 @@ where dimensions correspond to observations, explanations and metrics.
 Supported formats are numpy ndarray and torch tensor.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Weighted arithmetic mean of explanations, weighted by <a class="reference internal" href="EnsembleXAI.Metrics.html#EnsembleXAI.Metrics.ensemble_score" title="EnsembleXAI.Metrics.ensemble_score"><code class="xref py py-func docutils literal notranslate"><span class="pre">EnsembleXAI.Metrics.ensemble_score()</span></code></a>.
 Dimensions correspond to no. of observations, aggregated explanation.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Tensor</p>
 </dd>
 </dl>
@@ -146,16 +146,29 @@ Dimensions correspond to no. of observations, aggregated explanation.</p>
 <p class="rubric">Notes</p>
 <p>Explanations are normalized by mean and standard deviation before aggregation to ensure comparable values.</p>
 <p class="rubric">References</p>
-<dl class="citation">
-<dt class="label" id="rbe47d88d78bd-1"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
-<dd><p>Bobek, S., Bałaga, P., Nalepa, G.J. (2021), “Towards Model-Agnostic Ensemble Explanations.”
+<div role="list" class="citation-list">
+<div class="citation" id="rbe47d88d78bd-1" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>Bobek, S., Bałaga, P., Nalepa, G.J. (2021), “Towards Model-Agnostic Ensemble Explanations.”
 In: Paszynski, M., Kranzlmüller, D., Krzhizhanovskaya, V.V., Dongarra, J.J., Sloot, P.M. (eds)
 Computational Science – ICCS 2021. ICCS 2021. Lecture Notes in Computer Science(), vol 12745. Springer,
 Cham. <a class="reference external" href="https://doi.org/10.1007/978-3-030-77970-2_4">https://doi.org/10.1007/978-3-030-77970-2_4</a></p>
-</dd>
-</dl>
+</div>
+</div>
 <p class="rubric">Examples</p>
-<p>TODO</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">EnsembleXAI.Ensemble</span> <span class="kn">import</span> <span class="n">autoweighted</span>
+<span class="go"># We have a tensor of 4 explanations for 15 observations,</span>
+<span class="go"># each with 3 channels and image size 32 x 32</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">explanations</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">)</span>
+<span class="go"># We use precomputed metrics</span>
+<span class="go"># 2 metrics to evaluate each of 4 explanation for 15 observations</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">metrics</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ensembled_explanations</span> <span class="o">=</span> <span class="n">autoweighted</span><span class="p">(</span><span class="n">explanations</span><span class="p">,</span>
+<span class="gp">... </span>                                      <span class="n">metric_weights</span><span class="o">=</span><span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">],</span>
+<span class="gp">... </span>                                      <span class="n">precomputed_metrics</span><span class="o">=</span><span class="n">metrics</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -165,7 +178,7 @@ Cham. <a class="reference external" href="https://doi.org/10.1007/978-3-030-7797
 <p>Use provided aggregating functions or pass a custom callable. Combine explanations for every observation and get
 one aggregated explanation for every observation.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>inputs</strong> (<em>TensorOrTupleOfTensorsGeneric</em>) – Explanations in form of tuple of tensors or tensor. <cite>inputs</cite> dimensions correspond to no. of observations,
 no. of explanations for each observation, and single explanation.</p></li>
@@ -173,10 +186,10 @@ no. of explanations for each observation, and single explanation.</p></li>
 or a function from a list of tensors to tensor.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Aggregated explanations. Dimensions correspond to no. of observations, aggregated explanation.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Tensor</p>
 </dd>
 </dl>
@@ -190,15 +203,18 @@ or a function from a list of tensors to tensor.</p></li>
 </dl>
 </div>
 <p class="rubric">Examples</p>
-<p>import torch</p>
-<p>from EnsembleXAI.Ensemble import basic
-from captum.attr import IntegratedGradients, GradientShap, Saliency</p>
-<p>input = torch.randn(1, 3, 32, 32)</p>
-<p>ig = IntegratedGradients(net).attribute(input, target=3)
-gs = GradientShap(net).attribute(input, target=3)
-sal = Saliency(net).attribute(input, target=3)</p>
-<p>explanations = torch.stack([ig, gs, sal], dim=1)</p>
-<p>agg = basic(explanations, ‘avg’)</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">EnsembleXAI.Ensemble</span> <span class="kn">import</span> <span class="n">basic</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">captum.attr</span> <span class="kn">import</span> <span class="n">IntegratedGradients</span><span class="p">,</span> <span class="n">GradientShap</span><span class="p">,</span> <span class="n">Saliency</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">net</span> <span class="o">=</span> <span class="n">ImageClassifier</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">inputs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ig</span> <span class="o">=</span> <span class="n">IntegratedGradients</span><span class="p">(</span><span class="n">net</span><span class="p">)</span><span class="o">.</span><span class="n">attribute</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gs</span> <span class="o">=</span> <span class="n">GradientShap</span><span class="p">(</span><span class="n">net</span><span class="p">)</span><span class="o">.</span><span class="n">attribute</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sal</span> <span class="o">=</span> <span class="n">Saliency</span><span class="p">(</span><span class="n">net</span><span class="p">)</span><span class="o">.</span><span class="n">attribute</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">explanations</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">ig</span><span class="p">,</span> <span class="n">gs</span><span class="p">,</span> <span class="n">sal</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">agg</span> <span class="o">=</span> <span class="n">basic</span><span class="p">(</span><span class="n">explanations</span><span class="p">,</span> <span class="s1">&#39;avg&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -211,7 +227,7 @@ as inputs <span class="math notranslate nohighlight">\(X\)</span> and masks as o
 K-Fold split is used to generate aggregated explanations without information leakage. Internally uses
 <code class="xref py py-class docutils literal notranslate"><span class="pre">sklearn.model_selection.KFold</span></code> to make the split.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>inputs</strong> (<em>TensorOrTupleOfTensorsGeneric</em>) – Explanations in form of tuple of tensors or tensor. <cite>inputs</cite> dimensions correspond to no. of observations,
 no. of explanations for each observation, and single explanation.</p></li>
@@ -226,10 +242,10 @@ to <code class="xref py py-class docutils literal notranslate"><span class="pre"
 <li><p><strong>random_state</strong> (<em>Any</em><em>, </em><em>default None</em>) – Used only when <cite>shuffle</cite> is <cite>True</cite>. Internally passed to <code class="xref py py-class docutils literal notranslate"><span class="pre">sklearn.model_selection.KFold</span></code>.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Tensor of KRR model outputs, which are the aggregated explanations.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Tensor</p>
 </dd>
 </dl>
@@ -243,24 +259,28 @@ to <code class="xref py py-class docutils literal notranslate"><span class="pre"
 </dl>
 </div>
 <p class="rubric">References</p>
-<dl class="citation">
-<dt class="label" id="r51e119f02dac-1"><span class="brackets"><a class="fn-backref" href="#id2">1</a></span></dt>
-<dd><p>L. Zou et al., “Ensemble image explainable AI (XAI) algorithm for severe community-acquired
+<div role="list" class="citation-list">
+<div class="citation" id="r51e119f02dac-1" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">1</a><span class="fn-bracket">]</span></span>
+<p>L. Zou et al., “Ensemble image explainable AI (XAI) algorithm for severe community-acquired
 pneumonia and COVID-19 respiratory infections,”
 in IEEE Transactions on Artificial Intelligence, doi: 10.1109/TAI.2022.3153754.</p>
-</dd>
-</dl>
+</div>
+</div>
 <p class="rubric">Examples</p>
-<p>import torch</p>
-<p>from EnsembleXAI.Ensemble import basic
-from captum.attr import IntegratedGradients, GradientShap, Saliency</p>
-<p>input = torch.randn(15, 3, 32, 32)
-masks = torch.randint(low=0, high=2, size=(15, 32, 32))</p>
-<p>ig = IntegratedGradients(net).attribute(input, target=3)
-gs = GradientShap(net).attribute(input, target=3)
-sal = Saliency(net).attribute(input, target=3)</p>
-<p>explanations = torch.stack([ig, gs, sal], dim=1)</p>
-<p>krr_explanations = supervisedXAI(explanations, masks)</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">EnsembleXAI.Ensemble</span> <span class="kn">import</span> <span class="n">basic</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">captum.attr</span> <span class="kn">import</span> <span class="n">IntegratedGradients</span><span class="p">,</span> <span class="n">GradientShap</span><span class="p">,</span> <span class="n">Saliency</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">net</span> <span class="o">=</span> <span class="n">ImageClassifier</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">input</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">masks</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ig</span> <span class="o">=</span> <span class="n">IntegratedGradients</span><span class="p">(</span><span class="n">net</span><span class="p">)</span><span class="o">.</span><span class="n">attribute</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gs</span> <span class="o">=</span> <span class="n">GradientShap</span><span class="p">(</span><span class="n">net</span><span class="p">)</span><span class="o">.</span><span class="n">attribute</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sal</span> <span class="o">=</span> <span class="n">Saliency</span><span class="p">(</span><span class="n">net</span><span class="p">)</span><span class="o">.</span><span class="n">attribute</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">explanations</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">ig</span><span class="p">,</span> <span class="n">gs</span><span class="p">,</span> <span class="n">sal</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">krr_explanations</span> <span class="o">=</span> <span class="n">supervisedXAI</span><span class="p">(</span><span class="n">explanations</span><span class="p">,</span> <span class="n">masks</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </section>
