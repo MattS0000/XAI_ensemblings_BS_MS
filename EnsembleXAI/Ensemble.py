@@ -282,7 +282,8 @@ def supervisedXAI(inputs: TensorOrTupleOfTensorsGeneric, masks: TensorOrTupleOfT
         Explanations in form of tuple of tensors or tensor. `inputs` dimensions correspond to no. of observations,
         no. of explanations for each observation, and single explanation.
     masks : TensorOrTupleOfTensorsGeneric
-        Masks used by KRR model as output. Should be the same shape as `inputs`.
+        Masks used by KRR model as output. Should be 3 dimensional shape, where dimensions correspond to no. of observations,
+        and single mask. Size of single mask should be the same as size of single explanation in `inputs`.
     n_folds : int, default 3
         Number of folds used to train the KRR model. `n_folds` should be an `int` greater than 1. When `n_folds` is
         equal to no. of observations in `inputs`, "leave one out" training is done.
@@ -338,7 +339,7 @@ def supervisedXAI(inputs: TensorOrTupleOfTensorsGeneric, masks: TensorOrTupleOfT
         assert weights == 'auto'
         weights = _auto_calculate_weights(labels)
     assert len(parsed_inputs) == len(masks), "Inconsistent number of observations in masks and inputs"
-    assert len(parsed_inputs) > n_folds, "Number of observations should be greater than number of folds"
+    assert len(parsed_inputs) >= n_folds, "Number of observations should be greater or equal than number of folds"
     if weights is not None:
         assert len(weights) == len(masks)
     kf = KFold(n_splits=n_folds, random_state=random_state, shuffle=shuffle)
