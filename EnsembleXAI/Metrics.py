@@ -620,9 +620,10 @@ def confidence_impact_ratio(
 
     Measures the average change in probabilities after hiding the critical area found by the explanation.
     When using default value of "same_prediction" for argument `compare_to` the probabilities taken into account are
-    the ones correspoding to the same class, predicted on the original image. Then values are in range [0,1],
+    the ones correspoding to the same class, predicted on the original image. Then values are in range [-1,1],
     where 1 represents the best scenario, that is when for all images the prediction probability has changed
-    from 1 to 0 after hiding the critical area.
+    from 1 to 0 after hiding the critical area. Meanwhile -1 represents the situation when original probability
+    was close to 0 and after obscuring the critical area it change to 1.
     When using value of "new_prediction" for argument `compare_to` the probabilities taken into account are
     maximal probabilities, where the classes predicted are irrelevant. Therefore the values are in range [-1,1], where
     1 correspond to the situation when the model has probability of 1 on the original image and 0 on the modified image.
@@ -877,6 +878,7 @@ def F1_score(
     acc_prec = accordance_precision(explanations, masks, threshold=threshold)
     values = 2 * (acc_recall * acc_prec) / (acc_recall + acc_prec)
     value = torch.sum(values) / values.shape[0]
+    value[value != value] = 0
     return value.item()
 
 
