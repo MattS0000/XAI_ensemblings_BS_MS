@@ -7,10 +7,10 @@ packages = ["EnsembleXAI"]
 name = "EnsembleXAI"
 version = "0.0.1"
 authors = [
-  { name="Sperkowski Mateusz", email="author@example.com" },
-  { name="Sawicki Bartosz", email="author@example.com" },
+  { name="Sperkowski Mateusz", email="mateusz.sperkowski.stud@pw.edu.pl"},
+  { name="Sawicki Bartosz", email="bartosz.sawicki3.stud@pw.edu.pl"},
 ]
-description = ""
+description = "Aggregate explanations of CNN for image classifcation."
 readme = "README.md"
 requires-python = ">=3.8"
 dependencies = [
