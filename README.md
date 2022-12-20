@@ -4,16 +4,25 @@
 
 To build from source run following command in main project directory.
 
-```python -m build```
+```bash
+python -m build
+```
 
 It will create `dist` directory with build archives.
 
 ## Installation
 
-To install the package use pip. Run the following command from main project directory.
+To install the package use pip. Having build the package, just run the following command from main project directory.
 
-```pip install dist/EnsembleXAI-0.0.1.tar.gz```
+```bash
+ pip install dist/EnsembleXAI-0.0.1.tar.gz
+ ```
 
+If you have access to project GitHub repository you can download, build and install the package via command:
+
+```bash
+pip install git+https://github.com/MattS0000/XAI_ensemblings_BS_MS.git
+```
 
 ## Documntation
 
