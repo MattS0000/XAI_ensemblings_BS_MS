@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+[tool.setuptools]
+packages = ["EnsembleXAI"]
+[project]
+name = "EnsembleXAI"
+version = "0.0.1"
+authors = [
+  { name="Sperkowski Mateusz", email="author@example.com" },
+  { name="Sawicki Bartosz", email="author@example.com" },
+]
+description = ""
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "numpy==1.23.3",
+    "scikit-learn~=1.1.2",
+    "torch==1.12.1"
+
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/MattS0000/XAI_ensemblings_BS_MS"
+"Bug Tracker" = "https://github.com/MattS0000/XAI_ensemblings_BS_MS/issues"
