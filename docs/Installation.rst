@@ -1,6 +1,8 @@
-User Installation
-=================
+Installation Guide
+==================
 
+User Installation
+-----------------
 Usage of a virtual environment is strongly encouraged.
 
 #. Clone the repository from github.
@@ -9,14 +11,12 @@ Usage of a virtual environment is strongly encouraged.
     #. Activate virtual environment if applicable.
     #. `pip install -r /correct_path/XAI_ensemblings_BS_MS/requirements.txt`.
 
-Downloading as a package
+Downloading as a package (currently unavailable due to repository currently being private).
 
 `pip install git+https://github.com/MattS0000/XAI_ensemblings_BS_MS#egg=EnsembleXAI&subdirectory=EnsembleXAI`
 
-currently unavailable due to repository currently being private.
-
 Package Development Additional Installation
-===========================================
+-------------------------------------------
 To run documentation creation additional packages are required:
 
 #. Nbsphinx extension to convert notebooks to html requires seperate installation of `pandocs`, installation with conda is recommended.

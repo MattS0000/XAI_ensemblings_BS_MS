@@ -43,8 +43,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="Installation.html">User Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Installation.html#package-development-additional-installation">Package Development Additional Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Example_notebook.html">Example Usage on ImageNet dataset</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Submodules:</span></p>
@@ -231,7 +230,8 @@ K-Fold split is used to generate aggregated explanations without information lea
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>inputs</strong> (<em>TensorOrTupleOfTensorsGeneric</em>) – Explanations in form of tuple of tensors or tensor. <cite>inputs</cite> dimensions correspond to no. of observations,
 no. of explanations for each observation, and single explanation.</p></li>
-<li><p><strong>masks</strong> (<em>TensorOrTupleOfTensorsGeneric</em>) – Masks used by KRR model as output. Should be the same shape as <cite>inputs</cite>.</p></li>
+<li><p><strong>masks</strong> (<em>TensorOrTupleOfTensorsGeneric</em>) – Masks used by KRR model as output. Should be 3 dimensional shape, where dimensions correspond to no. of observations,
+and single mask. Size of single mask should be the same as size of single explanation in <cite>inputs</cite>.</p></li>
 <li><p><strong>n_folds</strong> (<em>int</em><em>, </em><em>default 3</em>) – Number of folds used to train the KRR model. <cite>n_folds</cite> should be an <cite>int</cite> greater than 1. When <cite>n_folds</cite> is
 equal to no. of observations in <cite>inputs</cite>, “leave one out” training is done.</p></li>
 <li><p><strong>weights</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>TensorOrTupleOfTensorsGeneric</em><em>, </em><em>np.ndarray</em><em>, </em><em>None</em><em>]</em><em>, </em><em>default None</em>) – Sample weights for training the KRR. If None, weights are uniform. If ‘auto’,
