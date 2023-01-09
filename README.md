@@ -24,7 +24,7 @@ If you have access to project GitHub repository you can download, build and inst
 pip install git+https://github.com/MattS0000/XAI_ensemblings_BS_MS.git
 ```
 
-## Documntation
+## Documentation
 
 Documentation available through file [./docs/_build/html/index.html](./docs/_build/html/index.html)
 
