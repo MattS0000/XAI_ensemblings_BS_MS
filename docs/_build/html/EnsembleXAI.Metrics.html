@@ -311,7 +311,7 @@ usage of always same class predictions probabilities.</p>
 <li><p><strong>predictor</strong> (<em>Callable</em><em>[</em><em>...</em><em>, </em><em>torch.Tensor</em><em>]</em>) – Function returning a Tensor with probabilities for classification of each image to each class.
 In typical cases it’s the model prediction function, possibly wrapped in torch.nn.Softmax.</p></li>
 <li><p><strong>explanations</strong> (<em>torch.Tensor</em>) – Explanations for each of the images in images_tensor. Therefore the shape should be the same as that of images_tensor.</p></li>
-<li><p><strong>explanation_threshold</strong> (<em>float</em>) – Minimal value for the explanation to be considered the critical area of the image.</p></li>
+<li><p><strong>explanation_threshold</strong> (<em>float</em>) – Maximal value for explanation data point to not be considered a part of the critical area.</p></li>
 <li><p><strong>replace_value</strong> (<em>float</em>) – The value with which data in critical area found by explanation in the image will be replaced by.</p></li>
 <li><p><strong>compare_to</strong> (<em>str</em>) – Argument deciding whether to compare the original maximum probability to the
 new maximum (value: “new_prediction”) or to the new probability for the same index/class as the original one
@@ -430,7 +430,7 @@ Implemented as proposed in <a class="reference internal" href="#rcfc94f3be51d-1"
 <li><p><strong>predictor</strong> (<em>Callable</em><em>[</em><em>...</em><em>, </em><em>torch.Tensor</em><em>]</em>) – Function returning a Tensor with probabilities for classification of each image to each class.
 In typical cases it’s the model prediction function, possibly wrapped in a softmax function.</p></li>
 <li><p><strong>explanations</strong> (<em>torch.Tensor</em>) – Explanations for each of the images in images_tensor. Therefore the shape should be the same as that of images_tensor.</p></li>
-<li><p><strong>explanation_threshold</strong> (<em>float</em>) – Minimal value for the explanation to be considered the critical area of the image.</p></li>
+<li><p><strong>explanation_threshold</strong> (<em>float</em>) – Maximal value for explanation data point to not be considered a part of the critical area.</p></li>
 <li><p><strong>replace_value</strong> (<em>float</em>) – The value with which data in critical area found by explanation in the image will be replaced by.</p></li>
 </ul>
 </dd>
