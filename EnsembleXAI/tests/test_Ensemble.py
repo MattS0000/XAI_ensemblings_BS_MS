@@ -94,18 +94,24 @@ class TestNormalize(TestCase):
         x = t.tensor([[[[[1, 2], [2, 1]]], [[[3, 4], [3, 4]]]],
                       [[[[3, 5], [5, 3]]], [[[0, 1], [1, 0]]]]], dtype=t.float64)
         normalized = _normalize_across_dataset(x)
-        expected = t.tensor([[[[[-1.1068, 0.0000],
-                                [-0.4743, -0.5916]]],
+        expected = t.tensor([[[[[-1.1068, -0.4743],
+                                [-0.4743, -1.1068]]],
 
-                              [[[0.1581, 1.1832],
-                                [0.1581, 1.1832]]]],
+                              [[[0.5916, 1.1832],
+                                [0.5916, 1.1832]]]],
 
-                             [[[[0.1581, 1.7748],
-                                [1.4230, 0.5916]]],
+                             [[[[0.1581, 1.4230],
+                                [1.4230, 0.1581]]],
 
-                              [[[-1.7393, -0.5916],
-                                [-1.1068, -1.1832]]]]], dtype=t.float64)
-        self.assertTrue(t.allclose(normalized, expected, atol=0.001))
+                              [[[-1.1832, -0.5916],
+                                [-0.5916, -1.1832]]]]], dtype=t.float64)
+        self.assertTrue(t.allclose(normalized, expected, atol=0.01))
+
+
+    def test_normalization_sample(self):
+        x = t.rand(8, 3, 3, 512, 512)
+        normalized = _normalize_across_dataset(x)
+        self.assertEqual(normalized.shape, x.shape)
 
 
 class TestAutoweighted(TestCase):

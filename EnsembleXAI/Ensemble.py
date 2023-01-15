@@ -155,7 +155,7 @@ def _normalize_across_dataset(parsed_inputs:Tensor, delta=0.00001):
     Tensor
         Normalized explanations.
     """
-    var, mean = torch.var_mean(parsed_inputs, dim=[0, 2, 3, 4], unbiased=True)
+    var, mean = torch.var_mean(parsed_inputs, dim=[0, 2, 3, 4], unbiased=True, keepdim=True)
     if torch.min(var.abs()) < delta:
         raise ZeroDivisionError("Variance close to 0. Can't normalize")
     return (parsed_inputs - mean) / torch.sqrt(var)
