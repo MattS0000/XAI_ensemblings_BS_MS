@@ -493,7 +493,7 @@ def _impact_ratio_helper(
     explanations: torch.Tensor
         Explanations for each of the images in images_tensor. Therefore the shape should be the same as that of images_tensor.
     explanation_threshold: float
-        Minimal value for the explanation to be considered the critical area of the image.
+        Maximal value for explanation data point to not be considered a part of the critical area.
     replace_value: float
         The value with which data in critical area found by explanation in the image will be replaced by.
 
@@ -530,7 +530,7 @@ def _impact_ratio_helper(
     """
     probabilities_original = predictor(images_tensor)
     # one explanation per image
-    explanations_boolean = explanations >= explanation_threshold
+    explanations_boolean = explanations > explanation_threshold
     modified_images = replace_masks(images_tensor, explanations_boolean, replace_value)
     probabilities_modified = predictor(modified_images)
     return probabilities_original, probabilities_modified
@@ -561,7 +561,7 @@ def decision_impact_ratio(
     explanations: torch.Tensor
         Explanations for each of the images in images_tensor. Therefore the shape should be the same as that of images_tensor.
     explanation_threshold: float
-        Minimal value for the explanation to be considered the critical area of the image.
+        Maximal value for explanation data point to not be considered a part of the critical area.
     replace_value: float
         The value with which data in critical area found by explanation in the image will be replaced by.
 
@@ -643,7 +643,7 @@ def confidence_impact_ratio(
     explanations: torch.Tensor
         Explanations for each of the images in images_tensor. Therefore the shape should be the same as that of images_tensor.
     explanation_threshold: float
-        Minimal value for the explanation to be considered the critical area of the image.
+        Maximal value for explanation data point to not be considered a part of the critical area.
     replace_value: float
         The value with which data in critical area found by explanation in the image will be replaced by.
     compare_to:  str
