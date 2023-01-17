@@ -363,9 +363,8 @@ def supervisedXAI(inputs: TensorOrTupleOfTensorsGeneric, masks: TensorOrTupleOfT
         )
         krr.fit(X_train, y_train, sample_weight=iter_weights)
         # predict masks for observations currently in test group
-        y_predicted = krr.predict(X_test)
+        ensembled[idx]  = krr.predict(X_test).reshape((tuple([len(X_test)]) + input_shape[3:5]))
         # reshape predictions and save them and indices to recreate original order later
-        ensembled[idx] = np.concatenate([y_predicted] * n_channels).reshape((tuple([len(X_test)]) + input_shape[2:5]))
         indices = np.concatenate([indices, test_index])
 
     # sort output to match input order
