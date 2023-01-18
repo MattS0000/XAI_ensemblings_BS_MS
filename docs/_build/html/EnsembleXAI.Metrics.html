@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EnsembleXAI.Metrics module &mdash; EnsembleXAI 1.0 documentation</title>
@@ -127,7 +127,7 @@ Values  are in range [0,1], where 1 corresponds to the scenario where
 critical areas in the explanations perfectly match the masks.
 Metric implemented as proposed in <a class="reference internal" href="#r728db6df1d6f-1" id="id1">[1]</a>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>explanations</strong> (<em>torch.Tensor</em>) – Tensor of the explanations with shape as such (n, channels, width, height), where n represents the number of
 explanations and correlates masks and explanations.</p></li>
@@ -137,10 +137,10 @@ where n represents the number of masks and correlates masks and explanations or 
 Values greater or equal than the threshold are considered important.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>F1 metric calculated with accordance_recall and accordance_precision of each explanation, mask pair.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float</p>
 </dd>
 </dl>
@@ -154,13 +154,14 @@ Values greater or equal than the threshold are considered important.</p></li>
 </dl>
 </div>
 <p class="rubric">References</p>
-<dl class="citation">
-<dt class="label" id="r728db6df1d6f-1"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
-<dd><p>L. Zou et al., “Ensemble image explainable AI (XAI) algorithm for severe community-acquired
+<div role="list" class="citation-list">
+<div class="citation" id="r728db6df1d6f-1" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>L. Zou et al., “Ensemble image explainable AI (XAI) algorithm for severe community-acquired
 pneumonia and COVID-19 respiratory infections,”
 in IEEE Transactions on Artificial Intelligence, doi: 10.1109/TAI.2022.3153754.</p>
-</dd>
-</dl>
+</div>
+</div>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">torch</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">cross_2d</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
@@ -184,7 +185,7 @@ the whole explanation area over the threshold.
 If no critical area is found in the explanation, returns 0.
 Metric implemented as proposed in <a class="reference internal" href="#r5b8012498873-1" id="id2">[1]</a>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>explanations</strong> (<em>torch.Tensor</em>) – Tensor of the explanations with shape as such (n, channels, width, height), where n represents the number
 of explanations and correlates masks and explanations.</p></li>
@@ -194,10 +195,10 @@ where n represents the number of masks and correlates masks and explanations or 
 the threshold are considered important.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Tensor with value of the metric for each of the pairs in explanations and masks.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>torch.Tensor</p>
 </dd>
 </dl>
@@ -213,13 +214,14 @@ the threshold are considered important.</p></li>
 </dl>
 </div>
 <p class="rubric">References</p>
-<dl class="citation">
-<dt class="label" id="r5b8012498873-1"><span class="brackets"><a class="fn-backref" href="#id2">1</a></span></dt>
-<dd><p>L. Zou et al., “Ensemble image explainable AI (XAI) algorithm for severe community-acquired pneumonia
+<div role="list" class="citation-list">
+<div class="citation" id="r5b8012498873-1" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">1</a><span class="fn-bracket">]</span></span>
+<p>L. Zou et al., “Ensemble image explainable AI (XAI) algorithm for severe community-acquired pneumonia
 and COVID-19 respiratory infections,” in IEEE Transactions on Artificial Intelligence,
 doi: 10.1109/TAI.2022.3153754.</p>
-</dd>
-</dl>
+</div>
+</div>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">torch</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">cross_2d</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
@@ -241,7 +243,7 @@ Similar to the recall metric in standard classification task. Values are in rang
 where 1 represents scenario when the explanation area over the threshold covers the whole mask.
 Metric implemented as proposed in <a class="reference internal" href="#r8ac7e9cc1650-1" id="id3">[1]</a>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>explanations</strong> (<em>torch.Tensor</em>) – Tensor of the explanations with shape as such (n, channels, width, height),
 where n represents the number of explanations and correlates masks and explanations.</p></li>
@@ -251,10 +253,10 @@ where n represents the number of masks and correlates masks and explanations or 
 Values greater or equal than the threshold are considered important.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Tensor with value of the metric for each of the pairs in explanations and masks.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>torch.Tensor</p>
 </dd>
 </dl>
@@ -268,13 +270,14 @@ Values greater or equal than the threshold are considered important.</p></li>
 </dl>
 </div>
 <p class="rubric">References</p>
-<dl class="citation">
-<dt class="label" id="r8ac7e9cc1650-1"><span class="brackets"><a class="fn-backref" href="#id3">1</a></span></dt>
-<dd><p>L. Zou et al., “Ensemble image explainable AI (XAI) algorithm for severe community-acquired
+<div role="list" class="citation-list">
+<div class="citation" id="r8ac7e9cc1650-1" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">1</a><span class="fn-bracket">]</span></span>
+<p>L. Zou et al., “Ensemble image explainable AI (XAI) algorithm for severe community-acquired
 pneumonia and COVID-19 respiratory infections,” in IEEE Transactions on Artificial Intelligence,
 doi: 10.1109/TAI.2022.3153754.</p>
-</dd>
-</dl>
+</div>
+</div>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">torch</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">cross_2d</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
@@ -305,7 +308,7 @@ but after modifying it one class has probability of 1.
 For value “new_prediction”, implemented as proposed in <a class="reference internal" href="#r7a3687e26ec9-1" id="id4">[1]</a>, while for “same_prediction” the only difference is
 usage of always same class predictions probabilities.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>images_tensors</strong> (<em>torch.Tensor</em>) – The images for the prediction with shape of (n, channels, width, height), where n stands for the number of images.</p></li>
 <li><p><strong>predictor</strong> (<em>Callable</em><em>[</em><em>...</em><em>, </em><em>torch.Tensor</em><em>]</em>) – Function returning a Tensor with probabilities for classification of each image to each class.
@@ -318,11 +321,11 @@ new maximum (value: “new_prediction”) or to the new probability for the same
 (value: “same_prediction”).</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The average change in probabilities after hiding the critical area.
 Calculation is equal to average(probability_original - probability_hidden_area)</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float</p>
 </dd>
 </dl>
@@ -336,13 +339,14 @@ Calculation is equal to average(probability_original - probability_hidden_area)<
 </dl>
 </div>
 <p class="rubric">References</p>
-<dl class="citation">
-<dt class="label" id="r7a3687e26ec9-1"><span class="brackets"><a class="fn-backref" href="#id4">1</a></span></dt>
-<dd><p>L. Zou et al., “Ensemble image explainable AI (XAI) algorithm for severe community-acquired
+<div role="list" class="citation-list">
+<div class="citation" id="r7a3687e26ec9-1" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">1</a><span class="fn-bracket">]</span></span>
+<p>L. Zou et al., “Ensemble image explainable AI (XAI) algorithm for severe community-acquired
 pneumonia and COVID-19 respiratory infections,”
 in IEEE Transactions on Artificial Intelligence, doi: 10.1109/TAI.2022.3153754.</p>
-</dd>
-</dl>
+</div>
+</div>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">torch</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">)])</span>
@@ -370,14 +374,14 @@ in IEEE Transactions on Artificial Intelligence, doi: 10.1109/TAI.2022.3153754.<
 Maximal value of 1 represents identical explanations and values close to 0 represent greatly differing explanations.
 Metric is calculated as proposed in <a class="reference internal" href="#r023f4c16b3b6-1" id="id5">[1]</a>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>explanations</strong> (<em>torch.Tensor</em>) – Explanations Tensor for the single image. Therefore the required shape is (n, channels, width, height),
 where n stands for the number of explanations and channels stands for a depth of the image (RGB channel in most cases).</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Value of the consistency metric for the input explanations.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float</p>
 </dd>
 </dl>
@@ -393,14 +397,15 @@ where n stands for the number of explanations and channels stands for a depth of
 </dl>
 </div>
 <p class="rubric">References</p>
-<dl class="citation">
-<dt class="label" id="r023f4c16b3b6-1"><span class="brackets"><a class="fn-backref" href="#id5">1</a></span></dt>
-<dd><p>Bobek, S., Bałaga, P., Nalepa, G.J. (2021), “Towards Model-Agnostic Ensemble Explanations.”
+<div role="list" class="citation-list">
+<div class="citation" id="r023f4c16b3b6-1" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">1</a><span class="fn-bracket">]</span></span>
+<p>Bobek, S., Bałaga, P., Nalepa, G.J. (2021), “Towards Model-Agnostic Ensemble Explanations.”
 In: Paszynski, M., Kranzlmüller, D., Krzhizhanovskaya, V.V., Dongarra, J.J., Sloot, P.M. (eds)
 Computational Science – ICCS 2021. ICCS 2021. Lecture Notes in Computer Science(), vol 12745. Springer,
 Cham. <a class="reference external" href="https://doi.org/10.1007/978-3-030-77970-2_4">https://doi.org/10.1007/978-3-030-77970-2_4</a></p>
-</dd>
-</dl>
+</div>
+</div>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">torch</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ones</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">])</span>
@@ -424,7 +429,7 @@ Values are in range [0,1], where 1 represents the best scenario,
 that is when for all images the prediction has changed after hiding the critical area.
 Implemented as proposed in <a class="reference internal" href="#rcfc94f3be51d-1" id="id6">[1]</a>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>images_tensors</strong> (<em>torch.Tensor</em>) – The images for the prediction with shape of (n, channels, width, height), where n stands for the number of images.</p></li>
 <li><p><strong>predictor</strong> (<em>Callable</em><em>[</em><em>...</em><em>, </em><em>torch.Tensor</em><em>]</em>) – Function returning a Tensor with probabilities for classification of each image to each class.
@@ -434,11 +439,11 @@ In typical cases it’s the model prediction function, possibly wrapped in a sof
 <li><p><strong>replace_value</strong> (<em>float</em>) – The value with which data in critical area found by explanation in the image will be replaced by.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The number of changes in the predictions after hiding the critica area found by the explanation.
 Equals to number of changed predictions/number of predictions.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float</p>
 </dd>
 </dl>
@@ -450,13 +455,14 @@ Equals to number of changed predictions/number of predictions.</p>
 </dl>
 </div>
 <p class="rubric">References</p>
-<dl class="citation">
-<dt class="label" id="rcfc94f3be51d-1"><span class="brackets"><a class="fn-backref" href="#id6">1</a></span></dt>
-<dd><p>L. Zou et al., “Ensemble image explainable AI (XAI) algorithm for severe community-acquired
+<div role="list" class="citation-list">
+<div class="citation" id="rcfc94f3be51d-1" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">1</a><span class="fn-bracket">]</span></span>
+<p>L. Zou et al., “Ensemble image explainable AI (XAI) algorithm for severe community-acquired
 pneumonia and COVID-19 respiratory infections,”
 in IEEE Transactions on Artificial Intelligence, doi: 10.1109/TAI.2022.3153754.</p>
-</dd>
-</dl>
+</div>
+</div>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">torch</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">)])</span>
@@ -480,28 +486,29 @@ in IEEE Transactions on Artificial Intelligence, doi: 10.1109/TAI.2022.3153754.<
 <dd><p>Measure calculates the weighted sum of different metrics scores.</p>
 <p>Measure calculates the weighted sum of different metrics scores. Metric implemented as proposed in <a class="reference internal" href="#r02217c50381e-1" id="id7">[1]</a>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>weights</strong> (<em>Union</em><em>[</em><em>List</em><em>, </em><em>torch.Tensor</em><em>]</em>) – Weights for the corresponding metric scores.</p></li>
 <li><p><strong>metrics_scores</strong> (<em>Union</em><em>[</em><em>List</em><em>[</em><em>torch.Tensor</em><em>]</em><em>, </em><em>torch.Tensor</em><em>, </em><em>List</em><em>[</em><em>float</em><em>]</em><em>]</em>) – Scores to be weighted and summed.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The weighted sum of weights times scores.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Torch.Tensor</p>
 </dd>
 </dl>
 <p class="rubric">References</p>
-<dl class="citation">
-<dt class="label" id="r02217c50381e-1"><span class="brackets"><a class="fn-backref" href="#id7">1</a></span></dt>
-<dd><p>Bobek, S., Bałaga, P., Nalepa, G.J. (2021), “Towards Model-Agnostic Ensemble Explanations.”
+<div role="list" class="citation-list">
+<div class="citation" id="r02217c50381e-1" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id7">1</a><span class="fn-bracket">]</span></span>
+<p>Bobek, S., Bałaga, P., Nalepa, G.J. (2021), “Towards Model-Agnostic Ensemble Explanations.”
 In: Paszynski, M., Kranzlmüller, D., Krzhizhanovskaya, V.V., Dongarra, J.J., Sloot, P.M. (eds)
 Computational Science – ICCS 2021. ICCS 2021. Lecture Notes in Computer Science(), vol 12745. Springer,
 Cham. <a class="reference external" href="https://doi.org/10.1007/978-3-030-77970-2_4">https://doi.org/10.1007/978-3-030-77970-2_4</a></p>
-</dd>
-</dl>
+</div>
+</div>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="mi">1</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">5</span>
 <span class="go">13</span>
@@ -522,7 +529,7 @@ Cham. <a class="reference external" href="https://doi.org/10.1007/978-3-030-7797
 <p>Calculates the logical ‘and’ intersections of two n-dimensional masks
 where the absolute values of data are greater than the thresholds.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>tensor1</strong> (<em>torch.Tensor</em>) – First of the two masks.</p></li>
 <li><p><strong>tensor2</strong> (<em>torch.Tensor</em>) – Second of the two masks.</p></li>
@@ -531,10 +538,10 @@ where the absolute values of data are greater than the thresholds.</p>
 <li><p><strong>absolute_value</strong> (<em>bool</em>) – Boolean deciding if the compared tensors should be taken as absolute value.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Boolean Tensor with True values where the masks intersect with values over the thresholds.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>torch.Tensor</p>
 </dd>
 </dl>
@@ -587,7 +594,7 @@ Values  are in range [0,1], where 1 corresponds to the scenario where
 critical areas in the explanations perfectly match the masks.
 Metric implemented as proposed in <a class="reference internal" href="#ra080333fabea-1" id="id8">[1]</a>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>explanations</strong> (<em>torch.Tensor</em>) – Tensor of the explanations with shape as such (n, channels, width, height),
 where n represents the number of explanations and correlates masks and explanations.</p></li>
@@ -597,10 +604,10 @@ where n represents the number of masks and correlates masks and explanations or 
 Values greater or equal than the threshold are considered important.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The calculated measure. Equal to average(intersection_area/union_area)</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float</p>
 </dd>
 </dl>
@@ -614,13 +621,14 @@ Values greater or equal than the threshold are considered important.</p></li>
 </dl>
 </div>
 <p class="rubric">References</p>
-<dl class="citation">
-<dt class="label" id="ra080333fabea-1"><span class="brackets"><a class="fn-backref" href="#id8">1</a></span></dt>
-<dd><p>L. Zou et al., “Ensemble image explainable AI (XAI) algorithm for severe community-acquired
+<div role="list" class="citation-list">
+<div class="citation" id="ra080333fabea-1" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id8">1</a><span class="fn-bracket">]</span></span>
+<p>L. Zou et al., “Ensemble image explainable AI (XAI) algorithm for severe community-acquired
 pneumonia and COVID-19 respiratory infections,”
 in IEEE Transactions on Artificial Intelligence, doi: 10.1109/TAI.2022.3153754.</p>
-</dd>
-</dl>
+</div>
+</div>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">torch</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">cross_2d</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
@@ -640,7 +648,7 @@ in IEEE Transactions on Artificial Intelligence, doi: 10.1109/TAI.2022.3153754.<
 <p>Computes the 2-norm of two matrices. By default works on the last two dimensions of the Tensor,
 which can be extended by the sum_dim parameter to one of the remaining dimensions of the Tensor.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>matrix1</strong> (<em>torch.Tensor</em>) – Tensor with one of the matrices to compute the norm.</p></li>
 <li><p><strong>matrix2</strong> (<em>torch.Tensor</em>) – Tensor with the second of the matrices to compute the norm. Shape has to be either equal to the first matrix,
@@ -649,11 +657,11 @@ only the first dimension of the first matrix can be omitted.</p></li>
 therefore supports both positive and negative indexing.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Tensor with value or values of the 2-norm. The shape is similar to both of the input matrices,
 except for last two removed dimensions and the optional dimension specified in sum_dim parameter.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>torch.Tensor</p>
 </dd>
 </dl>
@@ -695,7 +703,7 @@ except for last two removed dimensions and the optional dimension specified in s
 <p>Replaces data in the Tensor with one value in the spots where boolean index Tensor is True.
 In the case when a 4D tensor with a 3D index is given, index is repeated along the second dimension to fit the data shape.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>images</strong> (<em>torch.Tensor</em>) – Tensor of any shape, in most cases 4D Tensor of the images with shape (number of photos, RGB channel, height, width)</p></li>
 <li><p><strong>replacement_index</strong> (<em>torch.BoolTensor</em>) – Boolean Tensor of shape same as images or in case of the 4D images Tensor, a
@@ -703,10 +711,10 @@ In the case when a 4D tensor with a 3D index is given, index is repeated along t
 <li><p><strong>value</strong> (<em>int</em><em> or </em><em>float</em>) – Value to use for replacing the data with.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Tensor of same shape as input with the replaced data.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>torch.Tensor</p>
 </dd>
 </dl>
@@ -766,7 +774,7 @@ created for each of the images close enough (by some metric, norm 2 used here) t
 this may take a significant amount of processing power and memory. Values are always positive.</p>
 <p>The metrics is implemented as proposed in <a class="reference internal" href="#r98b4756b7876-1" id="id9">[1]</a>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>explanator</strong> (<em>Callable that returns torch.Tensor</em>) – The function used to obtain explanations for both the single image
 and the number of images in images_to_compare. Writing a wrapper to handle both options might be required.
@@ -779,10 +787,10 @@ Choice of this parameter should be done carefully and
 testing by calculating some distances manually is recommended, using the matrix 2 norm.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Value of the metrics calculated for the images close to the original image.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float</p>
 </dd>
 </dl>
@@ -798,14 +806,15 @@ testing by calculating some distances manually is recommended, using the matrix 
 </dl>
 </div>
 <p class="rubric">References</p>
-<dl class="citation">
-<dt class="label" id="r98b4756b7876-1"><span class="brackets"><a class="fn-backref" href="#id9">1</a></span></dt>
-<dd><p>Bobek, S., Bałaga, P., Nalepa, G.J. (2021), “Towards Model-Agnostic Ensemble Explanations.”
+<div role="list" class="citation-list">
+<div class="citation" id="r98b4756b7876-1" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id9">1</a><span class="fn-bracket">]</span></span>
+<p>Bobek, S., Bałaga, P., Nalepa, G.J. (2021), “Towards Model-Agnostic Ensemble Explanations.”
 In: Paszynski, M., Kranzlmüller, D., Krzhizhanovskaya, V.V., Dongarra, J.J., Sloot, P.M. (eds)
 Computational Science – ICCS 2021. ICCS 2021. Lecture Notes in Computer Science(), vol 12745. Springer,
 Cham. <a class="reference external" href="https://doi.org/10.1007/978-3-030-77970-2_4">https://doi.org/10.1007/978-3-030-77970-2_4</a></p>
-</dd>
-</dl>
+</div>
+</div>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">torch</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">images</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">])</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
@@ -831,17 +840,17 @@ Cham. <a class="reference external" href="https://doi.org/10.1007/978-3-030-7797
 <p>Splits the first n Tensor dimensions into a list of Tensors of length equal to product of the split dimensions sizes.
 Resulting Tensors have dimensions reduced by a factor of n.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>tensors</strong> (<em>torch.Tensor</em>) – Tensor to be split into a list. Number of dimensions greater than depth parameter.</p></li>
 <li><p><strong>depth</strong> (<em>int</em>) – Value representing the depth to which to split the tensors, starting from the first dimension.
 Therefore, depth=1 represents splitting only the first dimension. Thus depth cannot be larger than the length of the Tensors shape.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A single list consisting of all the split Tensors.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list of torch.Tensor</p>
 </dd>
 </dl>
@@ -885,7 +894,7 @@ Therefore, depth=1 represents splitting only the first dimension. Thus depth can
 <p>Calculates the logical ‘or’ union of two n-dimensional masks where the absolute
 values of data are greater than the thresholds.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>tensor1</strong> (<em>torch.Tensor</em>) – First of the two masks.</p></li>
 <li><p><strong>tensor2</strong> (<em>torch.Tensor</em>) – Second of the two masks.</p></li>
@@ -894,10 +903,10 @@ values of data are greater than the thresholds.</p>
 <li><p><strong>absolute_value</strong> (<em>bool</em>) – Boolean deciding if the compared tensors should be taken as absolute value.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Boolean Tensor with True values on the union of the masks, where values are over thresholds.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>torch.Tensor</p>
 </dd>
 </dl>
