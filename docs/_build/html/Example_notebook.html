@@ -362,7 +362,7 @@ div.rendered_html tbody tr:hover {
 <section id="Imports-of-the-necessary-packages">
 <h2>Imports of the necessary packages<a class="headerlink" href="#Imports-of-the-necessary-packages" title="Permalink to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gc</span>
@@ -382,7 +382,7 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-<p>We can find proper names for each class id under this link.</p>
+<p>We can find natural names for each class id under this link.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
@@ -397,7 +397,14 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">images_list</span><span class="p">(</span><span class="n">image_path</span><span class="p">,</span> <span class="n">resize</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">download_class_images</span><span class="p">(</span><span class="n">class_id</span><span class="p">,</span> <span class="n">masks_path</span><span class="p">):</span>
+    <span class="n">full_path</span> <span class="o">=</span> <span class="n">masks_path</span> <span class="o">+</span> <span class="n">class_id</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span>
+    <span class="n">kaggle_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;/ILSVRC/Data/CLS-LOC/train/</span><span class="si">{</span><span class="n">class_id</span><span class="si">}</span><span class="s2">/&quot;</span>
+    <span class="k">for</span> <span class="n">file_name</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">full_path</span><span class="p">):</span>
+        <span class="n">file_name_jpeg</span> <span class="o">=</span> <span class="n">file_name</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;JPEG&#39;</span>
+        <span class="o">!</span>kaggle competitions download -f <span class="o">{</span>kaggle_path<span class="o">}{</span>file_name_jpeg<span class="o">}</span> -p ./images/<span class="o">{</span>class_id<span class="o">}</span>/ -c imagenet-object-localization-challenge
+
+<span class="k">def</span> <span class="nf">images_list</span><span class="p">(</span><span class="n">image_path</span><span class="p">,</span> <span class="n">resize</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="n">_crop</span> <span class="o">=</span> <span class="n">CenterCrop</span><span class="p">(</span><span class="mi">224</span><span class="p">)</span><span class="o">.</span><span class="n">forward</span>
     <span class="n">_resize</span> <span class="o">=</span> <span class="n">Resize</span><span class="p">([</span><span class="mi">232</span><span class="p">,</span><span class="mi">232</span><span class="p">])</span><span class="o">.</span><span class="n">forward</span>
     <span class="n">images</span> <span class="o">=</span> <span class="p">[]</span>
@@ -422,12 +429,22 @@ div.rendered_html tbody tr:hover {
 </section>
 <section id="Loading-images-and-plotting-the-examples">
 <h2>Loading images and plotting the examples<a class="headerlink" href="#Loading-images-and-plotting-the-examples" title="Permalink to this heading"></a></h2>
-<p>First setting up correct paths to masks and images is required. Masks are the ImageNetS50 masks found on (<a class="reference external" href="https://lusseg.github.io/">https://lusseg.github.io/</a>), consisting of 10 pixel-perfect masks for each of 50 classes sampled from the imagenet dataset. For sake of easier visualization, we consider 3 images from the “n01491361” class which is a tiger shark class.</p>
+<p>First setting up correct paths to masks and images is required. Masks are the ImageNetS50 masks found on (<a class="reference external" href="https://lusseg.github.io/">https://lusseg.github.io/</a>, available under <a class="reference external" href="https://github.com/LUSSeg/ImageNet-S/releases/download/ImageNet-S/ImageNetS50-a0fe9d82231f9bc4787ee76e304dfa51.zip">https://github.com/LUSSeg/ImageNet-S/releases/download/ImageNet-S/ImageNetS50-a0fe9d82231f9bc4787ee76e304dfa51.zip</a>), consisting of 10 pixel-perfect masks for each of 50 classes sampled from the imagenet dataset. For sake of easier visualization, we consider 3 images from the “n01491361” class which is a tiger shark class.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="c1">#download single image from kaggle api, also available in func download_class_images()</span>
+<span class="o">!</span>kaggle competitions download -f <span class="s2">&quot;/ILSVRC/Data/CLS-LOC/train/n01491361/n01491361_1000.JPEG&quot;</span> -p ./images/ -c imagenet-object-localization-challenge
+</pre></div>
+</div>
+</div>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">input_dir</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;input&#39;</span><span class="p">])</span>
+<span class="c1">#Correct path to masks and input is crucial</span>
 <span class="n">masks_dir</span> <span class="o">=</span> <span class="n">input_dir</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">ImageNetS50</span><span class="se">\\</span><span class="s1">train-semi-segmentation</span><span class="se">\\</span><span class="s1">&#39;</span>
 <span class="n">images_dir</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;notebooks&#39;</span><span class="p">,</span> <span class="s1">&#39;images&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span>
 <span class="nb">id</span> <span class="o">=</span> <span class="s2">&quot;n01491361&quot;</span>
@@ -451,7 +468,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/Example_notebook_10_0.png" src="_images/Example_notebook_10_0.png" />
+<img alt="_images/Example_notebook_11_0.png" src="_images/Example_notebook_11_0.png" />
 </div>
 </div>
 </section>
@@ -504,7 +521,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/Example_notebook_14_0.png" src="_images/Example_notebook_14_0.png" />
+<img alt="_images/Example_notebook_15_0.png" src="_images/Example_notebook_15_0.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
@@ -527,7 +544,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/Example_notebook_15_0.png" src="_images/Example_notebook_15_0.png" />
+<img alt="_images/Example_notebook_16_0.png" src="_images/Example_notebook_16_0.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
@@ -554,7 +571,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/Example_notebook_16_0.png" src="_images/Example_notebook_16_0.png" />
+<img alt="_images/Example_notebook_17_0.png" src="_images/Example_notebook_17_0.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
@@ -582,7 +599,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/Example_notebook_17_0.png" src="_images/Example_notebook_17_0.png" />
+<img alt="_images/Example_notebook_18_0.png" src="_images/Example_notebook_18_0.png" />
 </div>
 </div>
 </section>
@@ -960,7 +977,7 @@ tensor([0.0423, 0.1679, 0.1560])
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/Example_notebook_50_0.png" src="_images/Example_notebook_50_0.png" />
+<img alt="_images/Example_notebook_51_0.png" src="_images/Example_notebook_51_0.png" />
 </div>
 </div>
 <p>Here we can see the results as expected. In presence of non negative gradients explanation, max aggregate results in positive only values, while min aggregate results in nearly negative only explanation. Kernel Ridge Regression works as expected considering we only gave it 3 images with 2-folds cross validation.</p>
