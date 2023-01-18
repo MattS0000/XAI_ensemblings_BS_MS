@@ -299,7 +299,7 @@ def supervisedXAI(inputs: TensorOrTupleOfTensorsGeneric, masks: TensorOrTupleOfT
     Returns
     -------
     Tensor
-        Tensor of KRR model outputs, which are the aggregated explanations.
+        Tensor of KRR model outputs, which are the aggregated explanations. It has 3 dimensions.
 
     See Also
     --------
@@ -332,7 +332,6 @@ def supervisedXAI(inputs: TensorOrTupleOfTensorsGeneric, masks: TensorOrTupleOfT
 
     parsed_inputs = _reformat_input_tensors(inputs)
     input_shape = parsed_inputs.shape
-    n_channels = input_shape[-3]
     numpy_inputs = parsed_inputs.numpy().reshape((len(inputs), -1))
     labels = _reformat_input_tensors(masks).squeeze().numpy().reshape((len(parsed_inputs), -1))
     if isinstance(weights, str):

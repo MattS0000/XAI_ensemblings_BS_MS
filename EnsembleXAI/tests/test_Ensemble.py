@@ -44,7 +44,7 @@ class TestSupervisedXAI(TestCase):
         inputs = t.rand([90, 3, 3, 32, 32])
         masks = t.randint(low=0, high=2, size=[90, 32, 32])
         ensembled = Ensemble.supervisedXAI(inputs, masks, shuffle=False)
-        self.assertTrue(ensembled.shape == (90, 3, 32, 32))
+        self.assertTrue(ensembled.shape == (90, 32, 32))
         # hard to predict outcome of this algorithm to check exact correctness, even on not random data
         # for now testing only result's shape
 
@@ -52,7 +52,7 @@ class TestSupervisedXAI(TestCase):
         inputs = t.rand([90, 3, 1, 32, 32])
         masks = t.randint(low=0, high=2, size=[90, 32, 32])
         ensembled = Ensemble.supervisedXAI(inputs, masks, shuffle=False)
-        self.assertTrue(ensembled.shape == (90, 1, 32, 32))
+        self.assertTrue(ensembled.shape == (90, 32, 32))
         # hard to predict outcome of this algorithm to check exact correctness, even on not random data
         # for now testing only result's shape
 
@@ -60,7 +60,7 @@ class TestSupervisedXAI(TestCase):
         inputs = t.rand([90, 3, 1, 32, 32])
         masks = t.randint(low=0, high=2, size=[90, 32, 32])
         ensembled = Ensemble.supervisedXAI(inputs, masks, shuffle=False, weights='auto')
-        self.assertTrue(ensembled.shape == (90, 1, 32, 32))
+        self.assertTrue(ensembled.shape == (90, 32, 32))
         # hard to predict outcome of this algorithm to check exact correctness, even on not random data
         # for now testing only result's shape
 
@@ -69,7 +69,7 @@ class TestSupervisedXAI(TestCase):
         masks = t.randint(low=0, high=2, size=[90, 32, 32])
         weights = t.rand(90)
         ensembled = Ensemble.supervisedXAI(inputs, masks, shuffle=False, weights=weights)
-        self.assertTrue(ensembled.shape == (90, 1, 32, 32))
+        self.assertTrue(ensembled.shape == (90, 32, 32))
         # hard to predict outcome of this algorithm to check exact correctness, even on not random data
         # for now testing only result's shape
 
@@ -78,7 +78,7 @@ class TestSupervisedXAI(TestCase):
         masks = t.randint(low=0, high=2, size=[90, 32, 32])
         weights = t.rand(90).numpy()
         ensembled = Ensemble.supervisedXAI(inputs, masks, shuffle=False, weights=weights)
-        self.assertTrue(ensembled.shape == (90, 1, 32, 32))
+        self.assertTrue(ensembled.shape == (90, 32, 32))
         # hard to predict outcome of this algorithm to check exact correctness, even on not random data
         # for now testing only result's shape
     def test_ensemble_one_channel_one_obs(self):
