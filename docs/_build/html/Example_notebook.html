@@ -362,10 +362,10 @@ div.rendered_html tbody tr:hover {
 <section id="Imports-of-the-necessary-packages">
 <h2>Imports of the necessary packages<a class="headerlink" href="#Imports-of-the-necessary-packages" title="Permalink to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gc</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gc</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -382,23 +382,38 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-<p>We can find natural names for each class id under this link.</p>
+</section>
+<section id="Setting-paths-to-downloaded-dataset">
+<h2>Setting paths to downloaded dataset<a class="headerlink" href="#Setting-paths-to-downloaded-dataset" title="Permalink to this heading"></a></h2>
+<p>Below are some paths linking to data. Adjust them according to your directory setup. Data download process is available in <code class="docutils literal notranslate"><span class="pre">Imagenet_data_prep.ipynb</span></code> in the notebooks folder in repo (<a class="reference external" href="https://github.com/MattS0000/XAI_ensemblings_BS_MS/blob/main/notebooks/Imagenet_data_prep.ipynb">link</a>)</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="s2">&quot;https://s3.amazonaws.com/deep-learning-models/image-models/imagenet_class_index.json&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">url</span><span class="p">:</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">input_dir</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;input&#39;</span><span class="p">])</span>
+<span class="c1">#Correct path to masks and input is crucial, setup depends on users download path of the masks</span>
+<span class="n">masks_dir</span> <span class="o">=</span> <span class="n">input_dir</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">ImageNetS50</span><span class="se">\\</span><span class="s1">train-semi-segmentation</span><span class="se">\\</span><span class="s1">&#39;</span>
+<span class="n">images_dir</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;notebooks&#39;</span><span class="p">,</span> <span class="s1">&#39;images&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+</div>
+<p>We can find natural names for each class id under this link.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="s2">&quot;https://s3.amazonaws.com/deep-learning-models/image-models/imagenet_class_index.json&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">url</span><span class="p">:</span>
     <span class="n">imagenet_classes_dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <p>Helper functions to hasten the loading and the required image transformations.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">download_class_images</span><span class="p">(</span><span class="n">class_id</span><span class="p">,</span> <span class="n">masks_path</span><span class="p">):</span>
-    <span class="n">full_path</span> <span class="o">=</span> <span class="n">masks_path</span> <span class="o">+</span> <span class="n">class_id</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">download_class_images</span><span class="p">(</span><span class="n">class_id</span><span class="p">,</span> <span class="n">masks_path</span><span class="p">):</span>
+    <span class="n">full_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">masks_path</span><span class="p">,</span> <span class="n">class_id</span><span class="p">)</span>
     <span class="n">kaggle_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;/ILSVRC/Data/CLS-LOC/train/</span><span class="si">{</span><span class="n">class_id</span><span class="si">}</span><span class="s2">/&quot;</span>
     <span class="k">for</span> <span class="n">file_name</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">full_path</span><span class="p">):</span>
         <span class="n">file_name_jpeg</span> <span class="o">=</span> <span class="n">file_name</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;JPEG&#39;</span>
@@ -409,17 +424,17 @@ div.rendered_html tbody tr:hover {
     <span class="n">_resize</span> <span class="o">=</span> <span class="n">Resize</span><span class="p">([</span><span class="mi">232</span><span class="p">,</span><span class="mi">232</span><span class="p">])</span><span class="o">.</span><span class="n">forward</span>
     <span class="n">images</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">image_name</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">image_path</span><span class="p">):</span>
-        <span class="n">image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">image_path</span> <span class="o">+</span> <span class="n">image_name</span><span class="p">)</span>
+        <span class="n">image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">image_path</span><span class="p">,</span> <span class="n">image_name</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">resize</span><span class="p">:</span>
             <span class="n">image</span> <span class="o">=</span> <span class="n">_crop</span><span class="p">(</span><span class="n">_resize</span><span class="p">(</span><span class="n">image</span><span class="p">))</span>
         <span class="n">images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">images</span>
 
 <span class="k">def</span> <span class="nf">load_all</span><span class="p">(</span><span class="n">classid</span><span class="p">):</span>
-    <span class="n">all_img</span> <span class="o">=</span> <span class="n">images_list</span><span class="p">(</span><span class="n">images_dir</span> <span class="o">+</span> <span class="n">classid</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">)[:</span><span class="mi">3</span><span class="p">]</span>
-    <span class="n">all_img_org</span> <span class="o">=</span> <span class="n">images_list</span><span class="p">(</span><span class="n">images_dir</span> <span class="o">+</span> <span class="n">classid</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">resize</span><span class="o">=</span><span class="kc">False</span><span class="p">)[:</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">all_img</span> <span class="o">=</span> <span class="n">images_list</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">images_dir</span><span class="p">,</span> <span class="n">classid</span><span class="p">))[:</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">all_img_org</span> <span class="o">=</span> <span class="n">images_list</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">images_dir</span><span class="p">,</span> <span class="n">classid</span><span class="p">),</span> <span class="n">resize</span><span class="o">=</span><span class="kc">False</span><span class="p">)[:</span><span class="mi">3</span><span class="p">]</span>
     <span class="n">all_tens</span> <span class="o">=</span> <span class="p">[</span><span class="n">F</span><span class="o">.</span><span class="n">to_tensor</span><span class="p">(</span><span class="n">img</span><span class="p">)</span> <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">all_img</span><span class="p">]</span>
-    <span class="n">all_msks</span> <span class="o">=</span> <span class="p">[(</span><span class="n">F</span><span class="o">.</span><span class="n">to_tensor</span><span class="p">(</span><span class="n">img</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">images_list</span><span class="p">(</span><span class="n">masks_dir</span> <span class="o">+</span> <span class="n">classid</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">)[:</span><span class="mi">3</span><span class="p">]]</span>
+    <span class="n">all_msks</span> <span class="o">=</span> <span class="p">[(</span><span class="n">F</span><span class="o">.</span><span class="n">to_tensor</span><span class="p">(</span><span class="n">img</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">images_list</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">masks_dir</span><span class="p">,</span> <span class="n">classid</span><span class="p">))[:</span><span class="mi">3</span><span class="p">]]</span>
     <span class="n">tens_img</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">all_tens</span><span class="p">)</span>
     <span class="n">tens_msks</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">all_msks</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">all_img</span><span class="p">,</span> <span class="n">all_img_org</span><span class="p">,</span> <span class="n">all_tens</span><span class="p">,</span> <span class="n">all_msks</span><span class="p">,</span> <span class="n">tens_img</span><span class="p">,</span> <span class="n">tens_msks</span>
@@ -434,29 +449,27 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="c1">#download single image from kaggle api, also available in func download_class_images()</span>
-<span class="o">!</span>kaggle competitions download -f <span class="s2">&quot;/ILSVRC/Data/CLS-LOC/train/n01491361/n01491361_1000.JPEG&quot;</span> -p ./images/ -c imagenet-object-localization-challenge
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#download single image from kaggle api, also available in func download_class_images()</span>
+<span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;images&#39;</span><span class="p">))</span>
+<span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;images/n01491361&#39;</span><span class="p">))</span>
+<span class="o">!</span>kaggle competitions download -f <span class="s2">&quot;/ILSVRC/Data/CLS-LOC/train/n01491361/n01491361_1000.JPEG&quot;</span> -p ./images/n01491361/ -c imagenet-object-localization-challenge
 </pre></div>
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">input_dir</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;input&#39;</span><span class="p">])</span>
-<span class="c1">#Correct path to masks and input is crucial</span>
-<span class="n">masks_dir</span> <span class="o">=</span> <span class="n">input_dir</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">ImageNetS50</span><span class="se">\\</span><span class="s1">train-semi-segmentation</span><span class="se">\\</span><span class="s1">&#39;</span>
-<span class="n">images_dir</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;notebooks&#39;</span><span class="p">,</span> <span class="s1">&#39;images&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span>
-<span class="nb">id</span> <span class="o">=</span> <span class="s2">&quot;n01491361&quot;</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">id</span> <span class="o">=</span> <span class="s2">&quot;n01491361&quot;</span>
 <span class="n">all_images</span><span class="p">,</span> <span class="n">all_images_original</span><span class="p">,</span> <span class="n">all_tensors</span><span class="p">,</span> <span class="n">all_masks</span><span class="p">,</span> <span class="n">tensor_images</span><span class="p">,</span> <span class="n">tensor_masks</span> <span class="o">=</span> <span class="n">load_all</span><span class="p">(</span><span class="s2">&quot;n01491361&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">photos</span> <span class="o">=</span> <span class="p">[]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">photos</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="k">for</span> <span class="n">tensor</span><span class="p">,</span> <span class="n">mask</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">all_tensors</span><span class="p">,</span> <span class="n">all_masks</span><span class="p">):</span>
     <span class="n">photo</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">tensor</span><span class="p">,</span> <span class="n">mask</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
     <span class="n">photos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">photo</span><span class="p">)</span>
@@ -468,7 +481,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/Example_notebook_11_0.png" src="_images/Example_notebook_11_0.png" />
+<img alt="_images/Example_notebook_13_0.png" src="_images/Example_notebook_13_0.png" />
 </div>
 </div>
 </section>
@@ -479,7 +492,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">resnet50</span><span class="p">(</span><span class="n">weights</span><span class="o">=</span><span class="n">ResNet50_Weights</span><span class="o">.</span><span class="n">DEFAULT</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">resnet50</span><span class="p">(</span><span class="n">weights</span><span class="o">=</span><span class="n">ResNet50_Weights</span><span class="o">.</span><span class="n">DEFAULT</span><span class="p">)</span>
 <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
 <span class="n">resnet_transform</span> <span class="o">=</span> <span class="n">ResNet50_Weights</span><span class="o">.</span><span class="n">DEFAULT</span><span class="o">.</span><span class="n">transforms</span><span class="p">()</span>
 <span class="n">pipeline</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">images</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">resnet_transform</span><span class="p">(</span><span class="n">image</span><span class="p">)</span> <span class="k">for</span> <span class="n">image</span> <span class="ow">in</span> <span class="n">images</span><span class="p">])</span>
@@ -497,7 +510,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">single_pred</span> <span class="o">=</span> <span class="n">preds</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">single_pred</span> <span class="o">=</span> <span class="n">preds</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 <span class="n">single_data</span> <span class="o">=</span> <span class="n">proper_data</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 <span class="n">integrated_gradients</span> <span class="o">=</span> <span class="n">IntegratedGradients</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 <span class="n">attributions_ig</span> <span class="o">=</span> <span class="n">integrated_gradients</span><span class="o">.</span><span class="n">attribute</span><span class="p">(</span><span class="n">single_data</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">single_pred</span><span class="p">,</span> <span class="n">n_steps</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
@@ -521,14 +534,14 @@ div.rendered_html tbody tr:hover {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/Example_notebook_15_0.png" src="_images/Example_notebook_15_0.png" />
+<img alt="_images/Example_notebook_17_0.png" src="_images/Example_notebook_17_0.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">noise_tunnel</span> <span class="o">=</span> <span class="n">NoiseTunnel</span><span class="p">(</span><span class="n">integrated_gradients</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">noise_tunnel</span> <span class="o">=</span> <span class="n">NoiseTunnel</span><span class="p">(</span><span class="n">integrated_gradients</span><span class="p">)</span>
 <span class="n">attributions_ig_nt</span> <span class="o">=</span> <span class="n">noise_tunnel</span><span class="o">.</span><span class="n">attribute</span><span class="p">(</span><span class="n">single_data</span><span class="p">,</span> <span class="n">nt_samples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">nt_type</span><span class="o">=</span><span class="s1">&#39;smoothgrad_sq&#39;</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">single_pred</span><span class="p">)</span>
 <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
 <span class="n">_2</span> <span class="o">=</span> <span class="n">viz</span><span class="o">.</span><span class="n">visualize_image_attr_multiple</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">attributions_ig_nt</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">)),</span>
@@ -544,14 +557,14 @@ div.rendered_html tbody tr:hover {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/Example_notebook_16_0.png" src="_images/Example_notebook_16_0.png" />
+<img alt="_images/Example_notebook_18_0.png" src="_images/Example_notebook_18_0.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">occlusion</span> <span class="o">=</span> <span class="n">Occlusion</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">occlusion</span> <span class="o">=</span> <span class="n">Occlusion</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 <span class="n">attributions_occ</span> <span class="o">=</span> <span class="n">occlusion</span><span class="o">.</span><span class="n">attribute</span><span class="p">(</span><span class="n">single_data</span><span class="p">,</span>
                                        <span class="n">strides</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
                                        <span class="n">target</span><span class="o">=</span><span class="n">single_pred</span><span class="p">,</span>
@@ -571,14 +584,14 @@ div.rendered_html tbody tr:hover {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/Example_notebook_17_0.png" src="_images/Example_notebook_17_0.png" />
+<img alt="_images/Example_notebook_19_0.png" src="_images/Example_notebook_19_0.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">occlusion</span> <span class="o">=</span> <span class="n">Occlusion</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">occlusion</span> <span class="o">=</span> <span class="n">Occlusion</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 
 <span class="n">attributions_occ2</span> <span class="o">=</span> <span class="n">occlusion</span><span class="o">.</span><span class="n">attribute</span><span class="p">(</span><span class="n">single_data</span><span class="p">,</span>
                                        <span class="n">strides</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
@@ -599,7 +612,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/Example_notebook_18_0.png" src="_images/Example_notebook_18_0.png" />
+<img alt="_images/Example_notebook_20_0.png" src="_images/Example_notebook_20_0.png" />
 </div>
 </div>
 </section>
@@ -610,7 +623,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">occlusion</span> <span class="o">=</span> <span class="n">Occlusion</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">occlusion</span> <span class="o">=</span> <span class="n">Occlusion</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 <span class="n">attributions_occ_all_25</span> <span class="o">=</span> <span class="n">occlusion</span><span class="o">.</span><span class="n">attribute</span><span class="p">(</span><span class="n">tensor_images</span><span class="p">,</span>
                                         <span class="n">strides</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
                                         <span class="n">target</span> <span class="o">=</span> <span class="n">preds</span><span class="p">,</span>
@@ -643,7 +656,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">Metrics</span><span class="o">.</span><span class="n">consistency</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">attributions_occ_all_15</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">attributions_occ_all_25</span><span class="p">[</span><span class="mi">0</span><span class="p">]]))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Metrics</span><span class="o">.</span><span class="n">consistency</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">attributions_occ_all_15</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">attributions_occ_all_25</span><span class="p">[</span><span class="mi">0</span><span class="p">]]))</span>
 </pre></div>
 </div>
 </div>
@@ -661,7 +674,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">predict</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Softmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)(</span><span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">predict</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Softmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)(</span><span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
 <span class="n">Metrics</span><span class="o">.</span><span class="n">decision_impact_ratio</span><span class="p">(</span><span class="n">tensor_images</span><span class="p">,</span> <span class="n">predict</span><span class="p">,</span> <span class="n">attributions_occ_all_25</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -680,7 +693,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">Metrics</span><span class="o">.</span><span class="n">confidence_impact_ratio</span><span class="p">(</span><span class="n">tensor_images</span><span class="p">,</span> <span class="n">predict</span><span class="p">,</span> <span class="n">attributions_occ_all_25</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">compare_to</span><span class="o">=</span><span class="s2">&quot;same_prediction&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Metrics</span><span class="o">.</span><span class="n">confidence_impact_ratio</span><span class="p">(</span><span class="n">tensor_images</span><span class="p">,</span> <span class="n">predict</span><span class="p">,</span> <span class="n">attributions_occ_all_25</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">compare_to</span><span class="o">=</span><span class="s2">&quot;same_prediction&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -698,7 +711,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">Metrics</span><span class="o">.</span><span class="n">confidence_impact_ratio</span><span class="p">(</span><span class="n">tensor_images</span><span class="p">,</span> <span class="n">predict</span><span class="p">,</span> <span class="n">attributions_occ_all_25</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">compare_to</span><span class="o">=</span><span class="s2">&quot;new_prediction&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Metrics</span><span class="o">.</span><span class="n">confidence_impact_ratio</span><span class="p">(</span><span class="n">tensor_images</span><span class="p">,</span> <span class="n">predict</span><span class="p">,</span> <span class="n">attributions_occ_all_25</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">compare_to</span><span class="o">=</span><span class="s2">&quot;new_prediction&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -716,7 +729,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">Metrics</span><span class="o">.</span><span class="n">accordance_recall</span><span class="p">(</span><span class="n">attributions_occ_all_25</span><span class="p">,</span> <span class="n">tensor_masks</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Metrics</span><span class="o">.</span><span class="n">accordance_recall</span><span class="p">(</span><span class="n">attributions_occ_all_25</span><span class="p">,</span> <span class="n">tensor_masks</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -734,7 +747,7 @@ tensor([0.3734, 0.5004, 0.2527])
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">Metrics</span><span class="o">.</span><span class="n">accordance_precision</span><span class="p">(</span><span class="n">attributions_occ_all_25</span><span class="p">,</span> <span class="n">tensor_masks</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Metrics</span><span class="o">.</span><span class="n">accordance_precision</span><span class="p">(</span><span class="n">attributions_occ_all_25</span><span class="p">,</span> <span class="n">tensor_masks</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -752,7 +765,7 @@ tensor([0.0423, 0.1679, 0.1560])
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">Metrics</span><span class="o">.</span><span class="n">F1_score</span><span class="p">(</span><span class="n">attributions_occ_all_25</span><span class="p">,</span> <span class="n">tensor_masks</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Metrics</span><span class="o">.</span><span class="n">F1_score</span><span class="p">(</span><span class="n">attributions_occ_all_25</span><span class="p">,</span> <span class="n">tensor_masks</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -770,7 +783,7 @@ tensor([0.0423, 0.1679, 0.1560])
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">Metrics</span><span class="o">.</span><span class="n">intersection_over_union</span><span class="p">(</span><span class="n">attributions_occ_all_15</span><span class="p">,</span> <span class="n">tensor_masks</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Metrics</span><span class="o">.</span><span class="n">intersection_over_union</span><span class="p">(</span><span class="n">attributions_occ_all_15</span><span class="p">,</span> <span class="n">tensor_masks</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -787,7 +800,7 @@ tensor([0.0423, 0.1679, 0.1560])
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">sample_xai</span><span class="p">(</span><span class="n">images</span><span class="p">):</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">sample_xai</span><span class="p">(</span><span class="n">images</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">images</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">target</span> <span class="o">=</span> <span class="n">single_pred</span>
     <span class="k">else</span><span class="p">:</span>
@@ -819,7 +832,7 @@ tensor([0.0423, 0.1679, 0.1560])
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">all_stacked</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">attributions_ig_nt_all</span><span class="p">,</span> <span class="n">attributions_occ_all_15</span><span class="p">,</span> <span class="n">attributions_occ_all_25</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">all_stacked</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">attributions_ig_nt_all</span><span class="p">,</span> <span class="n">attributions_occ_all_15</span><span class="p">,</span> <span class="n">attributions_occ_all_25</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">aggreg_all1</span> <span class="o">=</span> <span class="n">Ensemble</span><span class="o">.</span><span class="n">basic</span><span class="p">(</span><span class="n">all_stacked</span><span class="p">,</span> <span class="n">aggregating_func</span><span class="o">=</span><span class="s1">&#39;avg&#39;</span><span class="p">)</span>
 <span class="n">aggreg_all2</span> <span class="o">=</span> <span class="n">Ensemble</span><span class="o">.</span><span class="n">basic</span><span class="p">(</span><span class="n">all_stacked</span><span class="p">,</span> <span class="n">aggregating_func</span><span class="o">=</span><span class="s1">&#39;min&#39;</span><span class="p">)</span>
 <span class="n">aggreg_all3</span> <span class="o">=</span> <span class="n">Ensemble</span><span class="o">.</span><span class="n">basic</span><span class="p">(</span><span class="n">all_stacked</span><span class="p">,</span> <span class="n">aggregating_func</span><span class="o">=</span><span class="s1">&#39;max&#39;</span><span class="p">)</span>
@@ -832,7 +845,7 @@ tensor([0.0423, 0.1679, 0.1560])
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Metrics</span><span class="o">.</span><span class="n">consistency</span><span class="p">(</span><span class="n">all_stacked</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">all_stacked</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Metrics</span><span class="o">.</span><span class="n">consistency</span><span class="p">(</span><span class="n">all_stacked</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">all_stacked</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
 </pre></div>
 </div>
 </div>
@@ -849,7 +862,7 @@ tensor([0.0423, 0.1679, 0.1560])
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Metrics</span><span class="o">.</span><span class="n">consistency</span><span class="p">(</span><span class="n">explanations_all</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">explanations_all</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Metrics</span><span class="o">.</span><span class="n">consistency</span><span class="p">(</span><span class="n">explanations_all</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">explanations_all</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
 </pre></div>
 </div>
 </div>
@@ -867,7 +880,7 @@ tensor([0.0423, 0.1679, 0.1560])
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">res</span> <span class="o">=</span> <span class="n">Ensemble</span><span class="o">.</span><span class="n">supervisedXAI</span><span class="p">(</span><span class="n">explanations_all</span><span class="p">,</span> <span class="n">tensor_masks</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">weights</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">n_folds</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">res</span> <span class="o">=</span> <span class="n">Ensemble</span><span class="o">.</span><span class="n">supervisedXAI</span><span class="p">(</span><span class="n">explanations_all</span><span class="p">,</span> <span class="n">tensor_masks</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">weights</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">n_folds</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -875,7 +888,7 @@ tensor([0.0423, 0.1679, 0.1560])
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">Metrics</span><span class="o">.</span><span class="n">intersection_over_union</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">tensor_masks</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Metrics</span><span class="o">.</span><span class="n">intersection_over_union</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">tensor_masks</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -892,7 +905,7 @@ tensor([0.0423, 0.1679, 0.1560])
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">Metrics</span><span class="o">.</span><span class="n">accordance_recall</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">tensor_masks</span><span class="p">),</span> <span class="n">Metrics</span><span class="o">.</span><span class="n">accordance_precision</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">tensor_masks</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Metrics</span><span class="o">.</span><span class="n">accordance_recall</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">tensor_masks</span><span class="p">),</span> <span class="n">Metrics</span><span class="o">.</span><span class="n">accordance_precision</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">tensor_masks</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -909,7 +922,7 @@ tensor([0.0423, 0.1679, 0.1560])
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">Metrics</span><span class="o">.</span><span class="n">confidence_impact_ratio</span><span class="p">(</span><span class="n">tensor_images</span><span class="p">,</span> <span class="n">predict</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">compare_to</span><span class="o">=</span><span class="s2">&quot;same_prediction&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Metrics</span><span class="o">.</span><span class="n">confidence_impact_ratio</span><span class="p">(</span><span class="n">tensor_images</span><span class="p">,</span> <span class="n">predict</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">compare_to</span><span class="o">=</span><span class="s2">&quot;same_prediction&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -929,7 +942,7 @@ tensor([0.0423, 0.1679, 0.1560])
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;fast&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;fast&#39;</span><span class="p">)</span>
 <span class="c1"># helper function for the plotting</span>
 <span class="k">def</span> <span class="nf">plot_explanations</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="n">explanations</span><span class="p">,</span> <span class="n">columns_names</span><span class="p">,</span> <span class="n">classes_predicted</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="s2">&quot;heat_map&quot;</span><span class="p">):</span>
     <span class="n">cmaps</span><span class="o">=</span><span class="p">[</span><span class="n">default_cmap</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
@@ -967,7 +980,7 @@ tensor([0.0423, 0.1679, 0.1560])
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">predicted_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">imagenet_classes_dict</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">item</span><span class="p">())][</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">preds</span><span class="p">]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">predicted_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">imagenet_classes_dict</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">item</span><span class="p">())][</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">preds</span><span class="p">]</span>
 <span class="n">col_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Original&quot;</span><span class="p">,</span> <span class="s2">&quot;Gradients&quot;</span><span class="p">,</span> <span class="s2">&quot;Occlusion 25&quot;</span><span class="p">,</span><span class="s2">&quot;Occlusion 15&quot;</span><span class="p">,</span> <span class="s2">&quot;Max Aggregate&quot;</span><span class="p">,</span> <span class="s2">&quot;Min Aggregate&quot;</span><span class="p">,</span> <span class="s2">&quot;Avg&quot;</span><span class="p">,</span> <span class="s2">&quot;KRR&quot;</span><span class="p">]</span>
 <span class="n">plot_explanations</span><span class="p">(</span><span class="n">all_images</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">explanations_all</span><span class="p">,</span><span class="n">res</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">col_names</span><span class="p">,</span> <span class="n">predicted_names</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;blended_heat_map&quot;</span><span class="p">)</span>
 </pre></div>
@@ -977,7 +990,7 @@ tensor([0.0423, 0.1679, 0.1560])
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/Example_notebook_51_0.png" src="_images/Example_notebook_51_0.png" />
+<img alt="_images/Example_notebook_53_0.png" src="_images/Example_notebook_53_0.png" />
 </div>
 </div>
 <p>Here we can see the results as expected. In presence of non negative gradients explanation, max aggregate results in positive only values, while min aggregate results in nearly negative only explanation. Kernel Ridge Regression works as expected considering we only gave it 3 images with 2-folds cross validation.</p>
