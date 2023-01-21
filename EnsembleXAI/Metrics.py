@@ -938,8 +938,9 @@ def intersection_over_union(
         reshaped_mask = reshaped_mask.unsqueeze(dim=1).repeat(1, explanations.shape[1], 1, 1)
     intersections = intersection_mask(explanations, reshaped_mask, threshold1=threshold)
     union_masks = union_mask(explanations, reshaped_mask, threshold1=threshold)
-    intersections_areas = torch.sum(intersections, dim=(-3, -2, -1))
-    union_areas = torch.sum(union_masks, dim=(-3, -2, -1))
+    sum_dims = tuple((-1*i for i in range(len(explanations.shape)-1, 0, -1)))
+    intersections_areas = torch.sum(intersections, dim=sum_dims)
+    union_areas = torch.sum(union_masks, dim=sum_dims)
     values = intersections_areas / union_areas
     value = torch.sum(values) / values.shape[0]
     return value.item()

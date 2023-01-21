@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Example Usage on ImageNet dataset &mdash; EnsembleXAI 1.0 documentation</title>
@@ -362,7 +362,7 @@ div.rendered_html tbody tr:hover {
 <section id="Imports-of-the-necessary-packages">
 <h2>Imports of the necessary packages<a class="headerlink" href="#Imports-of-the-necessary-packages" title="Permalink to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gc</span>
@@ -387,7 +387,7 @@ div.rendered_html tbody tr:hover {
 <h2>Setting paths to downloaded dataset<a class="headerlink" href="#Setting-paths-to-downloaded-dataset" title="Permalink to this heading"></a></h2>
 <p>Below are some paths linking to data. Adjust them according to your directory setup. Data download process is available in <code class="docutils literal notranslate"><span class="pre">Imagenet_data_prep.ipynb</span></code> in the notebooks folder in repo (<a class="reference external" href="https://github.com/MattS0000/XAI_ensemblings_BS_MS/blob/main/notebooks/Imagenet_data_prep.ipynb">link</a>)</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">input_dir</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;input&#39;</span><span class="p">])</span>
@@ -399,7 +399,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <p>We can find natural names for each class id under this link.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="s2">&quot;https://s3.amazonaws.com/deep-learning-models/image-models/imagenet_class_index.json&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">url</span><span class="p">:</span>
@@ -409,7 +409,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <p>Helper functions to hasten the loading and the required image transformations.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">download_class_images</span><span class="p">(</span><span class="n">class_id</span><span class="p">,</span> <span class="n">masks_path</span><span class="p">):</span>
@@ -457,7 +457,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">id</span> <span class="o">=</span> <span class="s2">&quot;n01491361&quot;</span>
@@ -466,7 +466,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">photos</span> <span class="o">=</span> <span class="p">[]</span>
@@ -481,7 +481,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/Example_notebook_13_0.png" src="_images/Example_notebook_13_0.png" />
+<img alt="_images/Example_notebook_14_0.png" src="_images/Example_notebook_14_0.png" />
 </div>
 </div>
 </section>
@@ -489,7 +489,7 @@ div.rendered_html tbody tr:hover {
 <h2>Model Loading<a class="headerlink" href="#Model-Loading" title="Permalink to this heading"></a></h2>
 <p>We use the resnet50 model pretrained on the imagenet dataset and generate predictions on our three images.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[49]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">resnet50</span><span class="p">(</span><span class="n">weights</span><span class="o">=</span><span class="n">ResNet50_Weights</span><span class="o">.</span><span class="n">DEFAULT</span><span class="p">)</span>
@@ -507,7 +507,7 @@ div.rendered_html tbody tr:hover {
 <section id="Single-Explanations">
 <h2>Single Explanations<a class="headerlink" href="#Single-Explanations" title="Permalink to this heading"></a></h2>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[50]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">single_pred</span> <span class="o">=</span> <span class="n">preds</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -534,11 +534,11 @@ div.rendered_html tbody tr:hover {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/Example_notebook_17_0.png" src="_images/Example_notebook_17_0.png" />
+<img alt="_images/Example_notebook_18_0.png" src="_images/Example_notebook_18_0.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[51]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">noise_tunnel</span> <span class="o">=</span> <span class="n">NoiseTunnel</span><span class="p">(</span><span class="n">integrated_gradients</span><span class="p">)</span>
@@ -557,11 +557,11 @@ div.rendered_html tbody tr:hover {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/Example_notebook_18_0.png" src="_images/Example_notebook_18_0.png" />
+<img alt="_images/Example_notebook_19_0.png" src="_images/Example_notebook_19_0.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[52]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">occlusion</span> <span class="o">=</span> <span class="n">Occlusion</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
@@ -584,11 +584,11 @@ div.rendered_html tbody tr:hover {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/Example_notebook_19_0.png" src="_images/Example_notebook_19_0.png" />
+<img alt="_images/Example_notebook_20_0.png" src="_images/Example_notebook_20_0.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[53]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">occlusion</span> <span class="o">=</span> <span class="n">Occlusion</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
@@ -612,7 +612,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/Example_notebook_20_0.png" src="_images/Example_notebook_20_0.png" />
+<img alt="_images/Example_notebook_21_0.png" src="_images/Example_notebook_21_0.png" />
 </div>
 </div>
 </section>
@@ -620,7 +620,7 @@ div.rendered_html tbody tr:hover {
 <h2>Explanations for all 3 images<a class="headerlink" href="#Explanations-for-all-3-images" title="Permalink to this heading"></a></h2>
 <p>Here we create example explanations for all 3 considered images.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[54]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">occlusion</span> <span class="o">=</span> <span class="n">Occlusion</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
@@ -640,12 +640,12 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[54]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-45
+33356
 </pre></div></div>
 </div>
 </section>
@@ -653,7 +653,7 @@ div.rendered_html tbody tr:hover {
 <h2>Metrics for the created explanations<a class="headerlink" href="#Metrics-for-the-created-explanations" title="Permalink to this heading"></a></h2>
 <p>Calculation of consistency for the first image across both occlusion explanations.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[55]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Metrics</span><span class="o">.</span><span class="n">consistency</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">attributions_occ_all_15</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">attributions_occ_all_25</span><span class="p">[</span><span class="mi">0</span><span class="p">]]))</span>
@@ -661,7 +661,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[55]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -671,7 +671,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <p>Calculation of decision impact ratio for occlusion25 explanations with threshold = 0.3. 0.33 result means that one third of the original images has change the decision after obscuring the critical area of explanation.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[56]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">predict</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Softmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)(</span><span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
@@ -680,7 +680,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[56]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -690,7 +690,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <p>Calculation of confidence impact ratio for occlusion25 explanations with threshold = 0.3. Negative value on “same_prediction” argument implies that on average the probability for the class predicted has increased after obscuring the critical area.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[57]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Metrics</span><span class="o">.</span><span class="n">confidence_impact_ratio</span><span class="p">(</span><span class="n">tensor_images</span><span class="p">,</span> <span class="n">predict</span><span class="p">,</span> <span class="n">attributions_occ_all_25</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">compare_to</span><span class="o">=</span><span class="s2">&quot;same_prediction&quot;</span><span class="p">)</span>
@@ -698,7 +698,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[57]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -708,7 +708,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <p>Calculation of confidence impact ratio for occlusion25 explanations with threshold = 0.3. Negative value on “new_prediction” argument implies that on average the maximal probability for the prediction has increased after obscuring the critical area.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[58]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Metrics</span><span class="o">.</span><span class="n">confidence_impact_ratio</span><span class="p">(</span><span class="n">tensor_images</span><span class="p">,</span> <span class="n">predict</span><span class="p">,</span> <span class="n">attributions_occ_all_25</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">compare_to</span><span class="o">=</span><span class="s2">&quot;new_prediction&quot;</span><span class="p">)</span>
@@ -716,7 +716,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[58]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -726,7 +726,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <p>Calculation of accordance recall for occlusion25. This metric calculates the area of explanation, mask intersection over the mask area. Therefore for the second image the explanation covers half of the mask area.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[59]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Metrics</span><span class="o">.</span><span class="n">accordance_recall</span><span class="p">(</span><span class="n">attributions_occ_all_25</span><span class="p">,</span> <span class="n">tensor_masks</span><span class="p">)</span>
@@ -734,7 +734,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[59]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -744,7 +744,7 @@ tensor([0.3734, 0.5004, 0.2527])
 </div>
 <p>Calculation of accordance precision for occlusion25. This metric calculates the area of explanation, mask intersection over the explanation area. Therefore for the second image the mask covers ~0.17 of the explanation area.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[60]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Metrics</span><span class="o">.</span><span class="n">accordance_precision</span><span class="p">(</span><span class="n">attributions_occ_all_25</span><span class="p">,</span> <span class="n">tensor_masks</span><span class="p">)</span>
@@ -752,7 +752,7 @@ tensor([0.3734, 0.5004, 0.2527])
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[60]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -762,7 +762,7 @@ tensor([0.0423, 0.1679, 0.1560])
 </div>
 <p>Calculation of accordance F1 score for occlusion25. This is a average of harmonic averages of accordance precision and recall.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[61]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Metrics</span><span class="o">.</span><span class="n">F1_score</span><span class="p">(</span><span class="n">attributions_occ_all_25</span><span class="p">,</span> <span class="n">tensor_masks</span><span class="p">)</span>
@@ -770,7 +770,7 @@ tensor([0.0423, 0.1679, 0.1560])
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[61]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -780,7 +780,7 @@ tensor([0.0423, 0.1679, 0.1560])
 </div>
 <p>Calculation of average IOU for occlusion15.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[62]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Metrics</span><span class="o">.</span><span class="n">intersection_over_union</span><span class="p">(</span><span class="n">attributions_occ_all_15</span><span class="p">,</span> <span class="n">tensor_masks</span><span class="p">)</span>
@@ -788,7 +788,7 @@ tensor([0.0423, 0.1679, 0.1560])
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[62]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -797,7 +797,7 @@ tensor([0.0423, 0.1679, 0.1560])
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[63]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">sample_xai</span><span class="p">(</span><span class="n">images</span><span class="p">):</span>
@@ -816,7 +816,7 @@ tensor([0.0423, 0.1679, 0.1560])
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[63]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -829,7 +829,7 @@ tensor([0.0423, 0.1679, 0.1560])
 <h2>Ensembles<a class="headerlink" href="#Ensembles" title="Permalink to this heading"></a></h2>
 <p>Ensembling with the basic functions across the 3 explanations.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[64]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">all_stacked</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">attributions_ig_nt_all</span><span class="p">,</span> <span class="n">attributions_occ_all_15</span><span class="p">,</span> <span class="n">attributions_occ_all_25</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -842,7 +842,7 @@ tensor([0.0423, 0.1679, 0.1560])
 </div>
 <p>Consistency metric without and with the ensemblings.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[65]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Metrics</span><span class="o">.</span><span class="n">consistency</span><span class="p">(</span><span class="n">all_stacked</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">all_stacked</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
@@ -850,16 +850,16 @@ tensor([0.0423, 0.1679, 0.1560])
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[65]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[0.018643686547875404, 0.033208806067705154, 0.04660104587674141]
+[0.018643660470843315, 0.03320877254009247, 0.04660186171531677]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[66]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Metrics</span><span class="o">.</span><span class="n">consistency</span><span class="p">(</span><span class="n">explanations_all</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">explanations_all</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
@@ -867,17 +867,17 @@ tensor([0.0423, 0.1679, 0.1560])
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[66]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[0.015071512199938297, 0.022996004670858383, 0.0329229012131691]
+[0.015071503818035126, 0.022995971143245697, 0.032923243939876556]
 </pre></div></div>
 </div>
 <p>Creating a model on the three photos. Of course it will not generalize at all, many more should be used for this to work properly, here presented as proof of concept.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[67]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">res</span> <span class="o">=</span> <span class="n">Ensemble</span><span class="o">.</span><span class="n">supervisedXAI</span><span class="p">(</span><span class="n">explanations_all</span><span class="p">,</span> <span class="n">tensor_masks</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">weights</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">n_folds</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
@@ -885,41 +885,41 @@ tensor([0.0423, 0.1679, 0.1560])
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[68]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Metrics</span><span class="o">.</span><span class="n">intersection_over_union</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">tensor_masks</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-0.1440405398607254
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Metrics</span><span class="o">.</span><span class="n">accordance_recall</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">tensor_masks</span><span class="p">),</span> <span class="n">Metrics</span><span class="o">.</span><span class="n">accordance_precision</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">tensor_masks</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Metrics</span><span class="o">.</span><span class="n">intersection_over_union</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">tensor_masks</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[68]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-(tensor([0.6804, 0.5995, 0.7374]), tensor([0.0942, 0.2281, 0.1852]))
+0.32290786504745483
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[71]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Metrics</span><span class="o">.</span><span class="n">accordance_recall</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">tensor_masks</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]),</span> <span class="n">Metrics</span><span class="o">.</span><span class="n">accordance_precision</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">tensor_masks</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[71]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(tensor(0.6666), tensor(0.5122))
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[72]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Metrics</span><span class="o">.</span><span class="n">confidence_impact_ratio</span><span class="p">(</span><span class="n">tensor_images</span><span class="p">,</span> <span class="n">predict</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">compare_to</span><span class="o">=</span><span class="s2">&quot;same_prediction&quot;</span><span class="p">)</span>
@@ -927,7 +927,7 @@ tensor([0.0423, 0.1679, 0.1560])
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[72]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -939,7 +939,7 @@ tensor([0.0423, 0.1679, 0.1560])
 <section id="Plotting-all-explanations">
 <h2>Plotting all explanations<a class="headerlink" href="#Plotting-all-explanations" title="Permalink to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[73]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;fast&#39;</span><span class="p">)</span>
@@ -977,10 +977,11 @@ tensor([0.0423, 0.1679, 0.1560])
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[83]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">predicted_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">imagenet_classes_dict</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">item</span><span class="p">())][</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">preds</span><span class="p">]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">res2</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">predicted_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">imagenet_classes_dict</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">item</span><span class="p">())][</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">preds</span><span class="p">]</span>
 <span class="n">col_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Original&quot;</span><span class="p">,</span> <span class="s2">&quot;Gradients&quot;</span><span class="p">,</span> <span class="s2">&quot;Occlusion 25&quot;</span><span class="p">,</span><span class="s2">&quot;Occlusion 15&quot;</span><span class="p">,</span> <span class="s2">&quot;Max Aggregate&quot;</span><span class="p">,</span> <span class="s2">&quot;Min Aggregate&quot;</span><span class="p">,</span> <span class="s2">&quot;Avg&quot;</span><span class="p">,</span> <span class="s2">&quot;KRR&quot;</span><span class="p">]</span>
 <span class="n">plot_explanations</span><span class="p">(</span><span class="n">all_images</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">explanations_all</span><span class="p">,</span><span class="n">res</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">col_names</span><span class="p">,</span> <span class="n">predicted_names</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;blended_heat_map&quot;</span><span class="p">)</span>
 </pre></div>
@@ -990,7 +991,7 @@ tensor([0.0423, 0.1679, 0.1560])
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/Example_notebook_53_0.png" src="_images/Example_notebook_53_0.png" />
+<img alt="_images/Example_notebook_54_0.png" src="_images/Example_notebook_54_0.png" />
 </div>
 </div>
 <p>Here we can see the results as expected. In presence of non negative gradients explanation, max aggregate results in positive only values, while min aggregate results in nearly negative only explanation. Kernel Ridge Regression works as expected considering we only gave it 3 images with 2-folds cross validation.</p>
