@@ -1,5 +1,7 @@
 from typing import Callable, Union, List, Tuple
 import itertools
+
+import numpy as np
 import torch
 
 
@@ -188,7 +190,7 @@ def matrix_2_norm(
     tensor([4.8990, 4.8990, 4.8990, 4.8990, 4.8990])
     """
     if sum_dim is not None and sum_dim < 0:
-        sum_dim = sum_dim+2
+        sum_dim = sum_dim + 2
     difference = (matrix1 - matrix2).float()
     norm = torch.linalg.matrix_norm(difference, ord=2)
     # manual extension of the norm calculation to the sum_dim dimension
@@ -339,6 +341,17 @@ def union_mask(
     return logical_mask
 
 
+def consistency_image(models: List, transforms: List, image: torch.tensor, explanator: Callable, **kwargs):
+    explanations_list = []
+    for model, transform in zip(models, transforms):
+        image_transformed = transform(image)
+        explanations_list += [explanator(image_transformed, model, **kwargs)]
+
+    explanations = torch.cat(explanations_list)
+    consistency_value = consistency(explanations)
+    return consistency_value
+
+
 def consistency(explanations: torch.Tensor) -> float:
     """
     Metric representing how similar are different explanations of one photo.
@@ -389,6 +402,34 @@ def consistency(explanations: torch.Tensor) -> float:
         for exp1, exp2 in itertools.combinations(explanations_list, 2)
     ]
     return (1 / (max(diffs) + 1)).item()
+
+
+def stability_image(explanator: Callable[..., torch.Tensor],
+                    image: torch.Tensor,
+                    transform: Callable = lambda x: x,
+                    n_samples: int = 5,
+                    sigma: Union[str, float] = 'auto',
+                    random_seed: Union[None, int] = None,
+                    return_noised_images: bool = False,
+                    **kwargs):
+    if random_seed is not None:
+        rng = torch.Generator().manual_seed(random_seed)
+    else:
+        rng = torch.Generator()
+    scaling = 0.01
+    if sigma == 'auto':
+        std = scaling * torch.std(image.to(float))
+    elif isinstance(sigma, float) or isinstance(sigma, int):
+        std = sigma
+    else:
+        raise Exception("Sigma must be 'auto' or numeric")
+
+    images_to_compare = [torch.clamp(image + std * torch.randn(image.shape, generator=rng), 0, 255).round().to(image.dtype) for _ in range(n_samples)]
+    epsilon = np.Inf
+    stability_value = stability(explanator, transform(image), transform(torch.stack(images_to_compare)), epsilon, **kwargs)
+    if return_noised_images:
+        return stability_value, images_to_compare
+    return stability_value
 
 
 def stability(explanator: Callable[..., torch.Tensor], image: torch.Tensor,
@@ -819,7 +860,7 @@ def accordance_precision(
     overlapping_area = intersection_mask(explanations, reshaped_mask, threshold1=threshold)
     divisor = torch.sum(explanations > threshold, dim=(-3, -2, -1))
     value = torch.sum(overlapping_area, dim=(-3, -2, -1)) / divisor
-    #set nans to zero, since they indicate no value in explanation bigger than threshold
+    # set nans to zero, since they indicate no value in explanation bigger than threshold
     value[value != value] = 0
     return value
 
@@ -938,7 +979,7 @@ def intersection_over_union(
         reshaped_mask = reshaped_mask.unsqueeze(dim=1).repeat(1, explanations.shape[1], 1, 1)
     intersections = intersection_mask(explanations, reshaped_mask, threshold1=threshold)
     union_masks = union_mask(explanations, reshaped_mask, threshold1=threshold)
-    sum_dims = tuple((-1*i for i in range(len(explanations.shape)-1, 0, -1)))
+    sum_dims = tuple((-1 * i for i in range(len(explanations.shape) - 1, 0, -1)))
     intersections_areas = torch.sum(intersections, dim=sum_dims)
     union_areas = torch.sum(union_masks, dim=sum_dims)
     values = intersections_areas / union_areas
