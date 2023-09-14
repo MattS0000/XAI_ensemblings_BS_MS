@@ -137,7 +137,7 @@ def basic(inputs: TensorOrTupleOfTensorsGeneric,
     return output
 
 
-def _normalize_across_dataset(parsed_inputs: Tensor, delta=0.00001):
+def _normalize_across_dataset(parsed_inputs: Tensor, eps=1e-25):
     """
     Mean, variance normalization across all data in inputs.
 
@@ -156,9 +156,7 @@ def _normalize_across_dataset(parsed_inputs: Tensor, delta=0.00001):
         Normalized explanations.
     """
     var, mean = torch.var_mean(parsed_inputs, dim=[0, 2, 3, 4], unbiased=True, keepdim=True)
-    if torch.min(var.abs()) < delta:
-        raise ZeroDivisionError("Variance close to 0. Can't normalize")
-    return (parsed_inputs - mean) / torch.sqrt(var)
+    return (parsed_inputs - mean) / (torch.sqrt(var) + eps)
 
 
 def autoweighted(inputs: TensorOrTupleOfTensorsGeneric,

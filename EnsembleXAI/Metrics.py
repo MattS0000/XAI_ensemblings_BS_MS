@@ -425,7 +425,7 @@ def stability_image(explanator: Callable[..., torch.Tensor],
     else:
         raise Exception("Sigma must be 'auto' or numeric")
 
-    images_to_compare = [torch.clamp(image + std * torch.randn(image.shape, generator=rng), 0, 255).round().to(image.dtype).to(device) for _ in range(n_samples)]
+    images_to_compare = [torch.clamp(image + std * torch.randn(image.shape, generator=rng).to(device), 0, 255).round().to(image.dtype).to(device) for _ in range(n_samples)]
     epsilon = np.Inf
     stability_value = stability(explanator, transform(image), transform(torch.stack(images_to_compare)), epsilon, **kwargs)
     if return_noised_images:
