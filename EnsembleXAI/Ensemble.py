@@ -137,7 +137,7 @@ def basic(inputs: TensorOrTupleOfTensorsGeneric,
     return output
 
 
-def _normalize_across_dataset(parsed_inputs:Tensor, delta=0.00001):
+def _normalize_across_dataset(parsed_inputs: Tensor, delta=0.00001):
     """
     Mean, variance normalization across all data in inputs.
 
@@ -231,9 +231,12 @@ def autoweighted(inputs: TensorOrTupleOfTensorsGeneric,
         metric_vals = [
             [metric(explanation) for metric in metrics] for explanation in torch.unbind(parsed_inputs, dim=1)]
     else:
-        if isinstance(precomputed_metrics, np.ndarray): metric_vals = torch.from_numpy(precomputed_metrics)
-        elif isinstance(precomputed_metrics, torch.Tensor): metric_vals = precomputed_metrics
-        else: raise ValueError("precomputed_metrics should be numpy ndarray or torch tensor")
+        if isinstance(precomputed_metrics, np.ndarray):
+            metric_vals = torch.from_numpy(precomputed_metrics)
+        elif isinstance(precomputed_metrics, torch.Tensor):
+            metric_vals = precomputed_metrics
+        else:
+            raise ValueError("precomputed_metrics should be numpy ndarray or torch tensor")
         assert metric_vals.dim() == 3, "precomputed_metrics should have 3 dims"
         metric_vals = [y.unbind(0) for y in metric_vals.transpose(2, 0).transpose(1, 0).unbind(0)]
     ensemble_scores = torch.stack([ensemble_score(metric_weights, metric_val) for metric_val in metric_vals])
@@ -262,9 +265,102 @@ def _auto_calculate_weights(masks: np.ndarray) -> np.ndarray:
     non_zero = np.count_nonzero(masks, axis=1)
     return size / non_zero
 
+class SupervisedXAI():
+    def __init__(self, n_folds: int = 3, shuffle=False, random_state=None):
+        assert n_folds > 1
+        self.n_folds = n_folds
+        self.shuffle = shuffle
+        self.random_state = random_state
+        self.krr_model = None
+
+    def fit_predict_cv(self, inputs, masks, weights=None):
+        # reshape do 1d array for each observation
+
+        parsed_inputs = _reformat_input_tensors(inputs)
+        input_shape = parsed_inputs.shape
+        numpy_inputs = parsed_inputs.numpy().reshape((len(inputs), -1))
+        labels = _reformat_input_tensors(masks).squeeze().numpy().reshape((len(parsed_inputs), -1))
+        if isinstance(weights, str):
+            assert weights == 'auto'
+            weights = _auto_calculate_weights(labels)
+        assert len(parsed_inputs) == len(masks), "Inconsistent number of observations in masks and inputs"
+        assert len(parsed_inputs) >= self.n_folds, "Number of observations should be greater or equal than number of folds"
+        if weights is not None:
+            assert len(weights) == len(masks)
+        kf = KFold(n_splits=self.n_folds, random_state=self.random_state, shuffle=self.shuffle)
+
+        ensembled = [0] * self.n_folds
+        indices = np.empty(1, dtype=int)
+
+        for idx, (train_index, test_index) in enumerate(kf.split(numpy_inputs, labels)):
+            # get observations split by k-fold
+            X_train, X_test = (numpy_inputs[train_index]), (numpy_inputs[test_index])
+            y_train = labels[train_index]
+            if weights is not None:
+                iter_weights = weights[train_index]
+            else:
+                iter_weights = None
+            # train KRR
+            krr = KernelRidge(
+                alpha=1,  # regularization
+                kernel='polynomial'  # choose one from:
+                # https://github.com/scikit-learn/scikit-learn/blob/main/sklearn/metrics/pairwise.py#L2050
+            )
+            krr.fit(X_train, y_train, sample_weight=iter_weights)
+            # predict masks for observations currently in test group
+            ensembled[idx] = krr.predict(X_test).reshape((tuple([len(X_test)]) + input_shape[3:5]))
+            # reshape predictions and save them and indices to recreate original order later
+            indices = np.concatenate([indices, test_index])
+
+        # sort output to match input order
+        indices = indices[1:]
+        ensembled = np.concatenate(ensembled)
+        ensembled_ind = indices.argsort()
+        ensembled = ensembled[ensembled_ind[::1]]
+
+        return torch.from_numpy(ensembled)
+
+    def fit(self, inputs, masks, weights=None):
+
+        # reshape do 1d array for each observation
+
+        parsed_inputs = _reformat_input_tensors(inputs)
+        numpy_inputs = parsed_inputs.numpy().reshape((len(inputs), -1))
+        labels = _reformat_input_tensors(masks).squeeze().numpy().reshape((len(parsed_inputs), -1))
+        if isinstance(weights, str):
+            assert weights == 'auto'
+            weights = _auto_calculate_weights(labels)
+        assert len(parsed_inputs) == len(masks), "Inconsistent number of observations in masks and inputs"
+        if weights is not None:
+            assert len(weights) == len(masks)
+        X_train = numpy_inputs
+        y_train = labels
+        # train KRR
+        krr = KernelRidge(
+            alpha=1,  # regularization
+            kernel='polynomial'  # choose one from:
+            # https://github.com/scikit-learn/scikit-learn/blob/main/sklearn/metrics/pairwise.py#L2050
+        )
+        krr.fit(X_train, y_train, sample_weight=weights)
+        self.krr_model = krr
+
+        return self
+
+    def predict(self, inputs):
+        parsed_inputs = _reformat_input_tensors(inputs)
+        input_shape = parsed_inputs.shape
+        numpy_inputs = parsed_inputs.numpy().reshape((len(inputs), -1))
+
+        if self.krr_model is None:
+            raise ValueError("Internal model not fitted")
+
+        prediction = self.krr_model.predict(numpy_inputs).reshape((tuple([len(numpy_inputs)]) + input_shape[3:5]))
+
+        return torch.from_numpy(prediction)
+
 
 def supervisedXAI(inputs: TensorOrTupleOfTensorsGeneric, masks: TensorOrTupleOfTensorsGeneric, n_folds: int = 3,
-                  weights: Union[str, TensorOrTupleOfTensorsGeneric, np.ndarray, None]=None,
+                  weights: Union[str, TensorOrTupleOfTensorsGeneric, np.ndarray, None] = None,
                   shuffle=False, random_state=None) -> Tensor:
     """
     Aggregate explanations by training supervised machine learning model.
@@ -362,7 +458,7 @@ def supervisedXAI(inputs: TensorOrTupleOfTensorsGeneric, masks: TensorOrTupleOfT
         )
         krr.fit(X_train, y_train, sample_weight=iter_weights)
         # predict masks for observations currently in test group
-        ensembled[idx]  = krr.predict(X_test).reshape((tuple([len(X_test)]) + input_shape[3:5]))
+        ensembled[idx] = krr.predict(X_test).reshape((tuple([len(X_test)]) + input_shape[3:5]))
         # reshape predictions and save them and indices to recreate original order later
         indices = np.concatenate([indices, test_index])
 
