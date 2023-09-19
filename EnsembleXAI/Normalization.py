@@ -2,22 +2,18 @@ import numpy as np
 import torch
 
 
-def mean_var_normalize(explanation_tensor, delta=1e-15):
+def mean_var_normalize(explanation_tensor, eps=1e-25):
     var, mean = torch.var_mean(explanation_tensor, dim=[0, 2, 3, 4], unbiased=True, keepdim=True)
-    if torch.min(var.abs()) < delta:
-        raise ZeroDivisionError("Variance close to 0. Can't normalize")
-    return (explanation_tensor - mean) / torch.sqrt(var)
+    return (explanation_tensor - mean) / torch.sqrt(var + eps)
 
 
-def median_iqr_normalize(explanation_tensor, delta=1e-15):
+def median_iqr_normalize(explanation_tensor, eps=1e-25):
     explanation_tensor = explanation_tensor.squeeze(0)
     median = torch.tensor(np.median(explanation_tensor, axis=[1, 2, 3])).unsqueeze(1).unsqueeze(1).unsqueeze(1)
     q_25 = torch.tensor(np.quantile(explanation_tensor, q=0.25, axis=[1, 2, 3])).unsqueeze(1).unsqueeze(1).unsqueeze(1)
     q_75 = torch.tensor(np.quantile(explanation_tensor, q=0.75, axis=[1, 2, 3])).unsqueeze(1).unsqueeze(1).unsqueeze(1)
     iqr = q_75 - q_25
-    if torch.min(iqr) < delta:
-        raise ZeroDivisionError("IQR close to 0. Can't normalize")
-    return (explanation_tensor - median) / iqr
+    return (explanation_tensor - median) / (iqr + eps)
 
 
 def second_moment_normalize(explanation_tensor, eps=1e-25):
